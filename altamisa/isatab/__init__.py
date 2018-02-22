@@ -5,4 +5,9 @@
 
 from .models import *  # noqa: F403, F401
 from .parse_investigation import InvestigationReader  # noqa: F401
-from .parse_assay_study import AssayReader, StudyReader  # noqa: F401
+from .parse_assay_study import (  # noqa: F401
+    AssayReader,
+    AssayRowReader,
+    StudyReader,
+    StudyRowReader
+)
