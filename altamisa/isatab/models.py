@@ -194,3 +194,154 @@ class InvestigationInfo(NamedTuple):
 
 
 # Types used in study and assay files -----------------------------------------
+
+# The following constants are used for further qualifying process and material
+# nodes.
+
+# Material node type descriptions
+
+MATERIAL = 'material'
+
+EXTRACT = 'extract'
+LABELED_EXTRACT = 'labeled extract'
+SAMPLE = 'sample'
+SOURCE = 'source'
+
+# Data node types
+
+ARRAY_DATA_FILE = 'array_data_file'
+ARRAY_DATA_MATRIX_FILE = 'array_data_matrix_file'
+DERIVED_ARRAY_DATA_FILE = 'derived_array_data_file'
+DERIVED_ARRAY_MATRIX_DATA_FILE = 'derived_array_matrix_data_file'
+DERIVED_DATA_FILE = 'derived_data_file'
+DERIVED_SPECTRAL_DATA_FILE = 'derived_spectral_data_file'
+RAW_DATA_FILE = 'raw_data_file'
+RAW_SPECTRAL_DATA_FILE = 'raw_spectral_data_file'
+
+# Assay types
+
+PROTOCOL_REF = 'protocol_ref'
+ASSAY = 'assay'
+DATA_NORMALIZATION = 'data_normalization'
+DATA_TRANSFORMATION = 'data_transformation'
+GEL_ELECTROPHORESIS_ASSAY = 'gel_electrophoresis'
+HYBRIDIZATION_ASSAY = 'hybridization'
+MS_ASSAY = 'mass_spectometry'
+NORMALIZATION = 'normalization'
+
+
+class Characteristics(NamedTuple):
+    """Representation of a ``Characteristics[*]`` cell."""
+
+    #: Characteristics name
+    name: str
+    #: Characteristics value
+    value: FreeTextOrTermRef
+    #: Characteristics unit
+    unit: FreeTextOrTermRef
+
+
+class FactorValue(NamedTuple):
+    """Representation of a ``Factor Value[*]`` cell."""
+
+    #: Factor name
+    name: str
+    #: Factor value
+    value: FreeTextOrTermRef
+    #: Factor value unit
+    unit: FreeTextOrTermRef
+
+
+class ParameterValue(NamedTuple):
+    """Representation of a ``Parameter Value[*]`` cell."""
+
+    #: Parameter name
+    name: str
+    #: Parameter value
+    value: FreeTextOrTermRef
+    #: Parameter value unit
+    unit: FreeTextOrTermRef
+
+
+class Comment(NamedTuple):
+    """Representation of a ``Comment[*]`` cell."""
+
+    #: Comment name
+    name: str
+    #: Comment value
+    value: FreeTextOrTermRef
+    #: Comment unit
+    unit: FreeTextOrTermRef
+
+
+class Material(NamedTuple):
+    """Representation of a Material or Data node."""
+    type: str
+    name: str
+    label: str
+    #: Material characteristics
+    characteristics: Tuple[Characteristics]
+    #: Material comments
+    comments: Tuple[Comment]
+    #: Material factor values
+    factor_values: Tuple[FactorValue]
+    #: Material type
+    material_type: FreeTextOrTermRef
+
+
+class Process(NamedTuple):
+    """Representation of a Process or Assay node."""
+
+    #: Process type
+    type: str
+    #: Process name
+    name: str
+    #: Array design reference
+    array_design_ref: str
+    #: Process date
+    date: date
+    #: Performer of process
+    performer: str
+    #: Scan name of process
+    scan_name: str
+    #: Tuple of process characteristics
+    characteristics: Tuple[Characteristics]
+    #: Tuple of process comments
+    comments: Tuple[Comment]
+    #: Tuple of parameters values
+    parameter_values: Tuple[ParameterValue]
+
+
+class ProcessArc(NamedTuple):
+    """Representation of an arc  between two materials (given by name) and
+    labeled with a Process.
+    """
+
+    #: The arc's tail name
+    tail: str
+    #: The arc's head name
+    head: str
+    #: The ``Process`` label of the arc
+    process: Process
+
+
+class Study(NamedTuple):
+    """Representation of an ISA study."""
+
+    #: Path to ISA study file
+    file: Path
+    #: A mapping from material name to Material object (includes data)
+    materials: Dict[str, Material]
+    #: The processing arcs.
+    process_arcs: Tuple[ProcessArc]
+
+
+class Assay(NamedTuple):
+    """Representation of an ISA assay."""
+
+    #: Path to ISA assay file
+    file: Path
+    #: A mapping from material name to Material object (includes data)
+    materials: Dict[str, Material]
+    #: The processing arcs.
+    process_arcs: Tuple[ProcessArc]
