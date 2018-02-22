@@ -13,6 +13,7 @@ def print_dot(
         obj, outf, indent='    ',
         mat_shape='box', mat_color='black',
         proc_shape='ellipse', proc_color='blue'):
+
     print(indent + '/* materials */', file=outf)
     for name, _ in obj.materials.items():
         print('{}{} [shape={},color={},fontcolor={}]'.format(
@@ -45,9 +46,15 @@ def run(args):
     print('digraph investigation {', file=args.output_file)
     print('  rankdir = "LR";', file=args.output_file)
     print('  /* study */', file=args.output_file)
+    print('  subgraph clusterStudy {', file=args.output_file)
+    print('    label = "Study {}"'.format(study.file), file=args.output_file)
     print_dot(study, args.output_file)
+    print('  }', file=args.output_file)
     print('  /* assay */', file=args.output_file)
+    print('  subgraph clusterAssay {', file=args.output_file)
+    print('    label = "Assay {}"'.format(assay.file), file=args.output_file)
     print_dot(assay, args.output_file)
+    print('  }', file=args.output_file)
     print('}', file=args.output_file)
 
 
