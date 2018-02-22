@@ -200,6 +200,8 @@ class InvestigationInfo(NamedTuple):
 
 # Material node type descriptions
 
+# TODO: these could go away!
+
 MATERIAL = 'material'
 
 EXTRACT = 'extract'
@@ -215,6 +217,11 @@ DERIVED_ARRAY_DATA_FILE = 'derived_array_data_file'
 DERIVED_ARRAY_MATRIX_DATA_FILE = 'derived_array_matrix_data_file'
 DERIVED_DATA_FILE = 'derived_data_file'
 DERIVED_SPECTRAL_DATA_FILE = 'derived_spectral_data_file'
+METABOLITE_ASSIGNMENT_FILE = 'METABOLITE_ASSIGNMENT_FILE'
+PEPTIDE_ASSIGNMENT_FILE = 'PEPTIDE_ASSIGNMENT_FILE'
+PROTEIN_ASSIGNMENT_FILE = 'PROTEIN_ASSIGNMENT_FILE'
+POST_TRANSLATIONAL_MODIFICATION_ASSIGNMENT_FILE = (
+    'POST_TRANSLATIONAL_MODIFICATION_ASSIGNMENT_FILE')
 RAW_DATA_FILE = 'raw_data_file'
 RAW_SPECTRAL_DATA_FILE = 'raw_spectral_data_file'
 

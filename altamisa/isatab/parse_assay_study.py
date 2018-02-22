@@ -43,6 +43,10 @@ _MATERIAL_NAME_HEADERS = (
     'Derived Array Data Matrix File',
     'Derived Data File',
     'Derived Spectral Data File',
+    'Metabolite Assignment File',
+    'Peptide Assignment File',
+    'Post Translational Modification Assignment File',
+    'Protein Assignment File',
     'Raw Data File',
     'Raw Spectral Data File')
 
@@ -351,6 +355,26 @@ class _DerivedSpectralDataBuilder(_DataBuilder):
     type_ = models.DERIVED_SPECTRAL_DATA_FILE
 
 
+class _MetaboliteAssignmentFileBuilder(_DataBuilder):
+
+    type_ = models.METABOLITE_ASSIGNMENT_FILE
+
+
+class _PeptideAssignmentFileBuilder(_DataBuilder):
+
+    type_ = models.PEPTIDE_ASSIGNMENT_FILE
+
+
+class _ProteinAssignmentFileBuilder(_DataBuilder):
+
+    type_ = models.PROTEIN_ASSIGNMENT_FILE
+
+
+class _PostTranslationalModificationAssignmentFileBuilder(_DataBuilder):
+
+    type_ = models.POST_TRANSLATIONAL_MODIFICATION_ASSIGNMENT_FILE
+
+
 class _RawDataBuilder(_DataBuilder):
     """Specialization of ``_DataBuilder`` to build source ``DerivedSpectralData``
     objects."""
@@ -486,8 +510,6 @@ class _NormalizationBuilder(_ProcessBuilder):
 class _RowBuilderBase:
     """Base class for row builders from study and assay files"""
 
-    #: Material name headers
-
     #: Registry of column header to node builder
     node_builders = None
 
@@ -572,6 +594,11 @@ class _AssayRowBuilder(_RowBuilderBase):
         'Derived Array Data Matrix File': _DerivedArrayMatrixDataBuilder,
         'Derived Data File': _DerivedDataBuilder,
         'Derived Spectral Data File': _DerivedSpectralDataBuilder,
+        'Metabolite Assignment File': _MetaboliteAssignmentFileBuilder,
+        'Peptide Assignment File': _PeptideAssignmentFileBuilder,
+        'Post Translational Modification Assignment File':
+            _PostTranslationalModificationAssignmentFileBuilder,
+        'Protein Assignment File': _ProteinAssignmentFileBuilder,
         'Raw Data File': _RawDataBuilder,
         'Raw Spectral Data File': _RawSpectralDataBuilder,
         # Process node builders
