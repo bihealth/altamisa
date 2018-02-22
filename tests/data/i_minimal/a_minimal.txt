@@ -1,0 +1,2 @@
+Sample Name	Protocol REF	Assay Name	Raw Data File	Raw Data File
+0815-N1	nucleic acid sequencing	0815-N1-DNA1-WES1	0815-N1-DNA1-WES1_L???_???_R1.fastq.gz	0815-N1-DNA1-WES1_L???_???_R2.fastq.gz

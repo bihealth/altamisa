@@ -200,6 +200,8 @@ class InvestigationInfo(NamedTuple):
 
 # Material node type descriptions
 
+# TODO: these could go away!
+
 MATERIAL = 'material'
 
 EXTRACT = 'extract'
@@ -215,6 +217,11 @@ DERIVED_ARRAY_DATA_FILE = 'derived_array_data_file'
 DERIVED_ARRAY_MATRIX_DATA_FILE = 'derived_array_matrix_data_file'
 DERIVED_DATA_FILE = 'derived_data_file'
 DERIVED_SPECTRAL_DATA_FILE = 'derived_spectral_data_file'
+METABOLITE_ASSIGNMENT_FILE = 'METABOLITE_ASSIGNMENT_FILE'
+PEPTIDE_ASSIGNMENT_FILE = 'PEPTIDE_ASSIGNMENT_FILE'
+PROTEIN_ASSIGNMENT_FILE = 'PROTEIN_ASSIGNMENT_FILE'
+POST_TRANSLATIONAL_MODIFICATION_ASSIGNMENT_FILE = (
+    'POST_TRANSLATIONAL_MODIFICATION_ASSIGNMENT_FILE')
 RAW_DATA_FILE = 'raw_data_file'
 RAW_SPECTRAL_DATA_FILE = 'raw_spectral_data_file'
 
@@ -292,37 +299,35 @@ class Material(NamedTuple):
 class Process(NamedTuple):
     """Representation of a Process or Assay node."""
 
-    #: Process type
-    type: str
-    #: Process name
+    #: Referenced to protocol name from investigation
+    protocol_ref: str
+    #: Name of the process.  When "Protocol REF" is given without a further
+    #: qualifying name, this is generated from the protocol reference and
+    #: an auto-incrementing number.
     name: str
-    #: Array design reference
-    array_design_ref: str
     #: Process date
     date: date
     #: Performer of process
     performer: str
-    #: Scan name of process
-    scan_name: str
-    #: Tuple of process characteristics
-    characteristics: Tuple[Characteristics]
-    #: Tuple of process comments
-    comments: Tuple[Comment]
     #: Tuple of parameters values
     parameter_values: Tuple[ParameterValue]
+    #: Tuple of process comments
+    comments: Tuple[Comment]
+    #: Array design reference
+    array_design_ref: str
+    #: Scan name of process
+    scan_name: str
 
 
-class ProcessArc(NamedTuple):
-    """Representation of an arc  between two materials (given by name) and
-    labeled with a Process.
+class Arc(NamedTuple):
+    """Representation of an arc between two ``Material`` and/or ``Process``
+    nodes.
     """
 
     #: The arc's tail name
     tail: str
     #: The arc's head name
     head: str
-    #: The ``Process`` label of the arc
-    process: Process
 
 
 class Study(NamedTuple):
@@ -330,10 +335,15 @@ class Study(NamedTuple):
 
     #: Path to ISA study file
     file: Path
-    #: A mapping from material name to Material object (includes data)
+    #: The study's header
+    header: Tuple
+    #: A mapping from material name to ``Material`` object (``Data``
+    #: is a kind of material)
     materials: Dict[str, Material]
-    #: The processing arcs.
-    process_arcs: Tuple[ProcessArc]
+    #: A mapping from process name to ``Process`` object
+    processes: Dict[str, Process]
+    #: The processing arcs
+    arcs: Tuple[Arc]
 
 
 class Assay(NamedTuple):
@@ -341,7 +351,12 @@ class Assay(NamedTuple):
 
     #: Path to ISA assay file
     file: Path
-    #: A mapping from material name to Material object (includes data)
+    #: The assay's header
+    header: Tuple
+    #: A mapping from material name to ``Material`` object (``Data``
+    #: is a kind of material)
     materials: Dict[str, Material]
-    #: The processing arcs.
-    process_arcs: Tuple[ProcessArc]
+    #: A mapping from process name to ``Process`` object
+    processes: Dict[str, Process]
+    #: The processing arcs
+    arcs: Tuple[Arc]

@@ -2,6 +2,8 @@
 """This module contains code for the parsing of assay and study files.
 """
 
+# TODO: validate whether protocol is known in investigation
+
 import csv
 from datetime import datetime
 from pathlib import Path
@@ -27,9 +29,41 @@ HYBRIDIZATION_ASSAY = 'hybridization'
 MS_ASSAY = 'mass_spectometry'
 NORMALIZATION = 'normalization'
 
+#: Header values indicating a material name.
+_MATERIAL_NAME_HEADERS = (
+    # Material
+    'Extract Name',
+    'Labeled Extract Name',
+    'Source Name',
+    'Sample Name',
+    # Data
+    'Array Data File',
+    'Array Data Matrix File',
+    'Derived Array Data File',
+    'Derived Array Data Matrix File',
+    'Derived Data File',
+    'Derived Spectral Data File',
+    'Metabolite Assignment File',
+    'Peptide Assignment File',
+    'Post Translational Modification Assignment File',
+    'Protein Assignment File',
+    'Raw Data File',
+    'Raw Spectral Data File')
 
-class _BuilderBase:
-    """Base class for builder objects"""
+#: Header values indicating a process name.
+_PROCESS_NAME_HEADERS = (
+    'Assay Name',
+    'Protocol REF',
+    'Normalization Name',
+    'Data Normalization Name',
+    'Data Transformation Name',
+    'Gel Electrophoresis Name',
+    'Hybridization Assay Name',
+    'MS Assay Name')
+
+
+class _NodeBuilderBase:
+    """Base class for Material and Process builder objects"""
 
     #: Headers to use for naming
     name_headers = None
@@ -44,7 +78,9 @@ class _BuilderBase:
         self.ontology_source_refs = ontology_source_refs
         #: The column descriptions to build ``Material`` from.
         self.column_headers = column_headers
-        #: The header to use for building names
+        #: The "Protocol REF" header, if any
+        self.protocol_ref_header = None
+        #: The header to use for building names, if any
         self.name_header = None
         #: The headers for the characteristics
         self.characteristic_headers = []
@@ -56,7 +92,7 @@ class _BuilderBase:
         self.parameter_value_headers = []
         #: The header for array design ref
         self.array_design_ref = None
-        #: The header for array design reff
+        #: The header for array design ref
         self.array_design_ref_header = None
         #: The header for label type
         self.label_header = None
@@ -70,22 +106,34 @@ class _BuilderBase:
         self.unit_header = None
         #: The header for the scan name
         self.scan_name_header = None
+        #: Current counter value
+        self.counter_value = 0
         # Assign column headers to their roles (properties above)
         self._assign_column_headers()
 
+    def _next_counter(self):
+        """Increment counter value and return"""
+        self.counter_value += 1
+        return self.counter_value
+
     def _assign_column_headers(self):
         # Record the last column header that is a primary annotation (e.g.,
-        # Characteristics[*] is but "Term Source REF" is not.
+        # "Characteristics[*]" is but "Term Source REF" is not.
         prev = None
+        # Interpret the full sequence of column headers.
         for no, header in enumerate(self.column_headers):
             if (header.column_type not in self.name_headers and
                     header.column_type not in self.allowed_column_types):
-                tpl = 'Invalid column type occured {} not in {}'
+                tpl = 'Invalid column type occured "{}" not in {}'
                 msg = tpl.format(header.column_type, self.allowed_column_types)
                 raise ParseIsatabException(msg)
+            # Most headers are not secondary, so make this the default state.
             is_secondary = False
-            if no == 0:  # short-circuit name header
-                assert header.column_type in self.name_headers
+            if header.column_type == 'Protocol REF':
+                assert not self.protocol_ref_header
+                self.protocol_ref_header = header
+            elif header.column_type in self.name_headers:
+                assert not self.name_header
                 self.name_header = header
             elif header.column_type == 'Characteristics':
                 self.characteristic_headers.append(header)
@@ -183,28 +231,21 @@ class _BuilderBase:
             name = line[header.col_no]
             ontology_name = line[header2.col_no]
             accession = line[header2.col_no + 1]
-            ontology = self.ontology_source_refs[ontology_name]
-            return models.OntologyTermRef(
-                name, accession, ontology_name, ontology)
+            if ontology_name not in self.ontology_source_refs:
+                tpl = 'Ontology with name "{}" not defined in investigation!'
+                msg = tpl.format(ontology_name)
+                raise ParseIsatabException(msg)
+            return models.OntologyTermRef(name, accession, ontology_name)
         else:
             return line[header.col_no]
 
 
-class _MaterialBuilder(_BuilderBase):
+class _MaterialBuilder(_NodeBuilderBase):
     """Helper class to construct a ``Material`` object from a line"""
 
     type_ = models.MATERIAL
 
-    name_headers = (
-        # Material
-        'Extract Name', 'Labeled Extract Name', 'Material Name',
-        'Source Name', 'Sample Name',
-        # Data
-        'Array Data File', 'Array Data Matrix File',
-        'Derived Array Data File', 'Derived Array Data Matrix File',
-        'Derived Data File', 'Derived Spectral Data File',
-        'Raw Data File', 'Raw Spectral Data File'
-        )
+    name_headers = _MATERIAL_NAME_HEADERS
 
     allowed_column_types = (
         # Primary annotations (not parametrized)
@@ -217,7 +258,8 @@ class _MaterialBuilder(_BuilderBase):
     def build(self, line: List[str]) -> models.Material:
         """Build and return ``Material`` from TSV file line."""
         # First, build the individual components
-        type_ = self.name_header.column_type.replace(' Name', '')
+        assert self.name_header or self.protocol_ref_header
+        type_ = self.name_header.column_type
         name = line[self.name_header.col_no]
         label = None
         if self.label_header:
@@ -313,6 +355,26 @@ class _DerivedSpectralDataBuilder(_DataBuilder):
     type_ = models.DERIVED_SPECTRAL_DATA_FILE
 
 
+class _MetaboliteAssignmentFileBuilder(_DataBuilder):
+
+    type_ = models.METABOLITE_ASSIGNMENT_FILE
+
+
+class _PeptideAssignmentFileBuilder(_DataBuilder):
+
+    type_ = models.PEPTIDE_ASSIGNMENT_FILE
+
+
+class _ProteinAssignmentFileBuilder(_DataBuilder):
+
+    type_ = models.PROTEIN_ASSIGNMENT_FILE
+
+
+class _PostTranslationalModificationAssignmentFileBuilder(_DataBuilder):
+
+    type_ = models.POST_TRANSLATIONAL_MODIFICATION_ASSIGNMENT_FILE
+
+
 class _RawDataBuilder(_DataBuilder):
     """Specialization of ``_DataBuilder`` to build source ``DerivedSpectralData``
     objects."""
@@ -327,18 +389,10 @@ class _RawSpectralDataBuilder(_DataBuilder):
     type_ = models.RAW_SPECTRAL_DATA_FILE
 
 
-class _ProcessBuilder(_BuilderBase):
+class _ProcessBuilder(_NodeBuilderBase):
     """Helper class to construct ``Process`` objects."""
 
-    name_headers = (
-        'Protocol REF',
-        'Normalization Name',
-        'Data Normalization Name',
-        'Data Transformation Name',
-        'Gel Electrophoresis Name',
-        'Hybridization Assay Name',
-        'MS Assay Name',
-    )
+    name_headers = _PROCESS_NAME_HEADERS
 
     allowed_column_types = (
         # Primary annotations (not parametrized)
@@ -350,36 +404,51 @@ class _ProcessBuilder(_BuilderBase):
 
     def build(self, line: List[str]) -> models.Process:
         """Build and return ``Process`` from CSV file."""
-        # First, build the individual components
-        type_ = self.name_header.column_type.replace(' Name', '')
-        name = line[self.name_header.col_no]
-        array_design_ref = None
-        performer = None
-        process_date = None
-        scan_name = None
-        if self.array_design_ref_header:
-            array_design_ref = line[self.array_design_ref_header.col_no]
+        # First, build the individual attributes of ``Process``
+        protocol_ref, name = self._build_protocol_ref_and_name(line)
+        if self.date_header:
+            date = datetime.strptime(
+                    line[self.date_header.col_no], '%Y-%m-%d').date()
+        else:
+            date = None
         if self.performer_header:
             performer = line[self.performer_header.col_no]
-        if self.date_header:
-            process_date = datetime.strptime(
-                line[self.date_header.col_no], '%Y-%m-%d').date()
-        if self.scan_name_header:
-            scan_name = datetime.strptime(
-                line[self.scan_name_header.col_no], '%Y-%m-%d').date()
-        characteristics = tuple(
-            self._build_complex(hdr, line, models.Characteristics)
-            for hdr in self.characteristic_headers)
+        else:
+            performer = None
         comments = tuple(
             self._build_complex(hdr, line, models.Comment)
             for hdr in self.comment_headers)
         parameter_values = tuple(
             self._build_complex(hdr, line, models.ParameterValue)
             for hdr in self.parameter_value_headers)
+        if self.array_design_ref_header:
+            array_design_ref = line[self.array_design_ref_header.col_no]
+        else:
+            array_design_ref = None
+        if self.scan_name_header:
+            scan_name = datetime.strptime(
+                line[self.scan_name_header.col_no], '%Y-%m-%d').date()
+        else:
+            scan_name = None
         # Then, constructing ``Process`` is easy
         return models.Process(
-            type_, name, array_design_ref, process_date, performer,
-            scan_name, characteristics, comments, parameter_values)
+            protocol_ref, name, date, performer, parameter_values, comments,
+            array_design_ref, scan_name)
+
+    def _build_protocol_ref_and_name(self, line: List[str]):
+        # At least one of these headers has to be specified
+        assert self.name_header or self.protocol_ref_header
+        # Perform case distinction on which case is actually true
+        if not self.name_header:
+            protocol_ref = line[self.protocol_ref_header.col_no]
+            name = '{}-{}'.format(protocol_ref, self._next_counter())
+        elif not self.protocol_ref_header:
+            protocol_ref = 'UNKNOWN'
+            name = line[self.name_header.col_no]
+        else:  # both are given
+            protocol_ref = line[self.protocol_ref_header.col_no]
+            name = line[self.name_header.col_no]
+        return protocol_ref, name
 
 
 class _ProtocolRefBuilder(_ProcessBuilder):
@@ -457,10 +526,41 @@ class _RowBuilderBase:
             yield klass(self.ontology_source_refs, self.header[start:end])
 
     def _make_breaks(self):
-        """Build indices to break the columns at."""
+        """Build indices to break the columns at
+
+        Life would be simpler if ISA-Tab would require a "Protocol REF"
+        before generic or specialized assay names (e.g., "Assay Name" or
+        "MS Assay Name") or at least define what happens if we see
+        ("Protocol REF", "Assay Name", "Assay Name").
+
+        Our interpretation is that in the case above the first "Assay Name"
+        further qualifies (=annotates) the "Protocol REF") and the second
+        leads to an implicit "Protocol REF" creation with all cell values
+        set to "unknown".  This somewhat emulates what the official ISA-Tab
+        API does.
+        """
+        # Record whether we have seen a "Protocol REF" but no "Assay Name".
+        noname_protocol_ref = False
         for i, col_hdr in enumerate(self.header):
-            if col_hdr.column_type in self.node_builders:
+            if col_hdr.column_type in _MATERIAL_NAME_HEADERS:
+                noname_protocol_ref = False
                 yield i
+            elif col_hdr.column_type in self.node_builders:
+                # Column type has an associated node builder, can be
+                # "Protocol REF", an annotating assay name, or implicitely
+                # start a new process node.
+                if col_hdr.column_type == "Protocol REF":
+                    noname_protocol_ref = True
+                    yield i
+                else:
+                    if not noname_protocol_ref:
+                        # This one does not annotate a previous "Protocol
+                        # REF" because we have already seen a name (it
+                        # does not matter whether standalone or giving a
+                        # name to a "Protocol REF").
+                        yield i
+                    # In any case, we have seen a name for a protocol now
+                    noname_protocol_ref = False
         yield len(self.header)  # index to end of list
 
     def build(self, line):
@@ -494,6 +594,11 @@ class _AssayRowBuilder(_RowBuilderBase):
         'Derived Array Data Matrix File': _DerivedArrayMatrixDataBuilder,
         'Derived Data File': _DerivedDataBuilder,
         'Derived Spectral Data File': _DerivedSpectralDataBuilder,
+        'Metabolite Assignment File': _MetaboliteAssignmentFileBuilder,
+        'Peptide Assignment File': _PeptideAssignmentFileBuilder,
+        'Post Translational Modification Assignment File':
+            _PostTranslationalModificationAssignmentFileBuilder,
+        'Protein Assignment File': _ProteinAssignmentFileBuilder,
         'Raw Data File': _RawDataBuilder,
         'Raw Spectral Data File': _RawSpectralDataBuilder,
         # Process node builders
@@ -508,44 +613,95 @@ class _AssayRowBuilder(_RowBuilderBase):
     }
 
 
-def _build_study_assay(file_name, rows, klass):
-    """Helper for building Study and Assay objects"""
-    #: TODO: this is bogus
-    row_len = None
+def _build_study_assay(file_name, header, rows, klass):
+    """Helper for building ``Study`` and ``Assay`` objects.
+    """
     materials = {}
+    processes = {}
     arcs = []
     arc_set = set()
     for row in rows:
-        if row_len is None:
-            row_len = len(row)
-            if row_len % 2 != 1:
-                tpl = 'Even number of entities in row (file {}): {}'
-                msg = tpl.format(file_name, len(row))
-                raise ParseIsatabException(msg)
-        else:
-            if not row_len == len(row):
-                tpl = ('Inconsistent number of entities in row (file {}): '
-                       '{} vs {}')
-                msg = tpl.format(file_name, row_len, len(row))
-                raise ParseIsatabException(msg)
-        assert len(row) % 2 == 1
-        # Create materials
-        for i in range(0, len(row), 2):
-            material = row[i]
-            if material.name not in materials:
-                materials[material.name] = material
-        # Create arcs
-        for i in range(1, len(row), 2):
-            arc = models.ProcessArc(row[i - 1].name, row[i + 1].name, row[i])
-            if arc not in arc_set:
-                arc_set.add(arc)
-                arcs.append(arc)
-    return klass(Path(file_name), materials, tuple(arcs))
+        for i, entry in enumerate(row):
+            # Collect entry and materials
+            if isinstance(entry, models.Process):
+                processes[entry.name] = entry
+            else:
+                assert isinstance(entry, models.Material)
+                materials[entry.name] = entry
+            # Collect arc
+            if i > 0:
+                arc = models.Arc(row[i - 1].name, row[i].name)
+                if arc not in arc_set:
+                    arc_set.add(arc)
+                    arcs.append(arc)
+    return klass(Path(file_name), header, materials, processes, tuple(arcs))
+
+
+class StudyRowReader:
+    """Read an ISA-TAB study file (``s_*.txt``) into a tabular/object
+    representation.
+
+    This is a more low-level part of the interface.  Please prefer
+    using :py:StudyReader: over using this class.
+    """
+
+    @classmethod
+    def from_stream(
+            klass,
+            investigation: models.InvestigationInfo,
+            input_file: TextIO):
+        """Construct from file-like object"""
+        return StudyRowReader(investigation, input_file)
+
+    def __init__(
+            self,
+            investigation: models.InvestigationInfo,
+            input_file: TextIO):
+        self.investigation = investigation
+        self.input_file = input_file
+        self._reader = csv.reader(input_file, delimiter='\t', quotechar='"')
+        self._line = None
+        self._read_next_line()
+        self.header = self._read_header()
+
+    def _read_header(self):
+        """Read first line with header"""
+        try:
+            line = self._read_next_line()
+        except StopIteration:
+            msg = 'Study file has no header!'
+            raise ParseIsatabException(msg)
+        return list(StudyHeaderParser(line).run())
+
+    def _read_next_line(self):
+        """Read next line, skipping comments starting with ``'#'``."""
+        prev_line = self._line
+        try:
+            self._line = next(self._reader)
+            while self._line is not None and (
+                    not self._line or self._line[0].startswith('#')):
+                self._line = self.input_file.next()
+        except StopIteration:
+            self._line = None
+        return prev_line
+
+    def read(self):
+        builder = _StudyRowBuilder(
+            self.investigation.ontology_source_refs,
+            self.header)
+        while True:
+            line = self._read_next_line()
+            if line:
+                yield builder.build(line)
+            else:
+                break
 
 
 class StudyReader:
-    """Read an ISA-TAB study file (``s_*.txt``) into a tabular/object
-    representation.
+    """Read an ISA-TAB study file (``s_*.txt``) into a ``Study`` object.
+
+    This is the main facade class for reading study objects.  Prefer it
+    over using the more low-level code.
     """
 
     @classmethod
@@ -560,57 +716,87 @@ class StudyReader:
             self,
             investigation: models.InvestigationInfo,
             input_file: TextIO):
+        self.row_reader = StudyRowReader.from_stream(investigation, input_file)
+        self.investigation = investigation
+        #: The file used for reading from
+        self.input_file = input_file
+        #: The header of the ISA study file
+        self.header = self.row_reader.header
+
+    def read(self):
+        return _build_study_assay(
+            self.input_file.name, self.header, list(self.row_reader.read()),
+            models.Study)
+
+
+# TODO: extract common parts of {Assay,Study}[Row]Reader into two base classes
+
+
+class AssayRowReader:
+    """Read an ISA-TAB assay file (``a_*.txt``) into a tabular/object
+    representation.
+
+    This is a more low-level part of the interface.  Please prefer
+    using :py:AssayReader: over using this class.
+    """
+
+    @classmethod
+    def from_stream(
+            klass,
+            investigation: models.InvestigationInfo,
+            input_file: TextIO):
+        """Construct from file-like object"""
+        return AssayRowReader(investigation, input_file)
+
+    def __init__(
+            self,
+            investigation: models.InvestigationInfo,
+            input_file: TextIO):
         self.investigation = investigation
         self.input_file = input_file
         self._reader = csv.reader(input_file, delimiter='\t', quotechar='"')
         self._line = None
         self._read_next_line()
+        self.header = self._read_header()
 
-    def _read_next_line(self):
-        """Read next line, skipping comments starting with ``'#'``."""
-        prev_line = self._line
-        self._line = next(self._reader)
-        while self._line is not None and (
-                not self._line or self._line[0].startswith('#')):
-            self._line = self.input_file.next()
-        return prev_line
-
-    def read(self):
+    def _read_header(self):
+        """Read first line with header"""
         try:
             line = self._read_next_line()
         except StopIteration:
             msg = 'Study file has no header!'
             raise ParseIsatabException(msg)
-        self.header = list(StudyHeaderParser(line).run())
-        # import sys, pprint
-        # print('STUDY HEADER', file=sys.stderr)
-        # pprint.pprint(self.header, stream=sys.stderr)
-        # print('-- END: STUDY HEADER', file=sys.stderr)
-        builder = _StudyRowBuilder(
-            self.models.ontology_source_refs,
+        return list(AssayHeaderParser(line).run())
+
+    def _read_next_line(self):
+        """Read next line, skipping comments starting with ``'#'``."""
+        prev_line = self._line
+        try:
+            self._line = next(self._reader)
+            while self._line is not None and (
+                    not self._line or self._line[0].startswith('#')):
+                self._line = self.input_file.next()
+        except StopIteration:
+            self._line = None
+        return prev_line
+
+    def read(self):
+        builder = _AssayRowBuilder(
+            self.investigation.ontology_source_refs,
             self.header)
-        rows = []
         while True:
-            try:
-                line = self._read_next_line()
-            except StopIteration:
+            line = self._read_next_line()
+            if line:
+                yield builder.build(line)
+            else:
                 break
-            # import sys, pprint
-            # print('LINE', file=sys.stderr)
-            # pprint.pprint(line, stream=sys.stderr)
-            # print('-- END: LINE', file=sys.stderr)
-            row = builder.build(line)
-            # print('ROW', file=sys.stderr)
-            # pprint.pprint(row, stream=sys.stderr)
-            # print('-- END: ROW', file=sys.stderr)
-            rows.append(row)
-        return _build_study_assay(
-            self.input_file.name, rows, models.Study)
 
 
 class AssayReader:
-    """Read an ISA-TAB assay file (``a_*.txt``) into a tabular/object
-    representation.
+    """Read an ISA-TAB assay file (``a_*.txt``) into a ``Assay`` object.
+
+    This is the main facade class for reading assay objects.  Prefer it
+    over using the more low-level code.
     """
 
     @classmethod
@@ -625,49 +811,14 @@ class AssayReader:
             self,
             investigation: models.InvestigationInfo,
             input_file: TextIO):
+        self.row_reader = AssayRowReader.from_stream(investigation, input_file)
         self.investigation = investigation
+        #: The file used for reading from
         self.input_file = input_file
-        self._reader = csv.reader(input_file, delimiter='\t', quotechar='"')
-        self._line = None
-        self._read_next_line()
-
-    def _read_next_line(self):
-        """Read next line, skipping comments starting with ``'#'``."""
-        prev_line = self._line
-        self._line = next(self._reader)
-        while self._line is not None and (
-                not self._line or self._line[0].startswith('#')):
-            self._line = next(self._reader)
-        return prev_line
+        #: The header of the ISA assay file
+        self.header = self.row_reader.header
 
     def read(self):
-        try:
-            line = self._read_next_line()
-        except StopIteration:
-            msg = 'Assay file has no header!'
-            raise ParseIsatabException(msg)
-        self.header = list(AssayHeaderParser(line).run())
-        # import sys, pprint
-        # print('ASSAY HEADER', file=sys.stderr)
-        # pprint.pprint(self.header, stream=sys.stderr)
-        # print('-- END: ASSAY HEADER', file=sys.stderr)
-        builder = _AssayRowBuilder(
-            self.models.ontology_source_refs,
-            self.header)
-        rows = []
-        while True:
-            try:
-                line = self._read_next_line()
-            except StopIteration:
-                break
-            # import sys, pprint
-            # print('LINE', file=sys.stderr)
-            # pprint.pprint(line, stream=sys.stderr)
-            # print('-- END: LINE', file=sys.stderr)
-            row = builder.build(line)
-            # print('ROW', file=sys.stderr)
-            # pprint.pprint(row, stream=sys.stderr)
-            # print('-- END: ROW', file=sys.stderr)
-            rows.append(row)
         return _build_study_assay(
-            self.input_file.name, rows, models.Assay)
+            self.input_file.name, self.header, list(self.row_reader.read()),
+            models.Assay)
