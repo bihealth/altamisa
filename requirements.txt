@@ -1,1 +1,1 @@
-requirements/develop.txt
+requirements/base.txt
