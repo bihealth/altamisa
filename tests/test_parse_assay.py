@@ -122,7 +122,7 @@ def test_assay_row_reader_small_assay(
         'Sample Name', '0815-N1', None, (), (), (), None)
     assert expected == first_row[0]
     expected = models.Process(
-        'library preparation', 'library preparation-1', None,
+        'library preparation', 'library preparation-2-1', None,
         None, (), (), None, None)
     assert expected == first_row[1]
     expected = models.Process(
@@ -152,7 +152,7 @@ def test_assay_row_reader_small_assay(
         'Sample Name', '0815-T1', None, (), (), (), None)
     assert expected == second_row[0]
     expected = models.Process(
-        'library preparation', 'library preparation-2', None,
+        'library preparation', 'library preparation-2-2', None,
         None, (), (), None, None)
     assert expected == second_row[1]
     expected = models.Process(
@@ -225,13 +225,13 @@ def test_assay_reader_small_assay(
     assert expected == assay.materials['0815-somatic.vcf.gz']
 
     expected = models.Process(
-        'library preparation', 'library preparation-1', None,
+        'library preparation', 'library preparation-2-1', None,
         None, (), (), None, None)
-    assert expected == assay.processes['library preparation-1']
+    assert expected == assay.processes['library preparation-2-1']
     expected = models.Process(
-        'library preparation', 'library preparation-2', None,
+        'library preparation', 'library preparation-2-2', None,
         None, (), (), None, None)
-    assert expected == assay.processes['library preparation-2']
+    assert expected == assay.processes['library preparation-2-2']
     expected = models.Process(
         'nucleic acid sequencing', '0815-N1-DNA1-WES1', None,
         None, (), (), None, None)
@@ -242,14 +242,14 @@ def test_assay_reader_small_assay(
     assert expected == assay.processes['0815-T1-DNA1-WES1']
 
     expected = (
-        models.Arc('0815-N1', 'library preparation-1'),
-        models.Arc('library preparation-1', '0815-N1-DNA1-WES1'),
+        models.Arc('0815-N1', 'library preparation-2-1'),
+        models.Arc('library preparation-2-1', '0815-N1-DNA1-WES1'),
         models.Arc('0815-N1-DNA1-WES1', '0815-N1-DNA1-WES1_L???_???_R1.fastq.gz'),
         models.Arc('0815-N1-DNA1-WES1_L???_???_R1.fastq.gz', '0815-N1-DNA1-WES1_L???_???_R2.fastq.gz'),
         models.Arc('0815-N1-DNA1-WES1_L???_???_R2.fastq.gz', 'somatic variant calling-1'),
         models.Arc('somatic variant calling-1', '0815-somatic.vcf.gz'),
-        models.Arc('0815-T1', 'library preparation-2'),
-        models.Arc('library preparation-2', '0815-T1-DNA1-WES1'),
+        models.Arc('0815-T1', 'library preparation-2-2'),
+        models.Arc('library preparation-2-2', '0815-T1-DNA1-WES1'),
         models.Arc('0815-T1-DNA1-WES1', '0815-T1-DNA1-WES1_L???_???_R1.fastq.gz'),
         models.Arc('0815-T1-DNA1-WES1_L???_???_R1.fastq.gz', '0815-T1-DNA1-WES1_L???_???_R2.fastq.gz'),
         models.Arc('0815-T1-DNA1-WES1_L???_???_R2.fastq.gz', 'somatic variant calling-1')
