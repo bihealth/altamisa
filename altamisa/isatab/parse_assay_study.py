@@ -551,14 +551,14 @@ class StudyReader:
     @classmethod
     def from_stream(
             klass,
-            investigation: models.Investigation,
+            investigation: models.InvestigationInfo,
             input_file: TextIO):
         """Construct from file-like object"""
         return StudyReader(investigation, input_file)
 
     def __init__(
             self,
-            investigation: models.Investigation,
+            investigation: models.InvestigationInfo,
             input_file: TextIO):
         self.investigation = investigation
         self.input_file = input_file
@@ -616,14 +616,14 @@ class AssayReader:
     @classmethod
     def from_stream(
             klass,
-            investigation: models.Investigation,
+            investigation: models.InvestigationInfo,
             input_file: TextIO):
         """Construct from file-like object"""
         return AssayReader(investigation, input_file)
 
     def __init__(
             self,
-            investigation: models.Investigation,
+            investigation: models.InvestigationInfo,
             input_file: TextIO):
         self.investigation = investigation
         self.input_file = input_file
