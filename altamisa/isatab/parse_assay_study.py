@@ -16,6 +16,11 @@ from .headers import ColumnHeader, StudyHeaderParser, AssayHeaderParser
 
 __author__ = 'Manuel Holtgrewe <manuel.holtgrewe@bihealth.de>'
 
+#: Used for marking anonymous/unnamed Processes
+TOKEN_ANONYMOUS = 'Anonymous'
+#: Used for marking empty/unnamed Data
+TOKEN_EMPTY = 'Empty'
+
 # We define constants for the headers in the assay and study files as a typo in
 # the code below can then be caught as "unknown identifier" instead of having
 # to chase down string mismatches in if/then/else or table lookups.
@@ -257,10 +262,16 @@ class _MaterialBuilder(_NodeBuilderBase):
 
     def build(self, line: List[str]) -> models.Material:
         """Build and return ``Material`` from TSV file line."""
+        counter_value = self._next_counter()
         # First, build the individual components
         assert self.name_header or self.protocol_ref_header
         type_ = self.name_header.column_type
-        name = line[self.name_header.col_no]
+        if line[self.name_header.col_no]:
+            name = line[self.name_header.col_no]
+        else:
+            name = '{} {}-{}-{}'.format(
+                TOKEN_EMPTY, self.name_header.column_type,
+                self.name_header.col_no + 1, counter_value)
         label = None
         if self.label_header:
             label = line[self.label_header.col_no]
@@ -406,9 +417,14 @@ class _ProcessBuilder(_NodeBuilderBase):
         """Build and return ``Process`` from CSV file."""
         # First, build the individual attributes of ``Process``
         protocol_ref, name = self._build_protocol_ref_and_name(line)
-        if self.date_header:
-            date = datetime.strptime(
-                    line[self.date_header.col_no], '%Y-%m-%d').date()
+        if self.date_header and line[self.date_header.col_no]:
+            try:
+                date = datetime.strptime(
+                        line[self.date_header.col_no], '%Y-%m-%d').date()
+            except ValueError:
+                tpl = 'Invalid ISO8601 date "{}"'
+                msg = tpl.format(line[self.date_header.col_no])
+                raise ParseIsatabException(msg)
         else:
             date = None
         if self.performer_header:
@@ -439,15 +455,28 @@ class _ProcessBuilder(_NodeBuilderBase):
         # At least one of these headers has to be specified
         assert self.name_header or self.protocol_ref_header
         # Perform case distinction on which case is actually true
+        counter_value = self._next_counter()
         if not self.name_header:
+            # Name header is given but value is empty, will use auto-generated
+            # value.
             protocol_ref = line[self.protocol_ref_header.col_no]
-            name = '{}-{}'.format(protocol_ref, self._next_counter())
+            name = '{}-{}-{}'.format(
+                protocol_ref, self.protocol_ref_header.col_no + 1, counter_value)
         elif not self.protocol_ref_header:
             protocol_ref = 'UNKNOWN'
-            name = line[self.name_header.col_no]
+            if line[self.name_header.col_no]:
+                name = line[self.name_header.col_no]
+            else:  # empty!
+                name = '{} {}-{}-{}'.format(
+                    TOKEN_ANONYMOUS,
+                    self.name_header.column_type.replace(' Name', ''),
+                    self.name_header.col_no + 1, counter_value)
         else:  # both are given
             protocol_ref = line[self.protocol_ref_header.col_no]
-            name = line[self.name_header.col_no]
+            if line[self.name_header.col_no]:
+                name = line[self.name_header.col_no]
+            else:
+                name = '{}-{}'.format(protocol_ref, counter_value)
         return protocol_ref, name
 
 

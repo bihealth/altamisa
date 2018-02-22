@@ -35,7 +35,7 @@ def test_study_row_reader_minimal_study(
         'Source Name', '0815', None, (), (), (), None)
     assert expected == first_row[0]
     expected = models.Process(
-        'sample collection', 'sample collection-1', None, None,
+        'sample collection', 'sample collection-2-1', None, None,
         (), (), None, None)
     assert expected == first_row[1]
     expected = models.Material(
@@ -75,11 +75,11 @@ def test_study_reader_minimal_study(
     assert expected == study.materials['0815-N1']
 
     expected = models.Process(
-        'sample collection', 'sample collection-1', None, None, (), (), None, None)
-    assert expected == study.processes['sample collection-1']
+        'sample collection', 'sample collection-2-1', None, None, (), (), None, None)
+    assert expected == study.processes['sample collection-2-1']
 
-    expected = (models.Arc('0815', 'sample collection-1'),
-                models.Arc('sample collection-1', '0815-N1'))
+    expected = (models.Arc('0815', 'sample collection-2-1'),
+                models.Arc('sample collection-2-1', '0815-N1'))
     assert expected == study.arcs
 
 
@@ -115,7 +115,7 @@ def test_study_row_reader_small_study(
         'Source Name', '0815', None, (characteristics,), (), (), None)
     assert expected == first_row[0]
     expected = models.Process(
-        'sample collection', 'sample collection-1', date(2018, 2, 2),
+        'sample collection', 'sample collection-5-1', date(2018, 2, 2),
         'John Doe', (), (), None, None)
     assert expected == first_row[1]
     expected = models.Material(
@@ -127,7 +127,7 @@ def test_study_row_reader_small_study(
         'Source Name', '0815', None, (characteristics,), (), (), None)
     assert expected == second_row[0]
     expected = models.Process(
-        'sample collection', 'sample collection-2', date(2018, 2, 2),
+        'sample collection', 'sample collection-5-2', date(2018, 2, 2),
         'John Doe', (), (), None, None)
     assert expected == second_row[1]
     expected = models.Material(
@@ -174,18 +174,18 @@ def test_study_reader_small_study(
     assert expected == study.materials['0815-T1']
 
     expected = models.Process(
-        'sample collection', 'sample collection-1', date(2018, 2, 2),
+        'sample collection', 'sample collection-5-1', date(2018, 2, 2),
         'John Doe', (), (), None, None)
-    assert expected == study.processes['sample collection-1']
+    assert expected == study.processes['sample collection-5-1']
     expected = models.Process(
-        'sample collection', 'sample collection-2', date(2018, 2, 2),
+        'sample collection', 'sample collection-5-2', date(2018, 2, 2),
         'John Doe', (), (), None, None)
-    assert expected == study.processes['sample collection-2']
+    assert expected == study.processes['sample collection-5-2']
 
     expected = (
-        models.Arc('0815', 'sample collection-1'),
-        models.Arc('sample collection-1', '0815-N1'),
-        models.Arc('0815', 'sample collection-2'),
-        models.Arc('sample collection-2', '0815-T1'),
+        models.Arc('0815', 'sample collection-5-1'),
+        models.Arc('sample collection-5-1', '0815-N1'),
+        models.Arc('0815', 'sample collection-5-2'),
+        models.Arc('sample collection-5-2', '0815-T1'),
     )
     assert expected == study.arcs
