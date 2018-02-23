@@ -63,7 +63,7 @@ Study Assay Measurement Type Term Source REF	OBI
 Study Assay Technology Type	nucleotide sequencing
 Study Assay Technology Type Term Accession Number	http://purl.obolibrary.org/obo/OBI_0000626
 Study Assay Technology Type Term Source REF	OBI
-Study Assay Technology Platform
+Study Assay Technology Platform	
 STUDY PROTOCOLS
 Study Protocol Name	sample collection	nucleic acid sequencing
 Study Protocol Type	sample collection	nucleic acid sequencing

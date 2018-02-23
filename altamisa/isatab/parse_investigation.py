@@ -39,6 +39,40 @@ ONTOLOGY_SOURCE_REF_KEYS = (
     TERM_SOURCE_DESCRIPTION)
 
 
+# The string constants used for the references to studies basic info
+STUDY_IDENTIFIER = 'Study Identifier'
+STUDY_TITLE = 'Study Title'
+STUDY_DESCRIPTION = 'Study Description'
+STUDY_SUBMISSION_DATE = 'Study Submission Date'
+STUDY_PUBLIC_RELEASE_DATE = 'Study Public Release Date'
+STUDY_FILE_NAME = 'Study File Name'
+
+
+# The string constants used for the references to assays
+STUDY_ASSAY_FILE_NAME = 'Study Assay File Name'
+STUDY_ASSAY_MEASUREMENT_TYPE = 'Study Assay Measurement Type'
+STUDY_ASSAY_MEASUREMENT_TYPE_TERM_ACCESSION_NUMBER = (
+    'Study Assay Measurement Type Term Accession Number')
+STUDY_ASSAY_MEASUREMENT_TYPE_TERM_SOURCE_REF = (
+    'Study Assay Measurement Type Term Source REF')
+STUDY_ASSAY_TECHNOLOGY_TYPE = 'Study Assay Technology Type'
+STUDY_ASSAY_TECHNOLOGY_TYPE_TERM_ACCESSION_NUMBER = (
+    'Study Assay Technology Type Term Accession Number')
+STUDY_ASSAY_TECHNOLOGY_TYPE_TERM_SOURCE_REF = (
+    'Study Assay Technology Type Term Source REF')
+STUDY_ASSAY_TECHNOLOGY_PLATFORM = 'Study Assay Technology Platform'
+STUDY_ASSAY_REF_KEYS = (
+    STUDY_ASSAY_FILE_NAME,
+    STUDY_ASSAY_MEASUREMENT_TYPE,
+    STUDY_ASSAY_MEASUREMENT_TYPE_TERM_ACCESSION_NUMBER,
+    STUDY_ASSAY_MEASUREMENT_TYPE_TERM_SOURCE_REF,
+    STUDY_ASSAY_TECHNOLOGY_TYPE,
+    STUDY_ASSAY_TECHNOLOGY_TYPE_TERM_ACCESSION_NUMBER,
+    STUDY_ASSAY_TECHNOLOGY_TYPE_TERM_SOURCE_REF,
+    STUDY_ASSAY_TECHNOLOGY_PLATFORM
+)
+
+
 class InvestigationReader:
     """Helper class that reads an investigation file into a
     ``InvestigationInfo`` object.
@@ -64,13 +98,13 @@ class InvestigationReader:
             self._line = next(self._reader)
         return prev_line
 
-    def _line_startswith_comment(self):
+    def _next_line_startswith_comment(self):
         if not self._line:
             return False
         else:
             return self._line[0].startswith('Comment')
 
-    def _line_startswith(self, token):
+    def _next_line_startswith(self, token):
         """Return whether line starts with ``token``"""
         if not self._line:
             return False
@@ -98,10 +132,10 @@ class InvestigationReader:
             raise ParseIsatabException(msg)
         # Read the other four lines in this section.
         section = {}
-        while (self._line_startswith('Term Source') or
-               self._line_startswith_comment()):
+        while (self._next_line_startswith('Term Source') or
+               self._next_line_startswith_comment()):
             line = self._read_next_line()
-            if self._line_startswith_comment():
+            if self._next_line_startswith_comment():
                 continue  # skip comments
             if line[0] not in ONTOLOGY_SOURCE_REF_KEYS:
                 tpl = 'Line must start with one of {} but is {}'
@@ -137,10 +171,10 @@ class InvestigationReader:
             raise ParseIsatabException(msg)
         # Read the other lines in this section.
         # section = {}
-        while (self._line_startswith('Investigation') or
-               self._line_startswith_comment()):
+        while (self._next_line_startswith('Investigation') or
+               self._next_line_startswith_comment()):
             line = self._read_next_line()
-            if self._line_startswith_comment():
+            if self._next_line_startswith_comment():
                 continue  # skip comments
             # XXX
         return models.BasicInfo('', '', '', '', '', '')
@@ -154,10 +188,10 @@ class InvestigationReader:
             raise ParseIsatabException(msg)
         # Read the other lines in this section.
         # section = {}
-        while (self._line_startswith('Investigation Pub') or
-               self._line_startswith_comment()):
+        while (self._next_line_startswith('Investigation Pub') or
+               self._next_line_startswith_comment()):
             line = self._read_next_line()
-            if self._line_startswith_comment():
+            if self._next_line_startswith_comment():
                 continue  # skip comments
                 yield None  # XXX
 
@@ -170,10 +204,10 @@ class InvestigationReader:
             raise ParseIsatabException(msg)
         # Read the other lines in this section.
         # section = {}
-        while (self._line_startswith('Investigation Person') or
-               self._line_startswith_comment()):
+        while (self._next_line_startswith('Investigation Person') or
+               self._next_line_startswith_comment()):
             line = self._read_next_line()
-            if self._line_startswith_comment():
+            if self._next_line_startswith_comment():
                 continue  # skip comments
                 yield None  # XXX
 
@@ -188,18 +222,43 @@ class InvestigationReader:
                 raise ParseIsatabException(msg)
             # Read the other lines in this section.
             # section = {}
-            while (self._line_startswith('Study') or
-                   self._line_startswith_comment()):
+            study_identifier = ''
+            study_title = ''
+            study_description = ''
+            study_submission_date = ''
+            study_public_release_date = ''
+            study_file_name = ''
+            # study_comments = []
+            while (self._next_line_startswith('Study') or
+                   self._next_line_startswith_comment()):
                 line = self._read_next_line()
-                if self._line_startswith_comment():
-                    continue  # skip comments
+                if len(line) > 1:
+                    if line[0] == STUDY_IDENTIFIER:
+                        study_identifier = line[1]
+                    elif line[0] == STUDY_TITLE:
+                        study_title = line[1]
+                    elif line[0] == STUDY_DESCRIPTION:
+                        study_description = line[1]
+                    elif line[0] == STUDY_SUBMISSION_DATE:
+                        study_submission_date = line[1]
+                    elif line[0] == STUDY_PUBLIC_RELEASE_DATE:
+                        study_public_release_date = line[1]
+                    elif line[0] == STUDY_FILE_NAME:
+                        study_file_name = line[1]
+                    elif self._next_line_startswith_comment():
+                        continue  # skip comments
                 # XXX
             # From this, parse the basic information from the study
-            basic_info = models.BasicInfo('', '', '', '', '', '')
+            basic_info = models.BasicInfo(study_file_name,
+                                          study_identifier,
+                                          study_title,
+                                          study_description,
+                                          study_submission_date,
+                                          study_public_release_date)
             design_descriptors = list(self._read_study_design_descriptors())
             publications = list(self._read_study_publications())
             factors = {f.name: f for f in self._read_study_factors()}
-            assays = {a.name: a for a in self._read_study_assays()}
+            assays = {a.path: a for a in self._read_study_assays()}
             protocols = {p.name: p for p in self._read_study_protocols()}
             contacts = list(self._read_study_contacts())
             # Read the remaining sections for this study
@@ -217,10 +276,10 @@ class InvestigationReader:
             raise ParseIsatabException(msg)
         # Read the other lines in this section.
         # section = {}
-        while (self._line_startswith('Study Design') or
-               self._line_startswith_comment()):
+        while (self._next_line_startswith('Study Design') or
+               self._next_line_startswith_comment()):
             line = self._read_next_line()
-            if self._line_startswith_comment():
+            if self._next_line_startswith_comment():
                 continue  # skip comments
                 yield None  # XXX
 
@@ -233,10 +292,10 @@ class InvestigationReader:
             raise ParseIsatabException(msg)
         # Read the other lines in this section.
         # section = {}
-        while (self._line_startswith('Study Pub') or
-               self._line_startswith_comment()):
+        while (self._next_line_startswith('Study Pub') or
+               self._next_line_startswith_comment()):
             line = self._read_next_line()
-            if self._line_startswith_comment():
+            if self._next_line_startswith_comment():
                 continue  # skip comments
                 yield None  # XXX
 
@@ -249,10 +308,10 @@ class InvestigationReader:
             raise ParseIsatabException(msg)
         # Read the other lines in this section.
         # section = {}
-        while (self._line_startswith('Study Factor') or
-               self._line_startswith_comment()):
+        while (self._next_line_startswith('Study Factor') or
+               self._next_line_startswith_comment()):
             line = self._read_next_line()
-            if self._line_startswith_comment():
+            if self._next_line_startswith_comment():
                 continue  # skip comments
                 yield None  # XXX
 
@@ -264,13 +323,46 @@ class InvestigationReader:
             msg = tpl.format(STUDY_ASSAYS, line)
             raise ParseIsatabException(msg)
         # Read the other lines in this section.
-        # section = {}
-        while (self._line_startswith('Study Assay') or
-               self._line_startswith_comment()):
+        section = {}
+        while (self._next_line_startswith('Study Assay') or
+               self._next_line_startswith_comment()):
             line = self._read_next_line()
-            if self._line_startswith_comment():
+            if self._next_line_startswith_comment():
                 continue  # skip comments
-                yield None  # XXX
+            if line[0] not in STUDY_ASSAY_REF_KEYS:
+                tpl = 'Line must start with one of {} but is {}'
+                msg = tpl.format(STUDY_ASSAY_REF_KEYS, line)
+                raise ParseIsatabException(msg)
+            key = line[0]
+            if key in section:
+                tpl = 'Key {} repeated, previous value {}'
+                msg = tpl.format(key, section[key])
+                raise ParseIsatabException(msg)
+            section[key] = line[1:]
+        # Check that all eight keys are given and all contain the same number
+        # of entries
+        if len(section) != 8:
+            tpl = 'Missing entries in section {}; found: {}'
+            msg = tpl.format(STUDY_ASSAYS, list(sorted(section)))
+            raise ParseIsatabException(msg)
+        if not len(set([len(v) for v in section.values()])) == 1:
+            tpl = 'Inconsistent entry lengths in section {}'
+            msg = tpl.format(STUDY_ASSAYS)
+            raise ParseIsatabException(msg)
+        # Create resulting objects
+        columns = zip(*(section[k] for k in STUDY_ASSAY_REF_KEYS))
+        for file_, meas_type, meas_type_term_acc, meas_type_term_src, \
+            tech_type, tech_type_term_acc, tech_type_term_src, tech_plat \
+                in columns:
+            if not (file_):  # don't allow incomplete assay columns
+                tpl = 'Expected "a_*.txt" in line {}; found: "{}"'
+                msg = tpl.format(STUDY_ASSAY_FILE_NAME, file_)
+                raise ParseIsatabException(msg)
+            meas = models.OntologyTermRef(
+                meas_type, tech_type_term_acc, meas_type_term_src)
+            tech = models.OntologyTermRef(
+                tech_type, tech_type_term_acc, tech_type_term_src)
+            yield models.AssayInfo(meas, tech, tech_plat, file_)
 
     def _read_study_protocols(self) -> Iterator[models.ProtocolInfo]:
         # Read STUDY PROTOCOLS header
@@ -281,10 +373,10 @@ class InvestigationReader:
             raise ParseIsatabException(msg)
         # Read the other lines in this section.
         # section = {}
-        while (self._line_startswith('Study Protocol') or
-               self._line_startswith_comment()):
+        while (self._next_line_startswith('Study Protocol') or
+               self._next_line_startswith_comment()):
             line = self._read_next_line()
-            if self._line_startswith_comment():
+            if self._next_line_startswith_comment():
                 continue  # skip comments
                 yield None  # XXX
 
@@ -297,9 +389,9 @@ class InvestigationReader:
             raise ParseIsatabException(msg)
         # Read the other lines in this section.
         # section = {}
-        while (self._line_startswith('Study Person') or
-               self._line_startswith_comment()):
+        while (self._next_line_startswith('Study Person') or
+               self._next_line_startswith_comment()):
             line = self._read_next_line()
-            if self._line_startswith_comment():
+            if self._next_line_startswith_comment():
                 continue  # skip comments
                 yield None  # XXX
