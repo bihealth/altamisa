@@ -461,7 +461,9 @@ class _ProcessBuilder(_NodeBuilderBase):
             # value.
             protocol_ref = line[self.protocol_ref_header.col_no]
             name = '{}-{}-{}'.format(
-                protocol_ref, self.protocol_ref_header.col_no + 1, counter_value)
+                protocol_ref,
+                self.protocol_ref_header.col_no + 1,
+                counter_value)
         elif not self.protocol_ref_header:
             protocol_ref = 'UNKNOWN'
             if line[self.name_header.col_no]:
