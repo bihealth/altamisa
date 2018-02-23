@@ -2,6 +2,7 @@
 """Code for parsing investigation files.
 """
 
+import os
 import csv
 from typing import Iterator, TextIO
 
@@ -37,6 +38,17 @@ TERM_SOURCE_DESCRIPTION = 'Term Source Description'
 ONTOLOGY_SOURCE_REF_KEYS = (
     TERM_SOURCE_NAME, TERM_SOURCE_FILE, TERM_SOURCE_VERSION,
     TERM_SOURCE_DESCRIPTION)
+
+
+# The string constants used for the references to investigation basic info
+INVESTIGATION_IDENTIFIER = 'Investigation Identifier'
+INVESTIGATION_TITLE = 'Investigation Title'
+INVESTIGATION_DESCRIPTION = 'Investigation Description'
+INVESTIGATION_SUBMISSION_DATE = 'Investigation Submission Date'
+INVESTIGATION_PUBLIC_RELEASE_DATE = 'Investigation Public Release Date'
+INVESTIGATION_INFO_REF_KEYS = (
+    INVESTIGATION_IDENTIFIER, INVESTIGATION_TITLE, INVESTIGATION_DESCRIPTION,
+    INVESTIGATION_SUBMISSION_DATE, INVESTIGATION_PUBLIC_RELEASE_DATE)
 
 
 # The string constants used for the references to studies basic info
@@ -169,15 +181,46 @@ class InvestigationReader:
             tpl = 'Expected {} but got {}'
             msg = tpl.format(INVESTIGATION, line)
             raise ParseIsatabException(msg)
+
         # Read the other lines in this section.
-        # section = {}
+        section = {}
         while (self._next_line_startswith('Investigation') or
                self._next_line_startswith_comment()):
             line = self._read_next_line()
             if self._next_line_startswith_comment():
                 continue  # skip comments
-            # XXX
-        return models.BasicInfo('', '', '', '', '', '')
+            if line[0] not in INVESTIGATION_INFO_REF_KEYS:
+                tpl = 'Line must start with one of {} but is {}'
+                msg = tpl.format(INVESTIGATION_INFO_REF_KEYS, line)
+                raise ParseIsatabException(msg)
+            if len(line) > 2:
+                tpl = 'Line {} contains more than one entity: {}'
+                msg = tpl.format(line[0], line[1:])
+                raise ParseIsatabException(msg)
+            key = line[0]
+            if key in section:
+                tpl = 'Key {} repeated, previous value {}'
+                msg = tpl.format(key, section[key])
+                raise ParseIsatabException(msg)
+            section[key] = line[1] if len(line) > 1 else ''
+        # Check that all five keys are given
+        if len(section) != 5:
+            tpl = 'Missing entries in section {}; found: {}'
+            msg = tpl.format(INVESTIGATION, list(sorted(section)))
+            raise ParseIsatabException(msg)
+
+        # Create resulting object
+        # TODO: do we really need the name of the investigation file?
+        return models.BasicInfo(os.path.basename(self.input_file.name),
+                                section[INVESTIGATION_IDENTIFIER],
+                                section[INVESTIGATION_TITLE],
+                                section[INVESTIGATION_DESCRIPTION],
+                                section[INVESTIGATION_SUBMISSION_DATE],
+                                section[INVESTIGATION_PUBLIC_RELEASE_DATE])
+
+        # columns = zip(*(section[k] for k in ONTOLOGY_SOURCE_REF_KEYS))
+        # for name, file_, version, desc in columns:
+        #     yield models.OntologyRef(name, file_, version, desc)
 
     def _read_publications(self) -> Iterator[models.PublicationInfo]:
         # Read INVESTIGATION PUBLICATIONS header
