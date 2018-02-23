@@ -16,6 +16,35 @@ __author__ = 'Manuel Holtgrewe <manuel.holtgrewe@bihealth.de>'
 # Base types, used throughout -------------------------------------------------
 
 
+class AnnotatedStr(str):
+    """A ``str`` that can be flagged with values.
+
+    .. doctest::
+
+        >>> from altamisa.isatab.models import AnnotatedStr
+        >>> x = AnnotatedStr('EMPTY', was_empty=True, value_no=1)
+        >>> x
+        'EMPTY'
+        >>> hasattr(x, 'was_empty')
+        True
+        >>> x.was_empty
+        True
+        >>> hasattr(x, 'value_no')
+        True
+        >>> x.value_no
+        1
+    """
+
+    def __new__(cls, value, *args, **kwargs):
+        # Explicitly only pass value to the str constructor
+        return super().__new__(cls, value)
+
+    def __init__(self, value, **kwargs):
+        # Everything else is initialized in the str initializer
+        for key, value in kwargs.items():
+            setattr(self, key, value)
+
+
 class OntologyTermRef(NamedTuple):
     """Reference to a term into an ontology
     """
@@ -284,6 +313,12 @@ class Comment(NamedTuple):
 class Material(NamedTuple):
     """Representation of a Material or Data node."""
     type: str
+    #: The name of the material.
+    #:
+    #: In the case that the label was empty, an ``AnnotatedStr`` is used and
+    #: the attribute ``was_empty`` is set to ``True``.  As a ``str`` is used
+    #: otherwise, use ``getattr(m.name, 'was_empty', False)`` for obtaining
+    #: this information reliably.
     name: str
     label: str
     #: Material characteristics
@@ -301,9 +336,15 @@ class Process(NamedTuple):
 
     #: Referenced to protocol name from investigation
     protocol_ref: str
-    #: Name of the process.  When "Protocol REF" is given without a further
+    #: The name of the protocol.
+    #:
+    #: When "Protocol REF" is given without a further
     #: qualifying name, this is generated from the protocol reference and
-    #: an auto-incrementing number.
+    #: an auto-incrementing number.  In this case that the label was empty,
+    #: an ``AnnotatedStr`` is used and the attribute ``was_empty`` is set to
+    #: ``True``.  As a ``str`` is used otherwise, use
+    #: ``getattr(m.name, 'was_empty', False)`` for obtaining this information
+    #: reliably.
     name: str
     #: Process date
     date: date
