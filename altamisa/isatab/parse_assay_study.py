@@ -267,7 +267,22 @@ class _MaterialBuilder(_NodeBuilderBase):
         assert self.name_header or self.protocol_ref_header
         type_ = self.name_header.column_type
         if line[self.name_header.col_no]:
-            name = line[self.name_header.col_no]
+            # make material/data names unique by column
+            if self.name_header.column_type == "Source Name":
+                name = '{}-{}'.format(
+                    "source",
+                    line[self.name_header.col_no])
+            elif self.name_header.column_type == "Sample Name":
+                # use static column identifier "sample-", since the same
+                # samples occur in different columns in study and assay
+                name = '{}-{}'.format(
+                    "sample",
+                    line[self.name_header.col_no])
+            else:
+                # anything else gets the column id
+                name = '{}-COL{}'.format(
+                    line[self.name_header.col_no],
+                    self.name_header.col_no + 1)
         else:
             name_val = '{} {}-{}-{}'.format(
                 TOKEN_EMPTY, self.name_header.column_type,
