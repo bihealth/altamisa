@@ -284,9 +284,10 @@ class _MaterialBuilder(_NodeBuilderBase):
                     line[self.name_header.col_no],
                     self.name_header.col_no + 1)
         else:
-            name = '{} {}-{}-{}'.format(
+            name_val = '{} {}-{}-{}'.format(
                 TOKEN_EMPTY, self.name_header.column_type,
                 self.name_header.col_no + 1, counter_value)
+            name = models.AnnotatedStr(name_val, was_empty=True)
         label = None
         if self.label_header:
             label = line[self.label_header.col_no]
@@ -476,18 +477,18 @@ class _ProcessBuilder(_NodeBuilderBase):
             # value.
             protocol_ref = line[self.protocol_ref_header.col_no]
             name = '{}-{}-{}'.format(
-                protocol_ref,
-                self.protocol_ref_header.col_no + 1,
+                protocol_ref, self.protocol_ref_header.col_no + 1,
                 counter_value)
         elif not self.protocol_ref_header:
             protocol_ref = 'UNKNOWN'
             if line[self.name_header.col_no]:
                 name = line[self.name_header.col_no]
             else:  # empty!
-                name = '{} {}-{}-{}'.format(
+                name_val = '{} {}-{}-{}'.format(
                     TOKEN_ANONYMOUS,
                     self.name_header.column_type.replace(' Name', ''),
                     self.name_header.col_no + 1, counter_value)
+                name = models.AnnotatedStr(name_val, was_empty=True)
         else:  # both are given
             protocol_ref = line[self.protocol_ref_header.col_no]
             if line[self.name_header.col_no]:
