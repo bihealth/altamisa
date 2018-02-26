@@ -100,6 +100,29 @@ def test_parse_full_investigation(full_investigation_file):
     assert ("Growth control of the eukaryote cell: a systems biology study "
             "in yeast") == investigation.info.title
     assert "BII-I-1" == investigation.info.identifier
+    assert "2007-04-30" == investigation.info.submission_date
+    assert "2009-03-10" == investigation.info.public_release_date
+
+    # Publications
+    assert 3 == len(investigation.publications)
+    expected = models.PublicationInfo(
+        "17439666", "doi:10.1186/jbiol54",
+        "Castrillo JI, Zeef LA, Hoyle DC, Zhang N, Hayes A, Gardner DC, "
+        "Cornell MJ, Petty J, Hakes L, Wardleworth L, Rash B, Brown M, "
+        "Dunn WB, Broadhurst D, O'Donoghue K, Hester SS, Dunkley TP, Hart "
+        "SR, Swainston N, Li P, Gaskell SJ, Paton NW, Lilley KS, Kell DB, "
+        "Oliver SG.",
+        "Growth control of the eukaryote cell: a systems biology study in "
+        "yeast.", models.OntologyTermRef("indexed in Pubmed", "", ""))
+    assert expected == investigation.publications[0]
+    expected = models.PublicationInfo(
+        "1231222", "",
+        "Piatnochka IT.",
+        "Effect of prednisolone on the cardiovascular system in complex "
+        "treatment of newly detected pulmonary tuberculosis",
+        models.OntologyTermRef("published",
+                               "http://www.ebi.ac.uk/efo/EFO_0001796", "EFO"))
+    assert expected == investigation.publications[1]
 
     # Studies
     assert len(investigation.studies) == 2

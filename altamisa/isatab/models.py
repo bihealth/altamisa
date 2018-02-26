@@ -111,6 +111,8 @@ class PublicationInfo(NamedTuple):
     authors: str
     #: Publication title
     title: str
+    #: Publication status
+    status: FreeTextOrTermRef
 
 
 class ContactInfo(NamedTuple):

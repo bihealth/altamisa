@@ -412,13 +412,18 @@ class InvestigationReader:
             msg = tpl.format(INVESTIGATION_PUBLICATIONS, line)
             raise ParseIsatabException(msg)
         # Read the other lines in this section.
-        # section = {}
-        while (self._next_line_startswith('Investigation Pub') or
-               self._next_line_startswith_comment()):
-            line = self._read_next_line()
-            if self._next_line_startswith_comment():
-                continue  # skip comments
-                yield None  # XXX
+        section = self._read_multi_column_section(
+            'Investigation Pub',
+            INVESTIGATION_PUBLICATIONS_KEYS,
+            INVESTIGATION_PUBLICATIONS)
+        # Create resulting objects
+        columns = zip(*(section[k] for k in INVESTIGATION_PUBLICATIONS_KEYS))
+        for (pubmed_id, doi, authors, title,
+             status_term, status_term_acc, status_term_src) in columns:
+            status = models.OntologyTermRef(
+                status_term, status_term_acc, status_term_src)
+            yield models.PublicationInfo(
+                pubmed_id, doi, authors, title, status)
 
     def _read_contacts(self) -> Iterator[models.ContactInfo]:
         # Read INVESTIGATION CONTACTS header
