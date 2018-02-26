@@ -67,18 +67,18 @@ Study Assay Technology Platform
 STUDY PROTOCOLS
 Study Protocol Name	sample collection	nucleic acid sequencing	library preparation
 Study Protocol Type	sample collection	nucleic acid sequencing	library preparation
-Study Protocol Type Term Accession Number
-Study Protocol Type Term Source REF
-Study Protocol Description
-Study Protocol URI
-Study Protocol Version
-Study Protocol Parameters Name
-Study Protocol Parameters Name Term Accession Number
-Study Protocol Parameters Name Term Source REF
-Study Protocol Components Name
-Study Protocol Components Type
-Study Protocol Components Type Term Accession Number
-Study Protocol Components Type Term Source REF
+Study Protocol Type Term Accession Number			
+Study Protocol Type Term Source REF			
+Study Protocol Description			
+Study Protocol URI			
+Study Protocol Version			
+Study Protocol Parameters Name			
+Study Protocol Parameters Name Term Accession Number			
+Study Protocol Parameters Name Term Source REF			
+Study Protocol Components Name			
+Study Protocol Components Type			
+Study Protocol Components Type Term Accession Number			
+Study Protocol Components Type Term Source REF			
 STUDY CONTACTS
 Study Person Last Name
 Study Person First Name
