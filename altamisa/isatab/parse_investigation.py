@@ -172,6 +172,11 @@ class InvestigationReader:
         # Create resulting objects
         columns = zip(*(section[k] for k in ONTOLOGY_SOURCE_REF_KEYS))
         for name, file_, version, desc in columns:
+            # Check if ontology source is complete
+            if not (name and file_ and version and desc):
+                tpl = 'Incomplete ontology source; found: "{}", "{}", "{}", "{}"'
+                msg = tpl.format(name, file_, version, desc)
+                raise ParseIsatabException(msg)
             yield models.OntologyRef(name, file_, version, desc)
 
     def _read_basic_info(self) -> models.BasicInfo:
