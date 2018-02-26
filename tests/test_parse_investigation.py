@@ -1,9 +1,6 @@
 # -*- coding: utf-8 -*-
 """Tests for parsing ISA investigation files"""
 
-import pytest
-
-
 from altamisa.isatab import models
 from altamisa.isatab import InvestigationReader
 
@@ -38,6 +35,7 @@ def test_parse_minimal_investigation(minimal_investigation_file):
     assert len(investigation.studies[0].assays) == 1
     assay = investigation.studies[0].assays["a_minimal.txt"]
     assert "a_minimal.txt" == assay.path
+
 
 def test_parse_small_investigation(small_investigation_file):
     # Read Investigation from file-like object
@@ -74,6 +72,7 @@ def test_parse_small_investigation(small_investigation_file):
     assert len(investigation.studies[0].assays) == 1
     assay = investigation.studies[0].assays["a_small.txt"]
     assert "a_small.txt" == assay.path
+
 
 def test_parse_full_investigation(full_investigation_file):
     # Read Investigation from file-like object
@@ -162,6 +161,18 @@ def test_parse_full_investigation(full_investigation_file):
             ) == study.info.title
     assert "s_BII-S-1.txt" == study.info.path
 
+    # Study 1 - Design descriptors
+    assert 2 == len(study.designs)
+    expected = (models.OntologyTermRef(
+                    "intervention design",
+                    "http://purl.obolibrary.org/obo/OBI_0000115",
+                    "OBI"),
+                models.OntologyTermRef(
+                    "genotyping design",
+                    "http://purl.obolibrary.org/obo/OBI_0001444",
+                    "OBI"))
+    assert expected == study.designs
+
     # Study 1 - Publications
     assert 1 == len(study.publications)
     expected = models.PublicationInfo(
@@ -174,6 +185,21 @@ def test_parse_full_investigation(full_investigation_file):
         "Growth control of the eukaryote cell: a systems biology study in "
         "yeast.", models.OntologyTermRef("published", "", ""))
     assert expected == study.publications[0]
+
+    # Study 1 - Factors
+    assert 2 == len(study.factors)
+    expected = models.FactorInfo(
+        "limiting nutrient", models.OntologyTermRef(
+                    "chemical entity",
+                    "http://purl.obolibrary.org/obo/CHEBI_24431",
+                    "CHEBI"))
+    assert expected == study.factors["limiting nutrient"]
+    expected = models.FactorInfo(
+        "rate", models.OntologyTermRef(
+            "rate",
+            "http://purl.obolibrary.org/obo/PATO_0000161",
+            "PATO"))
+    assert expected == study.factors["rate"]
 
     # Study 1 - Assays
     assert len(study.assays) == 3
@@ -207,3 +233,33 @@ def test_parse_full_investigation(full_investigation_file):
                                "http://purl.obolibrary.org/obo/RoleO_0000061",
                                "ROLEO"))
     assert expected == study.contacts[2]
+
+    # Study 2
+    study = investigation.studies[1]
+    expected = models.BasicInfo(
+        "s_BII-S-2.txt", "BII-S-2",
+        "A time course analysis of transcription response in yeast treated "
+        "with rapamycin, a specific inhibitor of the TORC1 complex: impact "
+        "on yeast growth",
+        "Comprehensive high-throughput analyses at the levels of mRNAs, "
+        "proteins, and metabolites, and studies on gene expression patterns "
+        "are required for systems biology studies of cell growth [4,26-29]. "
+        "Although such comprehensive data sets are lacking, many studies have "
+        "pointed to a central role for the target-of-rapamycin (TOR) signal "
+        "transduction pathway in growth control. TOR is a serine/threonine "
+        "kinase that has been conserved from yeasts to mammals; it integrates "
+        "signals from nutrients or growth factors to regulate cell growth and "
+        "cell-cycle progression coordinately. Although such comprehensive data "
+        "sets are lacking, many studies have pointed to a central role for the "
+        "target-of-rapamycin (TOR) signal transduction pathway in growth "
+        "control. TOR is a serine/threonine kinase that has been conserved "
+        "from yeasts to mammals; it integrates signals from nutrients or "
+        "growth factors to regulate cell growth and cell-cycle progression "
+        "coordinately. The effect of rapamycin were studied as follows: a "
+        "culture growing at mid-exponential phase was divided into two. "
+        "Rapamycin (200 ng/ml) was added to one half, and the drug's solvent "
+        "to the other, as the control. Samples were taken at 0, 1, 2 and 4 h "
+        "after treatment. Gene expression at the mRNA level was investigated "
+        "by transcriptome analysis using Affymetrix hybridization arrays.",
+        "2007-04-30", "2009-03-10")
+    assert expected == study.info

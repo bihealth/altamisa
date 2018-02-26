@@ -196,7 +196,7 @@ class StudyInfo(NamedTuple):
     #: Basic study information
     info: BasicInfo
     #: Study designs by name
-    designs: Dict[str, FreeTextOrTermRef]
+    designs: Tuple[FreeTextOrTermRef]
     #: Publication list for study
     publications: Tuple[PublicationInfo]
     #: Study factors by name

@@ -469,12 +469,12 @@ class InvestigationReader:
                                           section[STUDY_PUBLIC_RELEASE_DATE])
             # Read the remaining sections for this study
             # TODO: specs says "order MAY vary"
-            design_descriptors = list(self._read_study_design_descriptors())
-            publications = list(self._read_study_publications())
+            design_descriptors = tuple(self._read_study_design_descriptors())
+            publications = tuple(self._read_study_publications())
             factors = {f.name: f for f in self._read_study_factors()}
             assays = {a.path: a for a in self._read_study_assays()}
             protocols = {p.name: p for p in self._read_study_protocols()}
-            contacts = list(self._read_study_contacts())
+            contacts = tuple(self._read_study_contacts())
             # Create study object
             yield models.StudyInfo(
                 basic_info, design_descriptors, publications, factors,
@@ -489,13 +489,16 @@ class InvestigationReader:
             msg = tpl.format(STUDY_DESIGN_DESCRIPTORS, line)
             raise ParseIsatabException(msg)
         # Read the other lines in this section.
-        # section = {}
-        while (self._next_line_startswith('Study Design') or
-               self._next_line_startswith_comment()):
-            line = self._read_next_line()
-            if self._next_line_startswith_comment():
-                continue  # skip comments
-                yield None  # XXX
+        section = self._read_multi_column_section(
+            'Study Design',
+            STUDY_DESIGN_DESCR_KEYS,
+            STUDY_DESIGN_DESCRIPTORS)
+        # Create resulting objects
+        columns = zip(*(section[k] for k in STUDY_DESIGN_DESCR_KEYS))
+        for (type_term, type_term_acc, type_term_src) in columns:
+            type = models.OntologyTermRef(
+                type_term, type_term_acc, type_term_src)
+            yield type
 
     def _read_study_publications(self) -> Iterator[models.PublicationInfo]:
         # Read STUDY PUBLICATIONS header
@@ -526,13 +529,16 @@ class InvestigationReader:
             msg = tpl.format(STUDY_FACTORS, line)
             raise ParseIsatabException(msg)
         # Read the other lines in this section.
-        # section = {}
-        while (self._next_line_startswith('Study Factor') or
-               self._next_line_startswith_comment()):
-            line = self._read_next_line()
-            if self._next_line_startswith_comment():
-                continue  # skip comments
-                yield None  # XXX
+        section = self._read_multi_column_section(
+            'Study Factor',
+            STUDY_FACTORS_KEYS,
+            STUDY_FACTORS)
+        # Create resulting objects
+        columns = zip(*(section[k] for k in STUDY_FACTORS_KEYS))
+        for (name, type_term, type_term_acc, type_term_src) in columns:
+            type = models.OntologyTermRef(
+                type_term, type_term_acc, type_term_src)
+            yield models.FactorInfo(name, type)
 
     def _read_study_assays(self) -> Iterator[models.AssayInfo]:
         # Read STUDY ASSAYS header
