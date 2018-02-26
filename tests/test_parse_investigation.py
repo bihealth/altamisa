@@ -124,6 +124,32 @@ def test_parse_full_investigation(full_investigation_file):
                                "http://www.ebi.ac.uk/efo/EFO_0001796", "EFO"))
     assert expected == investigation.publications[1]
 
+    # Contacts
+    assert 3 == len(investigation.contacts)
+    expected = models.ContactInfo(
+        "Oliver", "Stephen", "G", "stephen.oliver@test.mail", "", "",
+        "Oxford Road, Manchester M13 9PT, UK",
+        "Faculty of Life Sciences, Michael Smith Building, "
+        "University of Manchester",
+        models.OntologyTermRef("corresponding author", "", ""))
+    assert expected == investigation.contacts[0]
+    expected = models.ContactInfo(
+        "Juan", "Castrillo", "I", "", "123456789", "",
+        "Oxford Road, Manchester M13 9PT, UK",
+        "Faculty of Life Sciences, Michael Smith Building, "
+        "University of Manchester",
+        models.OntologyTermRef("author", "", ""))
+    assert expected == investigation.contacts[1]
+    expected = models.ContactInfo(
+        "Leo", "Zeef", "A", "", "", "+49 123456789",
+        "Oxford Road, Manchester M13 9PT, UK",
+        "Faculty of Life Sciences, Michael Smith Building, "
+        "University of Manchester",
+        models.OntologyTermRef("author",
+                               "http://purl.obolibrary.org/obo/RoleO_0000061",
+                               "ROLEO"))
+    assert expected == investigation.contacts[2]
+
     # Studies
     assert len(investigation.studies) == 2
     assert "BII-S-1" == investigation.studies[0].info.identifier

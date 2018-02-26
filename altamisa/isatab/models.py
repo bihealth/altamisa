@@ -120,10 +120,10 @@ class ContactInfo(NamedTuple):
 
     #: Last name of contact
     last_name: str
-    #: Middle initial of contact
-    mid_initial: str
     #: First name of contact
     first_name: str
+    #: Middle initial of contact
+    mid_initial: str
     #: Email of contact
     email: str
     #: Phone of contact
@@ -135,7 +135,7 @@ class ContactInfo(NamedTuple):
     #: Affiliation of contact
     affiliation: str
     #: Role of contact
-    role: str
+    role: FreeTextOrTermRef
 
 
 class FactorInfo(NamedTuple):
