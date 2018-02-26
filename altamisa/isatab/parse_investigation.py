@@ -15,7 +15,6 @@ __author__ = 'Manuel Holtgrewe <manuel.holtgrewe@bihealth.de>'
 # We define constants for the headers in the investigation file as a typo in
 # the code below can then be caught as "unknown identifier" instead of having
 # to chase down string mismatches in if/then/else or table lookups.
-
 ONTOLOGY_SOURCE_REFERENCE = 'ONTOLOGY SOURCE REFERENCE'
 INVESTIGATION = 'INVESTIGATION'
 INVESTIGATION_PUBLICATIONS = 'INVESTIGATION PUBLICATIONS'
@@ -29,41 +28,141 @@ STUDY_PROTOCOLS = 'STUDY PROTOCOLS'
 STUDY_CONTACTS = 'STUDY CONTACTS'
 
 
-# The string constants used for the references to ontology terms.
-
+# ONTOLOGY SOURCE REFERENCE
 TERM_SOURCE_NAME = 'Term Source Name'
 TERM_SOURCE_FILE = 'Term Source File'
 TERM_SOURCE_VERSION = 'Term Source Version'
 TERM_SOURCE_DESCRIPTION = 'Term Source Description'
 ONTOLOGY_SOURCE_REF_KEYS = (
-    TERM_SOURCE_NAME, TERM_SOURCE_FILE, TERM_SOURCE_VERSION,
+    TERM_SOURCE_NAME,
+    TERM_SOURCE_FILE,
+    TERM_SOURCE_VERSION,
     TERM_SOURCE_DESCRIPTION)
 
 
-# The string constants used for the references to investigation basic info
+# INVESTIGATION (basic info)
 INVESTIGATION_IDENTIFIER = 'Investigation Identifier'
 INVESTIGATION_TITLE = 'Investigation Title'
 INVESTIGATION_DESCRIPTION = 'Investigation Description'
 INVESTIGATION_SUBMISSION_DATE = 'Investigation Submission Date'
 INVESTIGATION_PUBLIC_RELEASE_DATE = 'Investigation Public Release Date'
-INVESTIGATION_INFO_REF_KEYS = (
-    INVESTIGATION_IDENTIFIER, INVESTIGATION_TITLE, INVESTIGATION_DESCRIPTION,
-    INVESTIGATION_SUBMISSION_DATE, INVESTIGATION_PUBLIC_RELEASE_DATE)
+INVESTIGATION_INFO_KEYS = (
+    INVESTIGATION_IDENTIFIER,
+    INVESTIGATION_TITLE,
+    INVESTIGATION_DESCRIPTION,
+    INVESTIGATION_SUBMISSION_DATE,
+    INVESTIGATION_PUBLIC_RELEASE_DATE)
 
 
-# The string constants used for the references to studies basic info
+# INVESTIGATION PUBLICATIONS
+INVESTIGATION_PUBMED_ID = 'Investigation PubMed ID'
+INVESTIGATION_PUBLICATION_DOI = 'Investigation Publication DOI'
+INVESTIGATION_PUBLICATION_AUTHOR_LIST = 'Investigation Publication Author List'
+INVESTIGATION_PUBLICATION_TITLE = 'Investigation Publication Title'
+INVESTIGATION_PUBLICATION_STATUS = 'Investigation Publication Status'
+INVESTIGATION_PUBLICATION_STATUS_TERM_ACCESSION_NUMBER = (
+    'Investigation Publication Status Term Accession Number')
+INVESTIGATION_PUBLICATION_STATUS_TERM_SOURCE_REF = (
+    'Investigation Publication Status Term Source REF')
+INVESTIGATION_PUBLICATIONS_KEYS = (
+    INVESTIGATION_PUBMED_ID,
+    INVESTIGATION_PUBLICATION_DOI,
+    INVESTIGATION_PUBLICATION_AUTHOR_LIST,
+    INVESTIGATION_PUBLICATION_TITLE,
+    INVESTIGATION_PUBLICATION_STATUS,
+    INVESTIGATION_PUBLICATION_STATUS_TERM_ACCESSION_NUMBER,
+    INVESTIGATION_PUBLICATION_STATUS_TERM_SOURCE_REF)
+
+
+# INVESTIGATION CONTACTS
+INVESTIGATION_PERSON_LAST_NAME = 'Investigation Person Last Name'
+INVESTIGATION_PERSON_FIRST_NAME = 'Investigation Person First Name'
+INVESTIGATION_PERSON_MID_INITIALS = 'Investigation Person Mid Initials'
+INVESTIGATION_PERSON_EMAIL = 'Investigation Person Email'
+INVESTIGATION_PERSON_PHONE = 'Investigation Person Phone'
+INVESTIGATION_PERSON_FAX = 'Investigation Person Fax'
+INVESTIGATION_PERSON_ADDRESS = 'Investigation Person Address'
+INVESTIGATION_PERSON_AFFILIATION = 'Investigation Person Affiliation'
+INVESTIGATION_PERSON_ROLES = 'Investigation Person Roles'
+INVESTIGATION_PERSON_ROLES_TERM_ACCESSION_NUMBER = (
+    'Investigation Person Roles Term Accession Number')
+INVESTIGATION_PERSON_ROLES_TERM_SOURCE_REF = (
+    'Investigation Person Roles Term Source REF')
+INVESTIGATION_CONTACTS_KEYS = (
+    INVESTIGATION_PERSON_LAST_NAME,
+    INVESTIGATION_PERSON_FIRST_NAME,
+    INVESTIGATION_PERSON_MID_INITIALS,
+    INVESTIGATION_PERSON_EMAIL,
+    INVESTIGATION_PERSON_PHONE,
+    INVESTIGATION_PERSON_FAX,
+    INVESTIGATION_PERSON_ADDRESS,
+    INVESTIGATION_PERSON_AFFILIATION,
+    INVESTIGATION_PERSON_ROLES,
+    INVESTIGATION_PERSON_ROLES_TERM_ACCESSION_NUMBER,
+    INVESTIGATION_PERSON_ROLES_TERM_SOURCE_REF)
+
+
+# STUDY (basic info)
 STUDY_IDENTIFIER = 'Study Identifier'
 STUDY_TITLE = 'Study Title'
 STUDY_DESCRIPTION = 'Study Description'
 STUDY_SUBMISSION_DATE = 'Study Submission Date'
 STUDY_PUBLIC_RELEASE_DATE = 'Study Public Release Date'
 STUDY_FILE_NAME = 'Study File Name'
-STUDY_INFO_REF_KEYS = (
-    STUDY_IDENTIFIER, STUDY_TITLE, STUDY_DESCRIPTION,
-    STUDY_SUBMISSION_DATE, STUDY_PUBLIC_RELEASE_DATE, STUDY_FILE_NAME)
+STUDY_INFO_KEYS = (
+    STUDY_IDENTIFIER,
+    STUDY_TITLE,
+    STUDY_DESCRIPTION,
+    STUDY_SUBMISSION_DATE,
+    STUDY_PUBLIC_RELEASE_DATE,
+    STUDY_FILE_NAME)
 
 
-# The string constants used for the references to assays
+# STUDY DESIGN DESCRIPTORS
+STUDY_DESIGN_TYPE = 'Study Design Type'
+STUDY_DESIGN_TYPE_TERM_ACCESSION_NUMBER = (
+    'Study Design Type Term Accession Number')
+STUDY_DESIGN_TYPE_TERM_SOURCE_REF = 'Study Design Type Term Source REF'
+STUDY_DESIGN_DESCR_KEYS = (
+    STUDY_DESIGN_TYPE,
+    STUDY_DESIGN_TYPE_TERM_ACCESSION_NUMBER,
+    STUDY_DESIGN_TYPE_TERM_SOURCE_REF)
+
+
+# STUDY PUBLICATIONS
+STUDY_PUBMED_ID = 'Study PubMed ID'
+STUDY_PUBLICATION_DOI = 'Study Publication DOI'
+STUDY_PUBLICATION_AUTHOR_LIST = 'Study Publication Author List'
+STUDY_PUBLICATION_TITLE = 'Study Publication Title'
+STUDY_PUBLICATION_STATUS = 'Study Publication Status'
+STUDY_PUBLICATION_STATUS_TERM_ACCESSION_NUMBER = (
+    'Study Publication Status Term Accession Number')
+STUDY_PUBLICATION_STATUS_TERM_SOURCE_REF = (
+    'Study Publication Status Term Source REF')
+STUDY_PUBLICATIONS_KEYS = (
+    STUDY_PUBMED_ID,
+    STUDY_PUBLICATION_DOI,
+    STUDY_PUBLICATION_AUTHOR_LIST,
+    STUDY_PUBLICATION_TITLE,
+    STUDY_PUBLICATION_STATUS,
+    STUDY_PUBLICATION_STATUS_TERM_ACCESSION_NUMBER,
+    STUDY_PUBLICATION_STATUS_TERM_SOURCE_REF)
+
+
+# STUDY FACTORS
+STUDY_FACTOR_NAME = 'Study Factor Name'
+STUDY_FACTOR_TYPE = 'Study Factor Type'
+STUDY_FACTOR_TYPE_TERM_ACCESSION_NUMBER = (
+    'Study Factor Type Term Accession Number')
+STUDY_FACTOR_TYPE_TERM_SOURCE_REF = 'Study Factor Type Term Source REF'
+STUDY_FACTORS_KEYS = (
+    STUDY_FACTOR_NAME,
+    STUDY_FACTOR_TYPE,
+    STUDY_FACTOR_TYPE_TERM_ACCESSION_NUMBER,
+    STUDY_FACTOR_TYPE_TERM_SOURCE_REF)
+
+
+# STUDY ASSAYS
 STUDY_ASSAY_FILE_NAME = 'Study Assay File Name'
 STUDY_ASSAY_MEASUREMENT_TYPE = 'Study Assay Measurement Type'
 STUDY_ASSAY_MEASUREMENT_TYPE_TERM_ACCESSION_NUMBER = (
@@ -76,7 +175,7 @@ STUDY_ASSAY_TECHNOLOGY_TYPE_TERM_ACCESSION_NUMBER = (
 STUDY_ASSAY_TECHNOLOGY_TYPE_TERM_SOURCE_REF = (
     'Study Assay Technology Type Term Source REF')
 STUDY_ASSAY_TECHNOLOGY_PLATFORM = 'Study Assay Technology Platform'
-STUDY_ASSAY_REF_KEYS = (
+STUDY_ASSAYS_KEYS = (
     STUDY_ASSAY_FILE_NAME,
     STUDY_ASSAY_MEASUREMENT_TYPE,
     STUDY_ASSAY_MEASUREMENT_TYPE_TERM_ACCESSION_NUMBER,
@@ -84,8 +183,71 @@ STUDY_ASSAY_REF_KEYS = (
     STUDY_ASSAY_TECHNOLOGY_TYPE,
     STUDY_ASSAY_TECHNOLOGY_TYPE_TERM_ACCESSION_NUMBER,
     STUDY_ASSAY_TECHNOLOGY_TYPE_TERM_SOURCE_REF,
-    STUDY_ASSAY_TECHNOLOGY_PLATFORM
-)
+    STUDY_ASSAY_TECHNOLOGY_PLATFORM)
+
+
+# STUDY PROTOCOLS
+STUDY_PROTOCOL_NAME = 'Study Protocol Name'
+STUDY_PROTOCOL_TYPE = 'Study Protocol Type'
+STUDY_PROTOCOL_TYPE_TERM_ACCESSION_NUMBER = (
+    'Study Protocol Type Term Accession Number')
+STUDY_PROTOCOL_TYPE_TERM_SOURCE_REF = 'Study Protocol Type Term Source REF'
+STUDY_PROTOCOL_DESCRIPTION = 'Study Protocol Description'
+STUDY_PROTOCOL_URI = 'Study Protocol URI'
+STUDY_PROTOCOL_VERSION = 'Study Protocol Version'
+STUDY_PROTOCOL_PARAMETERS_NAME = 'Study Protocol Parameters Name'
+STUDY_PROTOCOL_PARAMETERS_NAME_TERM_ACCESSION_NUMBER = (
+    'Study Protocol Parameters Name Term Accession Number')
+STUDY_PROTOCOL_PARAMETERS_NAME_TERM_SOURCE_REF = (
+    'Study Protocol Parameters Name Term Source REF')
+STUDY_PROTOCOL_COMPONENTS_NAME = 'Study Protocol Components Name'
+STUDY_PROTOCOL_COMPONENTS_TYPE = 'Study Protocol Components Type'
+STUDY_PROTOCOL_COMPONENTS_TYPE_TERM_ACCESSION_NUMBER = (
+    'Study Protocol Components Type Term Accession Number')
+STUDY_PROTOCOL_COMPONENTS_TYPE_TERM_SOURCE_REF = (
+    'Study Protocol Components Type Term Source REF')
+STUDY_PROTOCOLS_KEYS = (
+    STUDY_PROTOCOL_NAME,
+    STUDY_PROTOCOL_TYPE,
+    STUDY_PROTOCOL_TYPE_TERM_ACCESSION_NUMBER,
+    STUDY_PROTOCOL_TYPE_TERM_SOURCE_REF,
+    STUDY_PROTOCOL_DESCRIPTION,
+    STUDY_PROTOCOL_URI,
+    STUDY_PROTOCOL_VERSION,
+    STUDY_PROTOCOL_PARAMETERS_NAME,
+    STUDY_PROTOCOL_PARAMETERS_NAME_TERM_ACCESSION_NUMBER,
+    STUDY_PROTOCOL_PARAMETERS_NAME_TERM_SOURCE_REF,
+    STUDY_PROTOCOL_COMPONENTS_NAME,
+    STUDY_PROTOCOL_COMPONENTS_TYPE,
+    STUDY_PROTOCOL_COMPONENTS_TYPE_TERM_ACCESSION_NUMBER,
+    STUDY_PROTOCOL_COMPONENTS_TYPE_TERM_SOURCE_REF)
+
+
+# STUDY CONTACTS
+STUDY_PERSON_LAST_NAME = 'Study Person Last Name'
+STUDY_PERSON_FIRST_NAME = 'Study Person First Name'
+STUDY_PERSON_MID_INITIALS = 'Study Person Mid Initials'
+STUDY_PERSON_EMAIL = 'Study Person Email'
+STUDY_PERSON_PHONE = 'Study Person Phone'
+STUDY_PERSON_FAX = 'Study Person Fax'
+STUDY_PERSON_ADDRESS = 'Study Person Address'
+STUDY_PERSON_AFFILIATION = 'Study Person Affiliation'
+STUDY_PERSON_ROLES = 'Study Person Roles'
+STUDY_PERSON_ROLES_TERM_ACCESSION_NUMBER = (
+    'Study Person Roles Term Accession Number')
+STUDY_PERSON_ROLES_TERM_SOURCE_REF = 'Study Person Roles Term Source REF'
+STUDY_CONTACTS_KEYS = (
+    STUDY_PERSON_LAST_NAME,
+    STUDY_PERSON_FIRST_NAME,
+    STUDY_PERSON_MID_INITIALS,
+    STUDY_PERSON_EMAIL,
+    STUDY_PERSON_PHONE,
+    STUDY_PERSON_FAX,
+    STUDY_PERSON_ADDRESS,
+    STUDY_PERSON_AFFILIATION,
+    STUDY_PERSON_ROLES,
+    STUDY_PERSON_ROLES_TERM_ACCESSION_NUMBER,
+    STUDY_PERSON_ROLES_TERM_SOURCE_REF)
 
 
 class InvestigationReader:
@@ -232,7 +394,7 @@ class InvestigationReader:
             raise ParseIsatabException(msg)
         # Read the other lines in this section.
         section = self._read_single_column_section(
-            'Investigation', INVESTIGATION_INFO_REF_KEYS, INVESTIGATION)
+            'Investigation', INVESTIGATION_INFO_KEYS, INVESTIGATION)
         # Create resulting object
         # TODO: do we really need the name of the investigation file?
         return models.BasicInfo(os.path.basename(self.input_file.name),
@@ -285,7 +447,7 @@ class InvestigationReader:
                 raise ParseIsatabException(msg)
             # Read the other lines in this section.
             section = self._read_single_column_section(
-                'Study', STUDY_INFO_REF_KEYS, STUDY)
+                'Study', STUDY_INFO_KEYS, STUDY)
             # From this, parse the basic information from the study
             basic_info = models.BasicInfo(section[STUDY_FILE_NAME],
                                           section[STUDY_IDENTIFIER],
@@ -364,9 +526,9 @@ class InvestigationReader:
             raise ParseIsatabException(msg)
         # Read the other lines in this section.
         section = self._read_multi_column_section(
-            'Study Assay', STUDY_ASSAY_REF_KEYS, STUDY_ASSAYS)
+            'Study Assay', STUDY_ASSAYS_KEYS, STUDY_ASSAYS)
         # Create resulting objects
-        columns = zip(*(section[k] for k in STUDY_ASSAY_REF_KEYS))
+        columns = zip(*(section[k] for k in STUDY_ASSAYS_KEYS))
         for file_, meas_type, meas_type_term_acc, meas_type_term_src, \
             tech_type, tech_type_term_acc, tech_type_term_src, tech_plat \
                 in columns:
