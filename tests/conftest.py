@@ -48,3 +48,9 @@ def small_study_file():
 def small_assay_file():
     path = os.path.join(os.path.dirname(__file__), "data/i_small/a_small.txt")
     return open(path, 'rt')
+
+@pytest.fixture
+def full_investigation_file():
+    path = os.path.join(os.path.dirname(__file__),
+                        "data/i_fullinvest/i_fullinvest.txt")
+    return open(path, 'rt')
