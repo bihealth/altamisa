@@ -505,13 +505,18 @@ class InvestigationReader:
             msg = tpl.format(STUDY_PUBLICATIONS, line)
             raise ParseIsatabException(msg)
         # Read the other lines in this section.
-        # section = {}
-        while (self._next_line_startswith('Study Pub') or
-               self._next_line_startswith_comment()):
-            line = self._read_next_line()
-            if self._next_line_startswith_comment():
-                continue  # skip comments
-                yield None  # XXX
+        section = self._read_multi_column_section(
+            'Study Pub',
+            STUDY_PUBLICATIONS_KEYS,
+            STUDY_PUBLICATIONS)
+        # Create resulting objects
+        columns = zip(*(section[k] for k in STUDY_PUBLICATIONS_KEYS))
+        for (pubmed_id, doi, authors, title,
+             status_term, status_term_acc, status_term_src) in columns:
+            status = models.OntologyTermRef(
+                status_term, status_term_acc, status_term_src)
+            yield models.PublicationInfo(
+                pubmed_id, doi, authors, title, status)
 
     def _read_study_factors(self) -> Iterator[models.FactorInfo]:
         # Read STUDY FACTORS header
@@ -578,10 +583,17 @@ class InvestigationReader:
             msg = tpl.format(STUDY_CONTACTS, line)
             raise ParseIsatabException(msg)
         # Read the other lines in this section.
-        # section = {}
-        while (self._next_line_startswith('Study Person') or
-               self._next_line_startswith_comment()):
-            line = self._read_next_line()
-            if self._next_line_startswith_comment():
-                continue  # skip comments
-                yield None  # XXX
+        section = self._read_multi_column_section(
+            'Study Person',
+            STUDY_CONTACTS_KEYS,
+            STUDY_CONTACTS)
+        # Create resulting objects
+        columns = zip(
+            *(section[k] for k in STUDY_CONTACTS_KEYS))
+        for (last_name, first_name, mid_initial, email, phone, fax, address,
+             affiliation, role_term, role_term_acc, role_term_src) in columns:
+            role = models.OntologyTermRef(
+                role_term, role_term_acc, role_term_src)
+            yield models.ContactInfo(
+                last_name, first_name, mid_initial, email, phone, fax, address,
+                affiliation, role)

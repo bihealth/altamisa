@@ -152,14 +152,58 @@ def test_parse_full_investigation(full_investigation_file):
 
     # Studies
     assert len(investigation.studies) == 2
-    assert "BII-S-1" == investigation.studies[0].info.identifier
+
+    # Study 1
+    study = investigation.studies[0]
+    assert "BII-S-1" == study.info.identifier
     assert ("Study of the impact of changes in flux on the transcriptome, "
             "proteome, endometabolome and exometabolome of the yeast "
             "Saccharomyces cerevisiae under different nutrient limitations"
-            ) == investigation.studies[0].info.title
-    assert "s_BII-S-1.txt" == investigation.studies[0].info.path
+            ) == study.info.title
+    assert "s_BII-S-1.txt" == study.info.path
 
-    # Assays
-    assert len(investigation.studies[0].assays) == 3
-    assay = investigation.studies[0].assays["a_proteome.txt"]
+    # Study 1 - Publications
+    assert 1 == len(study.publications)
+    expected = models.PublicationInfo(
+        "17439666", "doi:10.1186/jbiol54",
+        "Castrillo JI, Zeef LA, Hoyle DC, Zhang N, Hayes A, Gardner DC, "
+        "Cornell MJ, Petty J, Hakes L, Wardleworth L, Rash B, Brown M, "
+        "Dunn WB, Broadhurst D, O'Donoghue K, Hester SS, Dunkley TP, Hart "
+        "SR, Swainston N, Li P, Gaskell SJ, Paton NW, Lilley KS, Kell DB, "
+        "Oliver SG.",
+        "Growth control of the eukaryote cell: a systems biology study in "
+        "yeast.", models.OntologyTermRef("published", "", ""))
+    assert expected == study.publications[0]
+
+    # Study 1 - Assays
+    assert len(study.assays) == 3
+    assay = study.assays["a_proteome.txt"]
     assert "a_proteome.txt" == assay.path
+
+    # Study 1 - Contacts
+    assert 3 == len(study.contacts)
+    expected = models.ContactInfo(
+        "Oliver", "Stephen", "G", "stephen.oliver@test.mail", "", "",
+        "Oxford Road, Manchester M13 9PT, UK",
+        "Faculty of Life Sciences, Michael Smith Building, "
+        "University of Manchester",
+        models.OntologyTermRef("corresponding author", "", ""))
+    assert expected == study.contacts[0]
+    expected = models.ContactInfo(
+        "Juan", "Castrillo", "I", "", "123456789", "",
+        "Oxford Road, Manchester M13 9PT, UK",
+        "Faculty of Life Sciences, Michael Smith Building, "
+        "University of Manchester",
+        models.OntologyTermRef("author",
+                               "http://purl.obolibrary.org/obo/RoleO_0000061",
+                               "ROLEO"))
+    assert expected == study.contacts[1]
+    expected = models.ContactInfo(
+        "Leo", "Zeef", "A", "", "", "+49 123456789",
+        "Oxford Road, Manchester M13 9PT, UK",
+        "Faculty of Life Sciences, Michael Smith Building, "
+        "University of Manchester",
+        models.OntologyTermRef("author",
+                               "http://purl.obolibrary.org/obo/RoleO_0000061",
+                               "ROLEO"))
+    assert expected == study.contacts[2]
