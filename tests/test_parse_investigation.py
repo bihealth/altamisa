@@ -202,9 +202,59 @@ def test_parse_full_investigation(full_investigation_file):
     assert expected == study.factors["rate"]
 
     # Study 1 - Assays
-    assert len(study.assays) == 3
+    assert 3 == len(study.assays)
     assay = study.assays["a_proteome.txt"]
     assert "a_proteome.txt" == assay.path
+
+    # Study 1 - Protocols
+    assert 7 == len(study.protocols)
+    expected = models.ProtocolInfo(
+        "growth protocol", models.OntologyTermRef("growth", "", ""),
+        "1. Biomass samples (45 ml) were taken via the sample port of the "
+        "Applikon fermenters. The cells were pelleted by centrifugation for 5 "
+        "min at 5000 rpm. The supernatant was removed and the RNA pellet "
+        "resuspended in the residual medium to form a slurry. This was added "
+        "in a dropwise manner directly into a 5 ml Teflon flask (B. Braun "
+        "Biotech, Germany) containing liquid nitrogen and a 7 mm-diameter "
+        "tungsten carbide ball. After allowing evaporation of the liquid "
+        "nitrogen the flask was reassembled and the cells disrupted by "
+        "agitation at 1500 rpm for 2 min in a Microdismembranator U (B. Braun "
+        "Biotech, Germany) 2. The frozen powder was then dissolved in 1 ml of "
+        "TriZol reagent (Sigma-Aldrich, UK), vortexed for 1 min, and then kept"
+        " at room temperature for a further 5min. 3. Chloroform extraction was"
+        " performed by addition of 0.2 ml chloroform, shaking vigorously or 15"
+        " s, then 5min incubation at room temperature. 4. Following "
+        "centrifugation at 12,000 rpm for 5 min, the RNA (contained in the "
+        "aqueous phase) was precipitated with 0.5 vol of 2-propanol at room "
+        "temperature for 15 min. 5. After further centrifugation (12,000 rpm "
+        "for 10 min at 4 C) the RNA pellet was washed twice with 70 % (v/v) "
+        "ethanol, briefly air-dried, and redissolved in 0.5 ml diethyl "
+        "pyrocarbonate (DEPC)-treated water. 6. The single-stranded RNA was "
+        "precipitated once more by addition of 0.5 ml of LiCl buffer (4 M "
+        "LiCl, 20 mM Tris-HCl, pH 7.5, 10 mM EDTA), thus removing tRNA and "
+        "DNA from the sample. 7. After precipitation (20 C for 1h) and "
+        "centrifugation (12,000 rpm, 30 min, 4 C), the RNA was washed twice in"
+        " 70 % (v/v) ethanol prior to being dissolved in a minimal volume of "
+        "DEPC-treated water. 8. Total RNA quality was checked using the RNA "
+        "6000 Nano Assay, and analysed on an Agilent 2100 Bioanalyser (Agilent"
+        " Technologies). RNA was quantified using the Nanodrop ultra low "
+        "volume spectrophotometer (Nanodrop Technologies).",
+        "", "",
+        models.OntologyTermRef(
+            "rate", "http://purl.obolibrary.org/obo/PATO_0000161", "PATO"),
+        models.ProtocolComponentInfo("", models.OntologyTermRef("", "", "")))
+    assert expected == study.protocols["growth protocol"]
+    expected = models.ProtocolInfo(
+        "metabolite extraction",
+        models.OntologyTermRef(
+            "extraction", "http://purl.obolibrary.org/obo/OBI_0302884", "OBI"),
+        "",  "", "",
+        models.OntologyTermRef(
+            "standard volume;sample volume", ";", ";"),
+        models.ProtocolComponentInfo(
+            "pipette", models.OntologyTermRef(
+                "instrument", "http://www.ebi.ac.uk/efo/EFO_0000548", "EFO")))
+    assert expected == study.protocols["metabolite extraction"]
 
     # Study 1 - Contacts
     assert 3 == len(study.contacts)

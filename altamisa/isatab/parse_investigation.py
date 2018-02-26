@@ -573,13 +573,28 @@ class InvestigationReader:
             msg = tpl.format(STUDY_PROTOCOLS, line)
             raise ParseIsatabException(msg)
         # Read the other lines in this section.
-        # section = {}
-        while (self._next_line_startswith('Study Protocol') or
-               self._next_line_startswith_comment()):
-            line = self._read_next_line()
-            if self._next_line_startswith_comment():
-                continue  # skip comments
-                yield None  # XXX
+        section = self._read_multi_column_section(
+            'Study Protocol', STUDY_PROTOCOLS_KEYS, STUDY_PROTOCOLS)
+        # Create resulting objects
+        columns = zip(*(section[k] for k in STUDY_PROTOCOLS_KEYS))
+        for (name, type_term, type_term_acc, type_term_src, description, uri,
+             version, para_name, para_name_term_acc, para_name_term_src,
+             comp_name, comp_type, comp_type_term_acc, comp_type_term_src) \
+                in columns:
+            if not name:  # don't allow unnamed assay columns
+                tpl = 'Expected protocol name in line {}; found: "{}"'
+                msg = tpl.format(STUDY_PROTOCOL_NAME, name)
+                raise ParseIsatabException(msg)
+            type_ont = models.OntologyTermRef(
+                type_term, type_term_acc, type_term_src)
+            # TODO: split multi-values of params and components
+            paras = models.OntologyTermRef(
+                para_name, para_name_term_acc, para_name_term_src)
+            comps = models.ProtocolComponentInfo(
+                comp_name, models.OntologyTermRef(
+                    comp_type, comp_type_term_acc, comp_type_term_src))
+            yield models.ProtocolInfo(name, type_ont, description, uri,
+                                      version, paras, comps)
 
     def _read_study_contacts(self) -> Iterator[models.ContactInfo]:
         # Read STUDY CONTACTS header

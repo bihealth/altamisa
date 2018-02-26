@@ -186,8 +186,6 @@ class ProtocolInfo(NamedTuple):
     parameters: Tuple[FreeTextOrTermRef]
     #: Protocol components
     component: Tuple[ProtocolComponentInfo]
-    #: Protocol contact lists
-    contacts: Tuple[ContactInfo]
 
 
 class StudyInfo(NamedTuple):
