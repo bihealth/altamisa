@@ -4,6 +4,7 @@
 import pytest
 
 
+from altamisa.isatab import models
 from altamisa.isatab import InvestigationReader
 
 
@@ -15,6 +16,13 @@ def test_parse_minimal_investigation(minimal_investigation_file):
     # Check results
     # Investigation
     assert investigation
+
+    # Ontology sources
+    assert 1 == len(investigation.ontology_source_refs)
+    expected = models.OntologyRef(
+        'OBI', 'http://data.bioontology.org/ontologies/OBI',
+        '31', 'Ontology for Biomedical Investigations')
+    assert expected == investigation.ontology_source_refs['OBI']
 
     # Basic info
     assert "Minimal Investigation" == investigation.info.title
@@ -39,6 +47,18 @@ def test_parse_small_investigation(small_investigation_file):
     # Check results
     # Investigation
     assert investigation
+
+    # Ontology sources
+    assert 2 == len(investigation.ontology_source_refs)
+    expected = models.OntologyRef(
+        'OBI', 'http://data.bioontology.org/ontologies/OBI',
+        '31', 'Ontology for Biomedical Investigations')
+    assert expected == investigation.ontology_source_refs['OBI']
+    expected = models.OntologyRef(
+        'NCBITAXON', 'http://data.bioontology.org/ontologies/NCBITAXON', '8',
+        ('National Center for Biotechnology Information (NCBI) Organismal '
+         'Classification'))
+    assert expected == investigation.ontology_source_refs['NCBITAXON']
 
     # Basic info
     assert "Small Investigation" == investigation.info.title
