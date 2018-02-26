@@ -137,6 +137,39 @@ class InvestigationReader:
         return models.InvestigationInfo(
             ontology_ref, info, publications, contacts, studies)
 
+    # reader for content of sections with possibly multiple columns
+    # i.e. ONTOLOGY SOURCE REFERENCE, INVESTIGATION PUBLICATIONS,
+    # INVESTIGATION CONTACTS, STUDY DESIGN DESCRIPTORS, STUDY PUBLICATIONS,
+    # STUDY FACTORS, STUDY ASSAYS, STUDY PROTOCOLS, STUDY CONTACTS
+    def _read_multi_column_section(self, prefix, ref_keys, section_name):
+        section = {}
+        while (self._next_line_startswith(prefix) or
+               self._next_line_startswith_comment()):
+            line = self._read_next_line()
+            if line[0].startswith('Comment'):
+                continue  # skip comments
+            key = line[0]
+            if key not in ref_keys:
+                tpl = 'Line must start with one of {} but is {}'
+                msg = tpl.format(ref_keys, line)
+                raise ParseIsatabException(msg)
+            if key in section:
+                tpl = 'Key {} repeated, previous value {}'
+                msg = tpl.format(key, section[key])
+                raise ParseIsatabException(msg)
+            section[key] = line[1:]
+        # Check that all keys are given and all contain the same number of
+        # entries
+        if len(section) != len(ref_keys):
+            tpl = 'Missing entries in section {}; found: {}'
+            msg = tpl.format(section_name, list(sorted(section)))
+            raise ParseIsatabException(msg)
+        if not len(set([len(v) for v in section.values()])) == 1:
+            tpl = 'Inconsistent entry lengths in section {}'
+            msg = tpl.format(section_name)
+            raise ParseIsatabException(msg)
+        return section
+
     # reader for content of a section with only one column
     # i.e. INVESTIGATION and STUDY
     def _read_single_column_section(self, prefix, ref_keys, section_name):
@@ -178,38 +211,14 @@ class InvestigationReader:
             msg = tpl.format(ONTOLOGY_SOURCE_REFERENCE, line)
             raise ParseIsatabException(msg)
         # Read the other four lines in this section.
-        section = {}
-        while (self._next_line_startswith('Term Source') or
-               self._next_line_startswith_comment()):
-            line = self._read_next_line()
-            if self._next_line_startswith_comment():
-                continue  # skip comments
-            if line[0] not in ONTOLOGY_SOURCE_REF_KEYS:
-                tpl = 'Line must start with one of {} but is {}'
-                msg = tpl.format(ONTOLOGY_SOURCE_REF_KEYS, line)
-                raise ParseIsatabException(msg)
-            key = line[0]
-            if key in section:
-                tpl = 'Key {} repeated, previous value {}'
-                msg = tpl.format(key, section[key])
-                raise ParseIsatabException(msg)
-            section[key] = line[1:]
-        # Check that all four keys are given and all contain the same number
-        # of entries
-        if len(section) != 4:
-            tpl = 'Missing entries in section {}; found: {}'
-            msg = tpl.format(ONTOLOGY_SOURCE_REFERENCE, list(sorted(section)))
-            raise ParseIsatabException(msg)
-        if not len(set([len(v) for v in section.values()])) == 1:
-            tpl = 'Inconsistent entry lengths in section {}'
-            msg = tpl.format(ONTOLOGY_SOURCE_REFERENCE)
-            raise ParseIsatabException(msg)
+        section = self._read_multi_column_section(
+            'Term Source', ONTOLOGY_SOURCE_REF_KEYS, ONTOLOGY_SOURCE_REFERENCE)
         # Create resulting objects
         columns = zip(*(section[k] for k in ONTOLOGY_SOURCE_REF_KEYS))
         for name, file_, version, desc in columns:
             # Check if ontology source is complete
             if not (name and file_ and version and desc):
-                tpl = 'Incomplete ontology source; found: "{}", "{}", "{}", "{}"'
+                tpl = 'Incomplete ontology source; found: {}, {}, {}, {}'
                 msg = tpl.format(name, file_, version, desc)
                 raise ParseIsatabException(msg)
             yield models.OntologyRef(name, file_, version, desc)
@@ -354,38 +363,14 @@ class InvestigationReader:
             msg = tpl.format(STUDY_ASSAYS, line)
             raise ParseIsatabException(msg)
         # Read the other lines in this section.
-        section = {}
-        while (self._next_line_startswith('Study Assay') or
-               self._next_line_startswith_comment()):
-            line = self._read_next_line()
-            if self._next_line_startswith_comment():
-                continue  # skip comments
-            if line[0] not in STUDY_ASSAY_REF_KEYS:
-                tpl = 'Line must start with one of {} but is {}'
-                msg = tpl.format(STUDY_ASSAY_REF_KEYS, line)
-                raise ParseIsatabException(msg)
-            key = line[0]
-            if key in section:
-                tpl = 'Key {} repeated, previous value {}'
-                msg = tpl.format(key, section[key])
-                raise ParseIsatabException(msg)
-            section[key] = line[1:]
-        # Check that all eight keys are given and all contain the same number
-        # of entries
-        if len(section) != 8:
-            tpl = 'Missing entries in section {}; found: {}'
-            msg = tpl.format(STUDY_ASSAYS, list(sorted(section)))
-            raise ParseIsatabException(msg)
-        if not len(set([len(v) for v in section.values()])) == 1:
-            tpl = 'Inconsistent entry lengths in section {}'
-            msg = tpl.format(STUDY_ASSAYS)
-            raise ParseIsatabException(msg)
+        section = self._read_multi_column_section(
+            'Study Assay', STUDY_ASSAY_REF_KEYS, STUDY_ASSAYS)
         # Create resulting objects
         columns = zip(*(section[k] for k in STUDY_ASSAY_REF_KEYS))
         for file_, meas_type, meas_type_term_acc, meas_type_term_src, \
             tech_type, tech_type_term_acc, tech_type_term_src, tech_plat \
                 in columns:
-            if not (file_):  # don't allow incomplete assay columns
+            if not file_:  # don't allow incomplete assay columns
                 tpl = 'Expected "a_*.txt" in line {}; found: "{}"'
                 msg = tpl.format(STUDY_ASSAY_FILE_NAME, file_)
                 raise ParseIsatabException(msg)
