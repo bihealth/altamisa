@@ -58,6 +58,9 @@ STUDY_DESCRIPTION = 'Study Description'
 STUDY_SUBMISSION_DATE = 'Study Submission Date'
 STUDY_PUBLIC_RELEASE_DATE = 'Study Public Release Date'
 STUDY_FILE_NAME = 'Study File Name'
+STUDY_INFO_REF_KEYS = (
+    STUDY_IDENTIFIER, STUDY_TITLE, STUDY_DESCRIPTION,
+    STUDY_SUBMISSION_DATE, STUDY_PUBLIC_RELEASE_DATE, STUDY_FILE_NAME)
 
 
 # The string constants used for the references to assays
@@ -134,6 +137,38 @@ class InvestigationReader:
         return models.InvestigationInfo(
             ontology_ref, info, publications, contacts, studies)
 
+    # reader for content of a section with only one column
+    # i.e. INVESTIGATION and STUDY
+    def _read_single_column_section(self, prefix, ref_keys, section_name):
+        # Read the lines in this section.
+        section = {}
+        while (self._next_line_startswith(prefix) or
+               self._next_line_startswith_comment()):
+            line = self._read_next_line()
+            if line[0].startswith('Comment'):
+                continue  # skip comments
+            if len(line) > 2:
+                tpl = 'Line {} contains more than one value: {}'
+                msg = tpl.format(line[0], line[1:])
+                raise ParseIsatabException(msg)
+            key = line[0]
+            if key not in ref_keys:
+                tpl = 'Line must start with one of {} but is {}'
+                msg = tpl.format(ref_keys, line)
+                raise ParseIsatabException(msg)
+            if key in section:
+                tpl = 'Key {} repeated, previous value {}'
+                msg = tpl.format(key, section[key])
+                raise ParseIsatabException(msg)
+            # read value if field is available, empty string else
+            section[key] = line[1] if len(line) > 1 else ''
+        # Check that all keys are given
+        if len(section) != len(ref_keys):
+            tpl = 'Missing entries in section {}; found: {}'
+            msg = tpl.format(section_name, list(sorted(section)))
+            raise ParseIsatabException(msg)
+        return section
+
     def _read_ontology_source_reference(self) -> Iterator[
             models.OntologyRef]:
         # Read ONTOLOGY SOURCE REFERENCE header
@@ -186,34 +221,9 @@ class InvestigationReader:
             tpl = 'Expected {} but got {}'
             msg = tpl.format(INVESTIGATION, line)
             raise ParseIsatabException(msg)
-
         # Read the other lines in this section.
-        section = {}
-        while (self._next_line_startswith('Investigation') or
-               self._next_line_startswith_comment()):
-            line = self._read_next_line()
-            if self._next_line_startswith_comment():
-                continue  # skip comments
-            if line[0] not in INVESTIGATION_INFO_REF_KEYS:
-                tpl = 'Line must start with one of {} but is {}'
-                msg = tpl.format(INVESTIGATION_INFO_REF_KEYS, line)
-                raise ParseIsatabException(msg)
-            if len(line) > 2:
-                tpl = 'Line {} contains more than one entity: {}'
-                msg = tpl.format(line[0], line[1:])
-                raise ParseIsatabException(msg)
-            key = line[0]
-            if key in section:
-                tpl = 'Key {} repeated, previous value {}'
-                msg = tpl.format(key, section[key])
-                raise ParseIsatabException(msg)
-            section[key] = line[1] if len(line) > 1 else ''
-        # Check that all five keys are given
-        if len(section) != 5:
-            tpl = 'Missing entries in section {}; found: {}'
-            msg = tpl.format(INVESTIGATION, list(sorted(section)))
-            raise ParseIsatabException(msg)
-
+        section = self._read_single_column_section(
+            'Investigation', INVESTIGATION_INFO_REF_KEYS, INVESTIGATION)
         # Create resulting object
         # TODO: do we really need the name of the investigation file?
         return models.BasicInfo(os.path.basename(self.input_file.name),
@@ -222,10 +232,6 @@ class InvestigationReader:
                                 section[INVESTIGATION_DESCRIPTION],
                                 section[INVESTIGATION_SUBMISSION_DATE],
                                 section[INVESTIGATION_PUBLIC_RELEASE_DATE])
-
-        # columns = zip(*(section[k] for k in ONTOLOGY_SOURCE_REF_KEYS))
-        # for name, file_, version, desc in columns:
-        #     yield models.OntologyRef(name, file_, version, desc)
 
     def _read_publications(self) -> Iterator[models.PublicationInfo]:
         # Read INVESTIGATION PUBLICATIONS header
@@ -269,47 +275,24 @@ class InvestigationReader:
                 msg = tpl.format(INVESTIGATION, line)
                 raise ParseIsatabException(msg)
             # Read the other lines in this section.
-            # section = {}
-            study_identifier = ''
-            study_title = ''
-            study_description = ''
-            study_submission_date = ''
-            study_public_release_date = ''
-            study_file_name = ''
-            # study_comments = []
-            while (self._next_line_startswith('Study') or
-                   self._next_line_startswith_comment()):
-                line = self._read_next_line()
-                if len(line) > 1:
-                    if line[0] == STUDY_IDENTIFIER:
-                        study_identifier = line[1]
-                    elif line[0] == STUDY_TITLE:
-                        study_title = line[1]
-                    elif line[0] == STUDY_DESCRIPTION:
-                        study_description = line[1]
-                    elif line[0] == STUDY_SUBMISSION_DATE:
-                        study_submission_date = line[1]
-                    elif line[0] == STUDY_PUBLIC_RELEASE_DATE:
-                        study_public_release_date = line[1]
-                    elif line[0] == STUDY_FILE_NAME:
-                        study_file_name = line[1]
-                    elif self._next_line_startswith_comment():
-                        continue  # skip comments
-                # XXX
+            section = self._read_single_column_section(
+                'Study', STUDY_INFO_REF_KEYS, STUDY)
             # From this, parse the basic information from the study
-            basic_info = models.BasicInfo(study_file_name,
-                                          study_identifier,
-                                          study_title,
-                                          study_description,
-                                          study_submission_date,
-                                          study_public_release_date)
+            basic_info = models.BasicInfo(section[STUDY_FILE_NAME],
+                                          section[STUDY_IDENTIFIER],
+                                          section[STUDY_TITLE],
+                                          section[STUDY_DESCRIPTION],
+                                          section[STUDY_SUBMISSION_DATE],
+                                          section[STUDY_PUBLIC_RELEASE_DATE])
+            # Read the remaining sections for this study
+            # TODO: specs says "order MAY vary"
             design_descriptors = list(self._read_study_design_descriptors())
             publications = list(self._read_study_publications())
             factors = {f.name: f for f in self._read_study_factors()}
             assays = {a.path: a for a in self._read_study_assays()}
             protocols = {p.name: p for p in self._read_study_protocols()}
             contacts = list(self._read_study_contacts())
-            # Read the remaining sections for this study
+            # Create study object
             yield models.StudyInfo(
                 basic_info, design_descriptors, publications, factors,
                 assays, protocols, contacts)
