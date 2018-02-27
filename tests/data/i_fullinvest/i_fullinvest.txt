@@ -164,10 +164,10 @@ Study Protocol Version
 Study Protocol Parameters Name										
 Study Protocol Parameters Name Term Accession Number										
 Study Protocol Parameters Name Term Source REF										
-Study Protocol Components Name										
-Study Protocol Components Type										
-Study Protocol Components Type Term Accession Number										
-Study Protocol Components Type Term Source REF										
+Study Protocol Components Name						NMR tubes;Bruker-Av600				
+Study Protocol Components Type						;instrument				
+Study Protocol Components Type Term Accession Number						;http://www.ebi.ac.uk/efo/EFO_0000548				
+Study Protocol Components Type Term Source REF						;EFO				
 STUDY CONTACTS
 Study Person Last Name	Oliver	Juan	Leo
 Study Person First Name	Stephen	Castrillo	Zeef

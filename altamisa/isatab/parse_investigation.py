@@ -579,8 +579,8 @@ class InvestigationReader:
         # Create resulting objects
         columns = zip(*(section[k] for k in STUDY_PROTOCOLS_KEYS))
         for (name, type_term, type_term_acc, type_term_src, description, uri,
-             version, para_name, para_name_term_acc, para_name_term_src,
-             comp_name, comp_type, comp_type_term_acc, comp_type_term_src) \
+             version, para_names, para_name_term_accs, para_name_term_srcs,
+             comp_names, comp_types, comp_type_term_accs, comp_type_term_srcs)\
                 in columns:
             if not name:  # don't allow unnamed assay columns
                 tpl = 'Expected protocol name in line {}; found: "{}"'
@@ -588,14 +588,46 @@ class InvestigationReader:
                 raise ParseIsatabException(msg)
             type_ont = models.OntologyTermRef(
                 type_term, type_term_acc, type_term_src)
-            # TODO: split multi-values of params and components
-            paras = models.OntologyTermRef(
-                para_name, para_name_term_acc, para_name_term_src)
-            comps = models.ProtocolComponentInfo(
-                comp_name, models.OntologyTermRef(
-                    comp_type, comp_type_term_acc, comp_type_term_src))
+            paras = tuple(self._split_study_protocols_parameters(
+                para_names, para_name_term_accs, para_name_term_srcs))
+            comps = tuple(self._split_study_protocols_components(
+                comp_names, comp_types, comp_type_term_accs,
+                comp_type_term_srcs))
             yield models.ProtocolInfo(name, type_ont, description, uri,
                                       version, paras, comps)
+
+    @staticmethod
+    def _split_study_protocols_parameters(
+        names, name_term_accs, name_term_srcs) -> Iterator[
+            models.OntologyTermRef]:
+        names = names.split(';')
+        name_term_accs = name_term_accs.split(';')
+        name_term_srcs = name_term_srcs.split(';')
+        if not (len(names) == len(name_term_accs) == len(name_term_srcs)):
+            tpl = 'Unequal protocol parameter splits; found: "{}", "{}", "{}"'
+            msg = tpl.format(names, name_term_accs, name_term_srcs)
+            raise ParseIsatabException(msg)
+        for (name, acc, src) in zip(names, name_term_accs, name_term_srcs):
+            yield models.OntologyTermRef(name, acc, src)
+
+    @staticmethod
+    def _split_study_protocols_components(
+        names, types, type_term_accs, type_term_srcs) -> Iterator[
+            models.ProtocolComponentInfo]:
+        names = names.split(';')
+        types = types.split(';')
+        type_term_accs = type_term_accs.split(';')
+        type_term_srcs = type_term_srcs.split(';')
+        if not (len(names) == len(types)
+                == len(type_term_accs) == len(type_term_srcs)):
+            tpl = ('Unequal protocol component splits; '
+                   'found: "{}", "{}", "{}", "{}"')
+            msg = tpl.format(names, types, type_term_accs, type_term_srcs)
+            raise ParseIsatabException(msg)
+        for (name, ctype, acc, src) in zip(names, types, type_term_accs,
+                                           type_term_srcs):
+            yield models.ProtocolComponentInfo(
+                name, models.OntologyTermRef(ctype, acc, src))
 
     def _read_study_contacts(self) -> Iterator[models.ContactInfo]:
         # Read STUDY CONTACTS header
