@@ -370,6 +370,26 @@ class InvestigationReader:
             raise ParseIsatabException(msg)
         return section, comment_keys
 
+    @staticmethod
+    def _parse_comments(section, comment_keys, i=None):
+
+        def _parse_comment_header(val):
+            # key might start with "Comment[" or "Comment ["
+            tok = val[len('Comment'):].strip()
+            if not tok or tok[0] != '[' or tok[-1] != ']':
+                tpl = 'Problem parsing comment header {}'
+                msg = tpl.format(tpl.format(val))
+                raise ParseIsatabException(msg)
+            return tok[1:-1]
+
+        if i is not None:
+            comments = {_parse_comment_header(k):
+                        section[k][i] for k in comment_keys}
+        else:
+            comments = {_parse_comment_header(k):
+                        section[k] for k in comment_keys}
+        return comments
+
     def _read_ontology_source_reference(self) -> Iterator[
             models.OntologyRef]:
         # Read ONTOLOGY SOURCE REFERENCE header
@@ -389,7 +409,7 @@ class InvestigationReader:
                 tpl = 'Incomplete ontology source; found: {}, {}, {}, {}'
                 msg = tpl.format(name, file_, version, desc)
                 raise ParseIsatabException(msg)
-            comments = {k: section[k][i] for k in comment_keys}
+            comments = self._parse_comments(section, comment_keys, i)
             yield models.OntologyRef(name, file_, version, desc, comments)
 
     def _read_basic_info(self) -> models.BasicInfo:
@@ -404,7 +424,7 @@ class InvestigationReader:
             'Investigation', INVESTIGATION_INFO_KEYS, INVESTIGATION)
         # Create resulting object
         # TODO: do we really need the name of the investigation file?
-        comments = {k: section[k] for k in comment_keys}
+        comments = self._parse_comments(section, comment_keys)
         return models.BasicInfo(Path(os.path.basename(self.input_file.name)),
                                 section[INVESTIGATION_IDENTIFIER],
                                 section[INVESTIGATION_TITLE],
@@ -432,7 +452,7 @@ class InvestigationReader:
                 in enumerate(columns):
             status = models.OntologyTermRef(
                 status_term, status_term_acc, status_term_src)
-            comments = {k: section[k][i] for k in comment_keys}
+            comments = self._parse_comments(section, comment_keys, i)
             yield models.PublicationInfo(
                 pubmed_id, doi, authors, title, status, comments)
 
@@ -456,7 +476,7 @@ class InvestigationReader:
                 enumerate(columns):
             role = models.OntologyTermRef(
                 role_term, role_term_acc, role_term_src)
-            comments = {k: section[k][i] for k in comment_keys}
+            comments = self._parse_comments(section, comment_keys, i)
             yield models.ContactInfo(
                 last_name, first_name, mid_initial, email, phone, fax, address,
                 affiliation, role, comments)
@@ -474,7 +494,7 @@ class InvestigationReader:
             section, comment_keys = self._read_single_column_section(
                 'Study', STUDY_INFO_KEYS, STUDY)
             # From this, parse the basic information from the study
-            comments = {k: section[k] for k in comment_keys}
+            comments = self._parse_comments(section, comment_keys)
             basic_info = models.BasicInfo(Path(section[STUDY_FILE_NAME]),
                                           section[STUDY_IDENTIFIER],
                                           section[STUDY_TITLE],
@@ -513,7 +533,7 @@ class InvestigationReader:
         for i, (type_term, type_term_acc, type_term_src) in enumerate(columns):
             type = models.OntologyTermRef(
                 type_term, type_term_acc, type_term_src)
-            comments = {k: section[k][i] for k in comment_keys}
+            comments = self._parse_comments(section, comment_keys, i)
             yield models.DesignDescriptorsInfo(type, comments)
 
     def _read_study_publications(self) -> Iterator[models.PublicationInfo]:
@@ -534,7 +554,7 @@ class InvestigationReader:
                 status_term_acc, status_term_src) in enumerate(columns):
             status = models.OntologyTermRef(
                 status_term, status_term_acc, status_term_src)
-            comments = {k: section[k][i] for k in comment_keys}
+            comments = self._parse_comments(section, comment_keys, i)
             yield models.PublicationInfo(
                 pubmed_id, doi, authors, title, status, comments)
 
@@ -556,7 +576,7 @@ class InvestigationReader:
                 type_term_src) in enumerate(columns):
             otype = models.OntologyTermRef(
                 type_term, type_term_acc, type_term_src)
-            comments = {k: section[k][i] for k in comment_keys}
+            comments = self._parse_comments(section, comment_keys, i)
             yield models.FactorInfo(name, otype, comments)
 
     def _read_study_assays(self) -> Iterator[models.AssayInfo]:
@@ -582,7 +602,7 @@ class InvestigationReader:
                 meas_type, meas_type_term_acc, meas_type_term_src)
             tech = models.OntologyTermRef(
                 tech_type, tech_type_term_acc, tech_type_term_src)
-            comments = {k: section[k][i] for k in comment_keys}
+            comments = self._parse_comments(section, comment_keys, i)
             yield models.AssayInfo(
                 meas, tech, tech_plat, Path(file_), comments)
 
@@ -614,7 +634,7 @@ class InvestigationReader:
             comps = tuple(self._split_study_protocols_components(
                 comp_names, comp_types, comp_type_term_accs,
                 comp_type_term_srcs))
-            comments = {k: section[k][i] for k in comment_keys}
+            comments = self._parse_comments(section, comment_keys, i)
             yield models.ProtocolInfo(name, type_ont, description, uri,
                                       version, paras, comps, comments)
 
@@ -671,7 +691,7 @@ class InvestigationReader:
                 enumerate(columns):
             role = models.OntologyTermRef(
                 role_term, role_term_acc, role_term_src)
-            comments = {k: section[k][i] for k in comment_keys}
+            comments = self._parse_comments(section, comment_keys, i)
             yield models.ContactInfo(
                 last_name, first_name, mid_initial, email, phone, fax, address,
                 affiliation, role, comments)

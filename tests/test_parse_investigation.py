@@ -143,8 +143,8 @@ def test_parse_full_investigation(full_investigation_file):
         "Faculty of Life Sciences, Michael Smith Building, "
         "University of Manchester",
         models.OntologyTermRef("corresponding author", "", ""),
-        {"Comment[Investigation Person ORCID]": "12345",
-         "Comment[Investigation Person REF]": "personA"})
+        {"Investigation Person ORCID": "12345",
+         "Investigation Person REF": "personA"})
     assert expected == investigation.contacts[0]
     expected = models.ContactInfo(
         "Juan", "Castrillo", "I", "", "123456789", "",
@@ -152,8 +152,8 @@ def test_parse_full_investigation(full_investigation_file):
         "Faculty of Life Sciences, Michael Smith Building, "
         "University of Manchester",
         models.OntologyTermRef("author", "", ""),
-        {"Comment[Investigation Person ORCID]": "0987654321",
-         "Comment[Investigation Person REF]": "personB"})
+        {"Investigation Person ORCID": "0987654321",
+         "Investigation Person REF": "personB"})
     assert expected == investigation.contacts[1]
     expected = models.ContactInfo(
         "Leo", "Zeef", "A", "", "", "+49 123456789",
@@ -163,8 +163,8 @@ def test_parse_full_investigation(full_investigation_file):
         models.OntologyTermRef("author",
                                "http://purl.obolibrary.org/obo/RoleO_0000061",
                                "ROLEO"),
-        {"Comment[Investigation Person ORCID]": "1357908642",
-         "Comment[Investigation Person REF]": "personC"})
+        {"Investigation Person ORCID": "1357908642",
+         "Investigation Person REF": "personC"})
     assert expected == investigation.contacts[2]
 
     # Studies
@@ -304,7 +304,7 @@ def test_parse_full_investigation(full_investigation_file):
         "Faculty of Life Sciences, Michael Smith Building, "
         "University of Manchester",
         models.OntologyTermRef("corresponding author", "", ""),
-        {"Comment[Study Person REF]": ""})
+        {"Study Person REF": ""})
     assert expected == study.contacts[0]
     expected = models.ContactInfo(
         "Juan", "Castrillo", "I", "", "123456789", "",
@@ -314,7 +314,7 @@ def test_parse_full_investigation(full_investigation_file):
         models.OntologyTermRef("author",
                                "http://purl.obolibrary.org/obo/RoleO_0000061",
                                "ROLEO"),
-        {"Comment[Study Person REF]": ""})
+        {"Study Person REF": ""})
     assert expected == study.contacts[1]
     expected = models.ContactInfo(
         "Leo", "Zeef", "A", "", "", "+49 123456789",
@@ -324,7 +324,7 @@ def test_parse_full_investigation(full_investigation_file):
         models.OntologyTermRef("author",
                                "http://purl.obolibrary.org/obo/RoleO_0000061",
                                "ROLEO"),
-        {"Comment[Study Person REF]": ""})
+        {"Study Person REF": ""})
     assert expected == study.contacts[2]
 
     # Study 2
@@ -355,17 +355,17 @@ def test_parse_full_investigation(full_investigation_file):
         "after treatment. Gene expression at the mRNA level was investigated "
         "by transcriptome analysis using Affymetrix hybridization arrays.",
         "2007-04-30", "2009-03-10",
-        {"Comment[Study Grant Number]": "",
-         "Comment[Study Funding Agency]": "",
-         "Comment[Manuscript Licence]": "CC BY 3.0",
-         "Comment[Experimental Metadata Licence]": "CC0",
-         "Comment[Data Repository]": "",
-         "Comment[Data Record Accession]": "",
-         "Comment[Data Record URI]": "",
-         "Comment[Supplementary Information File Name]": "",
-         "Comment[Supplementary Information File Type]": "",
-         "Comment[Supplementary File URI]": "",
-         "Comment[Subject Keywords]": ""})
+        {"Study Grant Number": "",
+         "Study Funding Agency": "",
+         "Manuscript Licence": "CC BY 3.0",
+         "Experimental Metadata Licence": "CC0",
+         "Data Repository": "",
+         "Data Record Accession": "",
+         "Data Record URI": "",
+         "Supplementary Information File Name": "",
+         "Supplementary Information File Type": "",
+         "Supplementary File URI": "",
+         "Subject Keywords": ""})
     assert expected == study.info
 
     # Study 2 - Factors
@@ -418,5 +418,5 @@ def test_parse_full_investigation(full_investigation_file):
         models.OntologyTermRef("author",
                                "http://purl.obolibrary.org/obo/RoleO_0000061",
                                "ROLEO"),
-        {"Comment[Study Person REF]": "personB"})
+        {"Study Person REF": "personB"})
     assert expected == study.contacts[1]
