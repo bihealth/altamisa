@@ -4,6 +4,7 @@
 
 import os
 import csv
+from pathlib import Path
 from typing import Iterator, TextIO
 
 from . import models
@@ -397,7 +398,7 @@ class InvestigationReader:
             'Investigation', INVESTIGATION_INFO_KEYS, INVESTIGATION)
         # Create resulting object
         # TODO: do we really need the name of the investigation file?
-        return models.BasicInfo(os.path.basename(self.input_file.name),
+        return models.BasicInfo(Path(os.path.basename(self.input_file.name)),
                                 section[INVESTIGATION_IDENTIFIER],
                                 section[INVESTIGATION_TITLE],
                                 section[INVESTIGATION_DESCRIPTION],
@@ -461,7 +462,7 @@ class InvestigationReader:
             section = self._read_single_column_section(
                 'Study', STUDY_INFO_KEYS, STUDY)
             # From this, parse the basic information from the study
-            basic_info = models.BasicInfo(section[STUDY_FILE_NAME],
+            basic_info = models.BasicInfo(Path(section[STUDY_FILE_NAME]),
                                           section[STUDY_IDENTIFIER],
                                           section[STUDY_TITLE],
                                           section[STUDY_DESCRIPTION],
@@ -472,7 +473,7 @@ class InvestigationReader:
             design_descriptors = tuple(self._read_study_design_descriptors())
             publications = tuple(self._read_study_publications())
             factors = {f.name: f for f in self._read_study_factors()}
-            assays = {a.path: a for a in self._read_study_assays()}
+            assays = {a.path.name: a for a in self._read_study_assays()}
             protocols = {p.name: p for p in self._read_study_protocols()}
             contacts = tuple(self._read_study_contacts())
             # Create study object
@@ -563,7 +564,7 @@ class InvestigationReader:
                 meas_type, tech_type_term_acc, meas_type_term_src)
             tech = models.OntologyTermRef(
                 tech_type, tech_type_term_acc, tech_type_term_src)
-            yield models.AssayInfo(meas, tech, tech_plat, file_)
+            yield models.AssayInfo(meas, tech, tech_plat, Path(file_))
 
     def _read_study_protocols(self) -> Iterator[models.ProtocolInfo]:
         # Read STUDY PROTOCOLS header

@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 """Tests for parsing ISA investigation files"""
 
+from pathlib import Path
 from altamisa.isatab import models
 from altamisa.isatab import InvestigationReader
 
@@ -29,12 +30,12 @@ def test_parse_minimal_investigation(minimal_investigation_file):
     assert len(investigation.studies) == 1
     assert "s_minimal" == investigation.studies[0].info.identifier
     assert "Minimal Germline Study" == investigation.studies[0].info.title
-    assert "s_minimal.txt" == investigation.studies[0].info.path
+    assert Path("s_minimal.txt") == investigation.studies[0].info.path
 
     # Assays
     assert len(investigation.studies[0].assays) == 1
     assay = investigation.studies[0].assays["a_minimal.txt"]
-    assert "a_minimal.txt" == assay.path
+    assert Path("a_minimal.txt") == assay.path
 
 
 def test_parse_small_investigation(small_investigation_file):
@@ -66,12 +67,12 @@ def test_parse_small_investigation(small_investigation_file):
     assert len(investigation.studies) == 1
     assert "s_small" == investigation.studies[0].info.identifier
     assert "Small Germline Study" == investigation.studies[0].info.title
-    assert "s_small.txt" == investigation.studies[0].info.path
+    assert Path("s_small.txt") == investigation.studies[0].info.path
 
     # Assays
     assert len(investigation.studies[0].assays) == 1
     assay = investigation.studies[0].assays["a_small.txt"]
-    assert "a_small.txt" == assay.path
+    assert Path("a_small.txt") == assay.path
 
 
 def test_parse_full_investigation(full_investigation_file):
@@ -159,7 +160,7 @@ def test_parse_full_investigation(full_investigation_file):
             "proteome, endometabolome and exometabolome of the yeast "
             "Saccharomyces cerevisiae under different nutrient limitations"
             ) == study.info.title
-    assert "s_BII-S-1.txt" == study.info.path
+    assert Path("s_BII-S-1.txt") == study.info.path
 
     # Study 1 - Design descriptors
     assert 2 == len(study.designs)
@@ -204,7 +205,7 @@ def test_parse_full_investigation(full_investigation_file):
     # Study 1 - Assays
     assert 3 == len(study.assays)
     assay = study.assays["a_proteome.txt"]
-    assert "a_proteome.txt" == assay.path
+    assert Path("a_proteome.txt") == assay.path
 
     # Study 1 - Protocols
     assert 7 == len(study.protocols)
@@ -287,7 +288,7 @@ def test_parse_full_investigation(full_investigation_file):
     # Study 2
     study = investigation.studies[1]
     expected = models.BasicInfo(
-        "s_BII-S-2.txt", "BII-S-2",
+        Path("s_BII-S-2.txt"), "BII-S-2",
         "A time course analysis of transcription response in yeast treated "
         "with rapamycin, a specific inhibitor of the TORC1 complex: impact "
         "on yeast growth",
