@@ -35,8 +35,8 @@ Investigation Person Affiliation	Faculty of Life Sciences, Michael Smith Buildin
 Investigation Person Roles	corresponding author	author	author
 Investigation Person Roles Term Accession Number			http://purl.obolibrary.org/obo/RoleO_0000061
 Investigation Person Roles Term Source REF			ROLEO
-Comment[Investigation Person ORCID]			
-Comment[Investigation Person REF]			
+Comment[Investigation Person ORCID]	12345	0987654321	1357908642
+Comment[Investigation Person REF]	personA	personB	personC
 STUDY
 Study Identifier	BII-S-1
 Study Title	Study of the impact of changes in flux on the transcriptome, proteome, endometabolome and exometabolome of the yeast Saccharomyces cerevisiae under different nutrient limitations
@@ -108,7 +108,7 @@ Study Person Affiliation	Faculty of Life Sciences, Michael Smith Building, Unive
 Study Person Roles	corresponding author	author	author
 Study Person Roles Term Accession Number		http://purl.obolibrary.org/obo/RoleO_0000061	http://purl.obolibrary.org/obo/RoleO_0000061
 Study Person Roles Term Source REF		ROLEO	ROLEO
-Comment[Study Person REF]
+Comment[Study Person REF]			
 STUDY
 Study Identifier	BII-S-2
 Study Title	A time course analysis of transcription response in yeast treated with rapamycin, a specific inhibitor of the TORC1 complex: impact on yeast growth
@@ -180,4 +180,5 @@ Study Person Affiliation	Faculty of Life Sciences, Michael Smith Building, Unive
 Study Person Roles	corresponding author	author	author
 Study Person Roles Term Accession Number		http://purl.obolibrary.org/obo/RoleO_0000061	
 Study Person Roles Term Source REF		ROLEO	
-Comment[Study Person REF]			
+Comment[Study Person REF]	personA	personB	personC
+

@@ -273,7 +273,7 @@ class InvestigationReader:
         try:
             self._line = next(self._reader)
             while self._line is not None and (
-                not self._line or self._line[0].startswith('#')):
+                    not self._line or self._line[0].startswith('#')):
                 self._line = next(self._reader)
         except StopIteration:
             self._line = None
@@ -309,24 +309,25 @@ class InvestigationReader:
     # STUDY FACTORS, STUDY ASSAYS, STUDY PROTOCOLS, STUDY CONTACTS
     def _read_multi_column_section(self, prefix, ref_keys, section_name):
         section = {}
+        comment_keys = set()
         while (self._next_line_startswith(prefix) or
                self._next_line_startswith_comment()):
             line = self._read_next_line()
-            if line[0].startswith('Comment'):
-                continue  # skip comments
             key = line[0]
-            if key not in ref_keys:
+            if key.startswith('Comment'):
+                comment_keys.add(key)
+            elif key not in ref_keys:
                 tpl = 'Line must start with one of {} but is {}'
                 msg = tpl.format(ref_keys, line)
                 raise ParseIsatabException(msg)
             if key in section:
-                tpl = 'Key {} repeated, previous value {}'
+                tpl = 'Key {} repeated, previous value "{}"'
                 msg = tpl.format(key, section[key])
                 raise ParseIsatabException(msg)
             section[key] = line[1:]
         # Check that all keys are given and all contain the same number of
         # entries
-        if len(section) != len(ref_keys):
+        if len(section) != len(ref_keys) + len(comment_keys):
             tpl = 'Missing entries in section {}; found: {}'
             msg = tpl.format(section_name, list(sorted(section)))
             raise ParseIsatabException(msg)
@@ -334,39 +335,40 @@ class InvestigationReader:
             tpl = 'Inconsistent entry lengths in section {}'
             msg = tpl.format(section_name)
             raise ParseIsatabException(msg)
-        return section
+        return section, comment_keys
 
     # reader for content of a section with only one column
     # i.e. INVESTIGATION and STUDY
     def _read_single_column_section(self, prefix, ref_keys, section_name):
         # Read the lines in this section.
         section = {}
+        comment_keys = set()
         while (self._next_line_startswith(prefix) or
                self._next_line_startswith_comment()):
             line = self._read_next_line()
-            if line[0].startswith('Comment'):
-                continue  # skip comments
             if len(line) > 2:
                 tpl = 'Line {} contains more than one value: {}'
                 msg = tpl.format(line[0], line[1:])
                 raise ParseIsatabException(msg)
             key = line[0]
-            if key not in ref_keys:
+            if key.startswith('Comment'):
+                comment_keys.add(key)
+            elif key not in ref_keys:
                 tpl = 'Line must start with one of {} but is {}'
                 msg = tpl.format(ref_keys, line)
                 raise ParseIsatabException(msg)
             if key in section:
-                tpl = 'Key {} repeated, previous value {}'
+                tpl = 'Key {} repeated, previous value "{}"'
                 msg = tpl.format(key, section[key])
                 raise ParseIsatabException(msg)
             # read value if field is available, empty string else
             section[key] = line[1] if len(line) > 1 else ''
         # Check that all keys are given
-        if len(section) != len(ref_keys):
+        if len(section) != len(ref_keys) + len(comment_keys):
             tpl = 'Missing entries in section {}; found: {}'
             msg = tpl.format(section_name, list(sorted(section)))
             raise ParseIsatabException(msg)
-        return section
+        return section, comment_keys
 
     def _read_ontology_source_reference(self) -> Iterator[
             models.OntologyRef]:
@@ -377,17 +379,18 @@ class InvestigationReader:
             msg = tpl.format(ONTOLOGY_SOURCE_REFERENCE, line)
             raise ParseIsatabException(msg)
         # Read the other four lines in this section.
-        section = self._read_multi_column_section(
+        section, comment_keys = self._read_multi_column_section(
             'Term Source', ONTOLOGY_SOURCE_REF_KEYS, ONTOLOGY_SOURCE_REFERENCE)
         # Create resulting objects
         columns = zip(*(section[k] for k in ONTOLOGY_SOURCE_REF_KEYS))
-        for name, file_, version, desc in columns:
+        for i, (name, file_, version, desc) in enumerate(columns):
             # Check if ontology source is complete
             if not (name and file_ and version and desc):
                 tpl = 'Incomplete ontology source; found: {}, {}, {}, {}'
                 msg = tpl.format(name, file_, version, desc)
                 raise ParseIsatabException(msg)
-            yield models.OntologyRef(name, file_, version, desc)
+            comments = {k: section[k][i] for k in comment_keys}
+            yield models.OntologyRef(name, file_, version, desc, comments)
 
     def _read_basic_info(self) -> models.BasicInfo:
         # Read INVESTIGATION header
@@ -397,16 +400,18 @@ class InvestigationReader:
             msg = tpl.format(INVESTIGATION, line)
             raise ParseIsatabException(msg)
         # Read the other lines in this section.
-        section = self._read_single_column_section(
+        section, comment_keys = self._read_single_column_section(
             'Investigation', INVESTIGATION_INFO_KEYS, INVESTIGATION)
         # Create resulting object
         # TODO: do we really need the name of the investigation file?
+        comments = {k: section[k] for k in comment_keys}
         return models.BasicInfo(Path(os.path.basename(self.input_file.name)),
                                 section[INVESTIGATION_IDENTIFIER],
                                 section[INVESTIGATION_TITLE],
                                 section[INVESTIGATION_DESCRIPTION],
                                 section[INVESTIGATION_SUBMISSION_DATE],
-                                section[INVESTIGATION_PUBLIC_RELEASE_DATE])
+                                section[INVESTIGATION_PUBLIC_RELEASE_DATE],
+                                comments)
 
     def _read_publications(self) -> Iterator[models.PublicationInfo]:
         # Read INVESTIGATION PUBLICATIONS header
@@ -416,18 +421,20 @@ class InvestigationReader:
             msg = tpl.format(INVESTIGATION_PUBLICATIONS, line)
             raise ParseIsatabException(msg)
         # Read the other lines in this section.
-        section = self._read_multi_column_section(
+        section, comment_keys = self._read_multi_column_section(
             'Investigation Pub',
             INVESTIGATION_PUBLICATIONS_KEYS,
             INVESTIGATION_PUBLICATIONS)
         # Create resulting objects
         columns = zip(*(section[k] for k in INVESTIGATION_PUBLICATIONS_KEYS))
-        for (pubmed_id, doi, authors, title,
-             status_term, status_term_acc, status_term_src) in columns:
+        for i, (pubmed_id, doi, authors, title,
+                status_term, status_term_acc, status_term_src) \
+                in enumerate(columns):
             status = models.OntologyTermRef(
                 status_term, status_term_acc, status_term_src)
+            comments = {k: section[k][i] for k in comment_keys}
             yield models.PublicationInfo(
-                pubmed_id, doi, authors, title, status)
+                pubmed_id, doi, authors, title, status, comments)
 
     def _read_contacts(self) -> Iterator[models.ContactInfo]:
         # Read INVESTIGATION CONTACTS header
@@ -437,20 +444,22 @@ class InvestigationReader:
             msg = tpl.format(INVESTIGATION_CONTACTS, line)
             raise ParseIsatabException(msg)
         # Read the other lines in this section.
-        section = self._read_multi_column_section(
+        section, comment_keys = self._read_multi_column_section(
             'Investigation Person',
             INVESTIGATION_CONTACTS_KEYS,
             INVESTIGATION_CONTACTS)
         # Create resulting objects
         columns = zip(
             *(section[k] for k in INVESTIGATION_CONTACTS_KEYS))
-        for (last_name, first_name, mid_initial, email, phone, fax, address,
-             affiliation, role_term, role_term_acc, role_term_src) in columns:
+        for i, (last_name, first_name, mid_initial, email, phone, fax, address,
+                affiliation, role_term, role_term_acc, role_term_src) in \
+                enumerate(columns):
             role = models.OntologyTermRef(
                 role_term, role_term_acc, role_term_src)
+            comments = {k: section[k][i] for k in comment_keys}
             yield models.ContactInfo(
                 last_name, first_name, mid_initial, email, phone, fax, address,
-                affiliation, role)
+                affiliation, role, comments)
 
     def _read_studies(self) -> Iterator[models.StudyInfo]:
         # TODO: is it legal to have no study in the investigation?
@@ -462,15 +471,17 @@ class InvestigationReader:
                 msg = tpl.format(INVESTIGATION, line)
                 raise ParseIsatabException(msg)
             # Read the other lines in this section.
-            section = self._read_single_column_section(
+            section, comment_keys = self._read_single_column_section(
                 'Study', STUDY_INFO_KEYS, STUDY)
             # From this, parse the basic information from the study
+            comments = {k: section[k] for k in comment_keys}
             basic_info = models.BasicInfo(Path(section[STUDY_FILE_NAME]),
                                           section[STUDY_IDENTIFIER],
                                           section[STUDY_TITLE],
                                           section[STUDY_DESCRIPTION],
                                           section[STUDY_SUBMISSION_DATE],
-                                          section[STUDY_PUBLIC_RELEASE_DATE])
+                                          section[STUDY_PUBLIC_RELEASE_DATE],
+                                          comments)
             # Read the remaining sections for this study
             # TODO: specs says "order MAY vary"
             design_descriptors = tuple(self._read_study_design_descriptors())
@@ -493,16 +504,17 @@ class InvestigationReader:
             msg = tpl.format(STUDY_DESIGN_DESCRIPTORS, line)
             raise ParseIsatabException(msg)
         # Read the other lines in this section.
-        section = self._read_multi_column_section(
+        section, comment_keys = self._read_multi_column_section(
             'Study Design',
             STUDY_DESIGN_DESCR_KEYS,
             STUDY_DESIGN_DESCRIPTORS)
         # Create resulting objects
         columns = zip(*(section[k] for k in STUDY_DESIGN_DESCR_KEYS))
-        for (type_term, type_term_acc, type_term_src) in columns:
+        for i, (type_term, type_term_acc, type_term_src) in enumerate(columns):
             type = models.OntologyTermRef(
                 type_term, type_term_acc, type_term_src)
-            yield type
+            comments = {k: section[k][i] for k in comment_keys}
+            yield models.DesignDescriptorsInfo(type, comments)
 
     def _read_study_publications(self) -> Iterator[models.PublicationInfo]:
         # Read STUDY PUBLICATIONS header
@@ -512,18 +524,19 @@ class InvestigationReader:
             msg = tpl.format(STUDY_PUBLICATIONS, line)
             raise ParseIsatabException(msg)
         # Read the other lines in this section.
-        section = self._read_multi_column_section(
+        section, comment_keys = self._read_multi_column_section(
             'Study Pub',
             STUDY_PUBLICATIONS_KEYS,
             STUDY_PUBLICATIONS)
         # Create resulting objects
         columns = zip(*(section[k] for k in STUDY_PUBLICATIONS_KEYS))
-        for (pubmed_id, doi, authors, title,
-             status_term, status_term_acc, status_term_src) in columns:
+        for i, (pubmed_id, doi, authors, title, status_term,
+                status_term_acc, status_term_src) in enumerate(columns):
             status = models.OntologyTermRef(
                 status_term, status_term_acc, status_term_src)
+            comments = {k: section[k][i] for k in comment_keys}
             yield models.PublicationInfo(
-                pubmed_id, doi, authors, title, status)
+                pubmed_id, doi, authors, title, status, comments)
 
     def _read_study_factors(self) -> Iterator[models.FactorInfo]:
         # Read STUDY FACTORS header
@@ -533,16 +546,18 @@ class InvestigationReader:
             msg = tpl.format(STUDY_FACTORS, line)
             raise ParseIsatabException(msg)
         # Read the other lines in this section.
-        section = self._read_multi_column_section(
+        section, comment_keys = self._read_multi_column_section(
             'Study Factor',
             STUDY_FACTORS_KEYS,
             STUDY_FACTORS)
         # Create resulting objects
         columns = zip(*(section[k] for k in STUDY_FACTORS_KEYS))
-        for (name, type_term, type_term_acc, type_term_src) in columns:
-            type = models.OntologyTermRef(
+        for i, (name, type_term, type_term_acc,
+                type_term_src) in enumerate(columns):
+            otype = models.OntologyTermRef(
                 type_term, type_term_acc, type_term_src)
-            yield models.FactorInfo(name, type)
+            comments = {k: section[k][i] for k in comment_keys}
+            yield models.FactorInfo(name, otype, comments)
 
     def _read_study_assays(self) -> Iterator[models.AssayInfo]:
         # Read STUDY ASSAYS header
@@ -552,13 +567,13 @@ class InvestigationReader:
             msg = tpl.format(STUDY_ASSAYS, line)
             raise ParseIsatabException(msg)
         # Read the other lines in this section.
-        section = self._read_multi_column_section(
+        section, comment_keys = self._read_multi_column_section(
             'Study Assay', STUDY_ASSAYS_KEYS, STUDY_ASSAYS)
         # Create resulting objects
         columns = zip(*(section[k] for k in STUDY_ASSAYS_KEYS))
-        for file_, meas_type, meas_type_term_acc, meas_type_term_src, \
-            tech_type, tech_type_term_acc, tech_type_term_src, tech_plat \
-                in columns:
+        for i, (file_, meas_type, meas_type_term_acc, meas_type_term_src,
+                tech_type, tech_type_term_acc, tech_type_term_src, tech_plat) \
+                in enumerate(columns):
             if not file_:  # don't allow incomplete assay columns
                 tpl = 'Expected "a_*.txt" in line {}; found: "{}"'
                 msg = tpl.format(STUDY_ASSAY_FILE_NAME, file_)
@@ -567,7 +582,9 @@ class InvestigationReader:
                 meas_type, meas_type_term_acc, meas_type_term_src)
             tech = models.OntologyTermRef(
                 tech_type, tech_type_term_acc, tech_type_term_src)
-            yield models.AssayInfo(meas, tech, tech_plat, Path(file_))
+            comments = {k: section[k][i] for k in comment_keys}
+            yield models.AssayInfo(
+                meas, tech, tech_plat, Path(file_), comments)
 
     def _read_study_protocols(self) -> Iterator[models.ProtocolInfo]:
         # Read STUDY PROTOCOLS header
@@ -577,14 +594,15 @@ class InvestigationReader:
             msg = tpl.format(STUDY_PROTOCOLS, line)
             raise ParseIsatabException(msg)
         # Read the other lines in this section.
-        section = self._read_multi_column_section(
+        section, comment_keys = self._read_multi_column_section(
             'Study Protocol', STUDY_PROTOCOLS_KEYS, STUDY_PROTOCOLS)
         # Create resulting objects
         columns = zip(*(section[k] for k in STUDY_PROTOCOLS_KEYS))
-        for (name, type_term, type_term_acc, type_term_src, description, uri,
-             version, para_names, para_name_term_accs, para_name_term_srcs,
-             comp_names, comp_types, comp_type_term_accs, comp_type_term_srcs)\
-                in columns:
+        for i, (name, type_term, type_term_acc, type_term_src, description,
+                uri, version, para_names, para_name_term_accs,
+                para_name_term_srcs, comp_names, comp_types,
+                comp_type_term_accs, comp_type_term_srcs) \
+                in enumerate(columns):
             if not name:  # don't allow unnamed assay columns
                 tpl = 'Expected protocol name in line {}; found: "{}"'
                 msg = tpl.format(STUDY_PROTOCOL_NAME, name)
@@ -596,8 +614,9 @@ class InvestigationReader:
             comps = tuple(self._split_study_protocols_components(
                 comp_names, comp_types, comp_type_term_accs,
                 comp_type_term_srcs))
+            comments = {k: section[k][i] for k in comment_keys}
             yield models.ProtocolInfo(name, type_ont, description, uri,
-                                      version, paras, comps)
+                                      version, paras, comps, comments)
 
     @staticmethod
     def _split_study_protocols_parameters(
@@ -640,17 +659,19 @@ class InvestigationReader:
             msg = tpl.format(STUDY_CONTACTS, line)
             raise ParseIsatabException(msg)
         # Read the other lines in this section.
-        section = self._read_multi_column_section(
+        section, comment_keys = self._read_multi_column_section(
             'Study Person',
             STUDY_CONTACTS_KEYS,
             STUDY_CONTACTS)
         # Create resulting objects
         columns = zip(
             *(section[k] for k in STUDY_CONTACTS_KEYS))
-        for (last_name, first_name, mid_initial, email, phone, fax, address,
-             affiliation, role_term, role_term_acc, role_term_src) in columns:
+        for i, (last_name, first_name, mid_initial, email, phone, fax, address,
+                affiliation, role_term, role_term_acc, role_term_src) in \
+                enumerate(columns):
             role = models.OntologyTermRef(
                 role_term, role_term_acc, role_term_src)
+            comments = {k: section[k][i] for k in comment_keys}
             yield models.ContactInfo(
                 last_name, first_name, mid_initial, email, phone, fax, address,
-                affiliation, role)
+                affiliation, role, comments)

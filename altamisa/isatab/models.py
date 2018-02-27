@@ -77,6 +77,8 @@ class OntologyRef(NamedTuple):
     version: str
     #: Description of the ontology
     description: str
+    #: Comments
+    comments: Dict[str, str]
 
 
 class BasicInfo(NamedTuple):
@@ -96,6 +98,8 @@ class BasicInfo(NamedTuple):
     submission_date: date
     #: Investigation/Study public release date
     public_release_date: date
+    #: Comments
+    comments: Dict[str, str]
 
 
 class PublicationInfo(NamedTuple):
@@ -113,6 +117,8 @@ class PublicationInfo(NamedTuple):
     title: str
     #: Publication status
     status: FreeTextOrTermRef
+    #: Comments
+    comments: Dict[str, str]
 
 
 class ContactInfo(NamedTuple):
@@ -136,6 +142,17 @@ class ContactInfo(NamedTuple):
     affiliation: str
     #: Role of contact
     role: FreeTextOrTermRef
+    #: Comments
+    comments: Dict[str, str]
+
+
+class DesignDescriptorsInfo(NamedTuple):
+    """Study design descriptors information"""
+
+    #: Design descriptors type
+    type: FreeTextOrTermRef
+    #: Comments
+    comments: Dict[str, str]
 
 
 class FactorInfo(NamedTuple):
@@ -145,6 +162,8 @@ class FactorInfo(NamedTuple):
     name: str
     #: Factor type
     type: FreeTextOrTermRef
+    #: Comments
+    comments: Dict[str, str]
 
 
 class AssayInfo(NamedTuple):
@@ -158,6 +177,8 @@ class AssayInfo(NamedTuple):
     platform: str
     #: Path to assay file
     path: Path
+    #: Comments
+    comments: Dict[str, str]
 
 
 class ProtocolComponentInfo(NamedTuple):
@@ -186,6 +207,8 @@ class ProtocolInfo(NamedTuple):
     parameters: Tuple[FreeTextOrTermRef]
     #: Protocol components
     component: Tuple[ProtocolComponentInfo]
+    #: Comments
+    comments: Dict[str, str]
 
 
 class StudyInfo(NamedTuple):
