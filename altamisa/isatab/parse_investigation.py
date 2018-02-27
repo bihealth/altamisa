@@ -561,7 +561,7 @@ class InvestigationReader:
                 msg = tpl.format(STUDY_ASSAY_FILE_NAME, file_)
                 raise ParseIsatabException(msg)
             meas = models.OntologyTermRef(
-                meas_type, tech_type_term_acc, meas_type_term_src)
+                meas_type, meas_type_term_acc, meas_type_term_src)
             tech = models.OntologyTermRef(
                 tech_type, tech_type_term_acc, tech_type_term_src)
             yield models.AssayInfo(meas, tech, tech_plat, Path(file_))

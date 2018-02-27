@@ -204,8 +204,24 @@ def test_parse_full_investigation(full_investigation_file):
 
     # Study 1 - Assays
     assert 3 == len(study.assays)
-    assay = study.assays["a_proteome.txt"]
-    assert Path("a_proteome.txt") == assay.path
+    expected = models.AssayInfo(
+        models.OntologyTermRef("protein expression profiling",
+                               "http://purl.obolibrary.org/obo/OBI_0000615",
+                               "OBI"),
+        models.OntologyTermRef("mass spectrometry",
+                               "http://purl.obolibrary.org/obo/OBI_0000470",
+                               "OBI"),
+        "iTRAQ", Path("a_proteome.txt"))
+    assert expected == study.assays["a_proteome.txt"]
+    expected = models.AssayInfo(
+        models.OntologyTermRef("transcription profiling",
+                               "http://purl.obolibrary.org/obo/OBI_0000424",
+                               "OBI"),
+        models.OntologyTermRef("DNA microarray",
+                               "http://purl.obolibrary.org/obo/OBI_0400148",
+                               "OBI"),
+        "Affymetrix", Path("a_transcriptome.txt"))
+    assert expected == study.assays["a_transcriptome.txt"]
 
     # Study 1 - Protocols
     assert 7 == len(study.protocols)
@@ -314,3 +330,37 @@ def test_parse_full_investigation(full_investigation_file):
         "by transcriptome analysis using Affymetrix hybridization arrays.",
         "2007-04-30", "2009-03-10")
     assert expected == study.info
+
+    # Study 2 - Factors
+    assert 3 == len(study.factors)
+    expected = models.FactorInfo(
+        "exposure time",
+        models.OntologyTermRef(
+            "time", "http://purl.obolibrary.org/obo/PATO_0000165", "OBI_BCGO"
+        ))
+    assert expected == study.factors["exposure time"]
+
+    # Study 2 - Assays
+    assert 1 == len(study.assays)
+    expected = models.AssayInfo(
+        models.OntologyTermRef("transcription profiling",
+                               "http://purl.obolibrary.org/obo/OBI_0000424",
+                               "OBI"),
+        models.OntologyTermRef("DNA microarray",
+                               "http://purl.obolibrary.org/obo/OBI_0400148",
+                               "OBI"),
+        "Affymetrix", Path("a_microarray.txt"))
+    assert expected == study.assays["a_microarray.txt"]
+
+    # Study 2 - Protocols
+    assert 10 == len(study.protocols)
+    expected = models.ProtocolInfo(
+        "NMR spectroscopy",
+        models.OntologyTermRef(
+            "NMR spectroscopy",
+            "http://purl.obolibrary.org/obo/OBI_0000623",
+            "OBI"),
+        "", "", "",
+        models.OntologyTermRef("", "", ""),
+        models.ProtocolComponentInfo("", models.OntologyTermRef("", "", "")))
+    assert expected == study.protocols["NMR spectroscopy"]
