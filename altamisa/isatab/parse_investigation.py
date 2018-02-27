@@ -270,10 +270,13 @@ class InvestigationReader:
     def _read_next_line(self):
         """Read next line, skipping comments starting with ``'#'``."""
         prev_line = self._line
-        self._line = next(self._reader)
-        while self._line is not None and (
-                not self._line or self._line[0].startswith('#')):
+        try:
             self._line = next(self._reader)
+            while self._line is not None and (
+                not self._line or self._line[0].startswith('#')):
+                self._line = next(self._reader)
+        except StopIteration:
+            self._line = None
         return prev_line
 
     def _next_line_startswith_comment(self):

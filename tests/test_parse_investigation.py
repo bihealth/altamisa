@@ -37,6 +37,9 @@ def test_parse_minimal_investigation(minimal_investigation_file):
     assay = investigation.studies[0].assays["a_minimal.txt"]
     assert Path("a_minimal.txt") == assay.path
 
+    # Study contacts
+    assert 0 == len(investigation.studies[0].contacts)
+
 
 def test_parse_small_investigation(small_investigation_file):
     # Read Investigation from file-like object
@@ -48,7 +51,7 @@ def test_parse_small_investigation(small_investigation_file):
     assert investigation
 
     # Ontology sources
-    assert 2 == len(investigation.ontology_source_refs)
+    assert 3 == len(investigation.ontology_source_refs)
     expected = models.OntologyRef(
         'OBI', 'http://data.bioontology.org/ontologies/OBI',
         '31', 'Ontology for Biomedical Investigations')
@@ -58,6 +61,10 @@ def test_parse_small_investigation(small_investigation_file):
         ('National Center for Biotechnology Information (NCBI) Organismal '
          'Classification'))
     assert expected == investigation.ontology_source_refs['NCBITAXON']
+    expected = models.OntologyRef(
+        'ROLEO', 'http://data.bioontology.org/ontologies/ROLEO', '1',
+        'Role Ontology')
+    assert expected == investigation.ontology_source_refs['ROLEO']
 
     # Basic info
     assert "Small Investigation" == investigation.info.title
@@ -73,6 +80,9 @@ def test_parse_small_investigation(small_investigation_file):
     assert len(investigation.studies[0].assays) == 1
     assay = investigation.studies[0].assays["a_small.txt"]
     assert Path("a_small.txt") == assay.path
+
+    # Study contacts
+    assert 1 == len(investigation.studies[0].contacts)
 
 
 def test_parse_full_investigation(full_investigation_file):
@@ -373,3 +383,15 @@ def test_parse_full_investigation(full_investigation_file):
                                           "http://www.ebi.ac.uk/efo/EFO_0000548",
                                           "EFO"))))
     assert expected == study.protocols["NMR spectroscopy"]
+
+    # Study 2 - Contacts
+    assert 3 == len(study.contacts)
+    expected = models.ContactInfo(
+        "Juan", "Castrillo", "I", "", "123456789", "",
+        "Oxford Road, Manchester M13 9PT, UK",
+        "Faculty of Life Sciences, Michael Smith Building, "
+        "University of Manchester",
+        models.OntologyTermRef("author",
+                               "http://purl.obolibrary.org/obo/RoleO_0000061",
+                               "ROLEO"))
+    assert expected == study.contacts[1]
