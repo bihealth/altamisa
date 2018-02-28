@@ -251,6 +251,61 @@ STUDY_CONTACTS_KEYS = (
     STUDY_PERSON_ROLES_TERM_SOURCE_REF)
 
 
+# Helper function to extract comment headers and values from a section dict
+def _parse_comments(section, comment_keys, i=None):
+    def _parse_comment_header(val):
+        # key might start with "Comment[" or "Comment ["
+        tok = val[len('Comment'):].strip()
+        if not tok or tok[0] != '[' or tok[-1] != ']':
+            tpl = 'Problem parsing comment header {}'
+            msg = tpl.format(tpl.format(val))
+            raise ParseIsatabException(msg)
+        return tok[1:-1]
+
+    if i is not None:
+        comments = {_parse_comment_header(k):
+                    section[k][i] for k in comment_keys}
+    else:
+        comments = {_parse_comment_header(k):
+                    section[k] for k in comment_keys}
+    return comments
+
+
+# Helper function to extract protocol parameters
+def _split_study_protocols_parameters(
+    names, name_term_accs, name_term_srcs) -> Iterator[
+        models.OntologyTermRef]:
+    names = names.split(';')
+    name_term_accs = name_term_accs.split(';')
+    name_term_srcs = name_term_srcs.split(';')
+    if not (len(names) == len(name_term_accs) == len(name_term_srcs)):
+        tpl = 'Unequal protocol parameter splits; found: "{}", "{}", "{}"'
+        msg = tpl.format(names, name_term_accs, name_term_srcs)
+        raise ParseIsatabException(msg)
+    for (name, acc, src) in zip(names, name_term_accs, name_term_srcs):
+        yield models.OntologyTermRef(name, acc, src)
+
+
+# Helper function to extract protocol components
+def _split_study_protocols_components(
+    names, types, type_term_accs, type_term_srcs) -> Iterator[
+        models.ProtocolComponentInfo]:
+    names = names.split(';')
+    types = types.split(';')
+    type_term_accs = type_term_accs.split(';')
+    type_term_srcs = type_term_srcs.split(';')
+    if not (len(names) == len(types)
+            == len(type_term_accs) == len(type_term_srcs)):
+        tpl = ('Unequal protocol component splits; '
+               'found: "{}", "{}", "{}", "{}"')
+        msg = tpl.format(names, types, type_term_accs, type_term_srcs)
+        raise ParseIsatabException(msg)
+    for (name, ctype, acc, src) in zip(names, types, type_term_accs,
+                                       type_term_srcs):
+        yield models.ProtocolComponentInfo(
+            name, models.OntologyTermRef(ctype, acc, src))
+
+
 class InvestigationReader:
     """Helper class that reads an investigation file into a
     ``InvestigationInfo`` object.
@@ -370,26 +425,6 @@ class InvestigationReader:
             raise ParseIsatabException(msg)
         return section, comment_keys
 
-    @staticmethod
-    def _parse_comments(section, comment_keys, i=None):
-
-        def _parse_comment_header(val):
-            # key might start with "Comment[" or "Comment ["
-            tok = val[len('Comment'):].strip()
-            if not tok or tok[0] != '[' or tok[-1] != ']':
-                tpl = 'Problem parsing comment header {}'
-                msg = tpl.format(tpl.format(val))
-                raise ParseIsatabException(msg)
-            return tok[1:-1]
-
-        if i is not None:
-            comments = {_parse_comment_header(k):
-                        section[k][i] for k in comment_keys}
-        else:
-            comments = {_parse_comment_header(k):
-                        section[k] for k in comment_keys}
-        return comments
-
     def _read_ontology_source_reference(self) -> Iterator[
             models.OntologyRef]:
         # Read ONTOLOGY SOURCE REFERENCE header
@@ -409,7 +444,7 @@ class InvestigationReader:
                 tpl = 'Incomplete ontology source; found: {}, {}, {}, {}'
                 msg = tpl.format(name, file_, version, desc)
                 raise ParseIsatabException(msg)
-            comments = self._parse_comments(section, comment_keys, i)
+            comments = _parse_comments(section, comment_keys, i)
             yield models.OntologyRef(name, file_, version, desc, comments)
 
     def _read_basic_info(self) -> models.BasicInfo:
@@ -424,7 +459,7 @@ class InvestigationReader:
             'Investigation', INVESTIGATION_INFO_KEYS, INVESTIGATION)
         # Create resulting object
         # TODO: do we really need the name of the investigation file?
-        comments = self._parse_comments(section, comment_keys)
+        comments = _parse_comments(section, comment_keys)
         return models.BasicInfo(Path(os.path.basename(self.input_file.name)),
                                 section[INVESTIGATION_IDENTIFIER],
                                 section[INVESTIGATION_TITLE],
@@ -452,7 +487,7 @@ class InvestigationReader:
                 in enumerate(columns):
             status = models.OntologyTermRef(
                 status_term, status_term_acc, status_term_src)
-            comments = self._parse_comments(section, comment_keys, i)
+            comments = _parse_comments(section, comment_keys, i)
             yield models.PublicationInfo(
                 pubmed_id, doi, authors, title, status, comments)
 
@@ -476,7 +511,7 @@ class InvestigationReader:
                 enumerate(columns):
             role = models.OntologyTermRef(
                 role_term, role_term_acc, role_term_src)
-            comments = self._parse_comments(section, comment_keys, i)
+            comments = _parse_comments(section, comment_keys, i)
             yield models.ContactInfo(
                 last_name, first_name, mid_initial, email, phone, fax, address,
                 affiliation, role, comments)
@@ -494,7 +529,7 @@ class InvestigationReader:
             section, comment_keys = self._read_single_column_section(
                 'Study', STUDY_INFO_KEYS, STUDY)
             # From this, parse the basic information from the study
-            comments = self._parse_comments(section, comment_keys)
+            comments = _parse_comments(section, comment_keys)
             basic_info = models.BasicInfo(Path(section[STUDY_FILE_NAME]),
                                           section[STUDY_IDENTIFIER],
                                           section[STUDY_TITLE],
@@ -533,7 +568,7 @@ class InvestigationReader:
         for i, (type_term, type_term_acc, type_term_src) in enumerate(columns):
             type = models.OntologyTermRef(
                 type_term, type_term_acc, type_term_src)
-            comments = self._parse_comments(section, comment_keys, i)
+            comments = _parse_comments(section, comment_keys, i)
             yield models.DesignDescriptorsInfo(type, comments)
 
     def _read_study_publications(self) -> Iterator[models.PublicationInfo]:
@@ -554,7 +589,7 @@ class InvestigationReader:
                 status_term_acc, status_term_src) in enumerate(columns):
             status = models.OntologyTermRef(
                 status_term, status_term_acc, status_term_src)
-            comments = self._parse_comments(section, comment_keys, i)
+            comments = _parse_comments(section, comment_keys, i)
             yield models.PublicationInfo(
                 pubmed_id, doi, authors, title, status, comments)
 
@@ -576,7 +611,7 @@ class InvestigationReader:
                 type_term_src) in enumerate(columns):
             otype = models.OntologyTermRef(
                 type_term, type_term_acc, type_term_src)
-            comments = self._parse_comments(section, comment_keys, i)
+            comments = _parse_comments(section, comment_keys, i)
             yield models.FactorInfo(name, otype, comments)
 
     def _read_study_assays(self) -> Iterator[models.AssayInfo]:
@@ -602,7 +637,7 @@ class InvestigationReader:
                 meas_type, meas_type_term_acc, meas_type_term_src)
             tech = models.OntologyTermRef(
                 tech_type, tech_type_term_acc, tech_type_term_src)
-            comments = self._parse_comments(section, comment_keys, i)
+            comments = _parse_comments(section, comment_keys, i)
             yield models.AssayInfo(
                 meas, tech, tech_plat, Path(file_), comments)
 
@@ -629,47 +664,14 @@ class InvestigationReader:
                 raise ParseIsatabException(msg)
             type_ont = models.OntologyTermRef(
                 type_term, type_term_acc, type_term_src)
-            paras = tuple(self._split_study_protocols_parameters(
+            paras = tuple(_split_study_protocols_parameters(
                 para_names, para_name_term_accs, para_name_term_srcs))
-            comps = tuple(self._split_study_protocols_components(
+            comps = tuple(_split_study_protocols_components(
                 comp_names, comp_types, comp_type_term_accs,
                 comp_type_term_srcs))
-            comments = self._parse_comments(section, comment_keys, i)
+            comments = _parse_comments(section, comment_keys, i)
             yield models.ProtocolInfo(name, type_ont, description, uri,
                                       version, paras, comps, comments)
-
-    @staticmethod
-    def _split_study_protocols_parameters(
-        names, name_term_accs, name_term_srcs) -> Iterator[
-            models.OntologyTermRef]:
-        names = names.split(';')
-        name_term_accs = name_term_accs.split(';')
-        name_term_srcs = name_term_srcs.split(';')
-        if not (len(names) == len(name_term_accs) == len(name_term_srcs)):
-            tpl = 'Unequal protocol parameter splits; found: "{}", "{}", "{}"'
-            msg = tpl.format(names, name_term_accs, name_term_srcs)
-            raise ParseIsatabException(msg)
-        for (name, acc, src) in zip(names, name_term_accs, name_term_srcs):
-            yield models.OntologyTermRef(name, acc, src)
-
-    @staticmethod
-    def _split_study_protocols_components(
-        names, types, type_term_accs, type_term_srcs) -> Iterator[
-            models.ProtocolComponentInfo]:
-        names = names.split(';')
-        types = types.split(';')
-        type_term_accs = type_term_accs.split(';')
-        type_term_srcs = type_term_srcs.split(';')
-        if not (len(names) == len(types)
-                == len(type_term_accs) == len(type_term_srcs)):
-            tpl = ('Unequal protocol component splits; '
-                   'found: "{}", "{}", "{}", "{}"')
-            msg = tpl.format(names, types, type_term_accs, type_term_srcs)
-            raise ParseIsatabException(msg)
-        for (name, ctype, acc, src) in zip(names, types, type_term_accs,
-                                           type_term_srcs):
-            yield models.ProtocolComponentInfo(
-                name, models.OntologyTermRef(ctype, acc, src))
 
     def _read_study_contacts(self) -> Iterator[models.ContactInfo]:
         # Read STUDY CONTACTS header
@@ -691,7 +693,7 @@ class InvestigationReader:
                 enumerate(columns):
             role = models.OntologyTermRef(
                 role_term, role_term_acc, role_term_src)
-            comments = self._parse_comments(section, comment_keys, i)
+            comments = _parse_comments(section, comment_keys, i)
             yield models.ContactInfo(
                 last_name, first_name, mid_initial, email, phone, fax, address,
                 affiliation, role, comments)
