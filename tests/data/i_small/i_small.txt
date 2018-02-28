@@ -1,8 +1,8 @@
 ONTOLOGY SOURCE REFERENCE
-Term Source Name	OBI	NCBITAXON
-Term Source File	http://data.bioontology.org/ontologies/OBI	http://data.bioontology.org/ontologies/NCBITAXON
-Term Source Version	31	8
-Term Source Description	Ontology for Biomedical Investigations	National Center for Biotechnology Information (NCBI) Organismal Classification
+Term Source Name	OBI	NCBITAXON	ROLEO
+Term Source File	http://data.bioontology.org/ontologies/OBI	http://data.bioontology.org/ontologies/NCBITAXON	http://data.bioontology.org/ontologies/ROLEO
+Term Source Version	31	8	1
+Term Source Description	Ontology for Biomedical Investigations	National Center for Biotechnology Information (NCBI) Organismal Classification	Role Ontology
 INVESTIGATION
 Investigation Identifier	i_small
 Investigation Title	Small Investigation
@@ -67,27 +67,27 @@ Study Assay Technology Platform
 STUDY PROTOCOLS
 Study Protocol Name	sample collection	nucleic acid sequencing	library preparation
 Study Protocol Type	sample collection	nucleic acid sequencing	library preparation
-Study Protocol Type Term Accession Number
-Study Protocol Type Term Source REF
-Study Protocol Description
-Study Protocol URI
-Study Protocol Version
-Study Protocol Parameters Name
-Study Protocol Parameters Name Term Accession Number
-Study Protocol Parameters Name Term Source REF
-Study Protocol Components Name
-Study Protocol Components Type
-Study Protocol Components Type Term Accession Number
-Study Protocol Components Type Term Source REF
+Study Protocol Type Term Accession Number			
+Study Protocol Type Term Source REF			
+Study Protocol Description			
+Study Protocol URI			
+Study Protocol Version			
+Study Protocol Parameters Name			
+Study Protocol Parameters Name Term Accession Number			
+Study Protocol Parameters Name Term Source REF			
+Study Protocol Components Name			
+Study Protocol Components Type			
+Study Protocol Components Type Term Accession Number			
+Study Protocol Components Type Term Source REF			
 STUDY CONTACTS
-Study Person Last Name
-Study Person First Name
-Study Person Mid Initials
-Study Person Email
-Study Person Phone
-Study Person Fax
-Study Person Address
-Study Person Affiliation
-Study Person Roles
-Study Person Roles Term Accession Number
-Study Person Roles Term Source REF
+Study Person Last Name	Doe
+Study Person First Name	John
+Study Person Mid Initials	
+Study Person Email	
+Study Person Phone	
+Study Person Fax	
+Study Person Address	
+Study Person Affiliation	
+Study Person Roles	author
+Study Person Roles Term Accession Number	http://purl.obolibrary.org/obo/RoleO_0000061
+Study Person Roles Term Source REF	ROLEO

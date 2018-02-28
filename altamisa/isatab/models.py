@@ -77,6 +77,8 @@ class OntologyRef(NamedTuple):
     version: str
     #: Description of the ontology
     description: str
+    #: Comments
+    comments: Dict[str, str]
 
 
 class BasicInfo(NamedTuple):
@@ -96,6 +98,8 @@ class BasicInfo(NamedTuple):
     submission_date: date
     #: Investigation/Study public release date
     public_release_date: date
+    #: Comments
+    comments: Dict[str, str]
 
 
 class PublicationInfo(NamedTuple):
@@ -111,6 +115,10 @@ class PublicationInfo(NamedTuple):
     authors: str
     #: Publication title
     title: str
+    #: Publication status
+    status: FreeTextOrTermRef
+    #: Comments
+    comments: Dict[str, str]
 
 
 class ContactInfo(NamedTuple):
@@ -118,10 +126,10 @@ class ContactInfo(NamedTuple):
 
     #: Last name of contact
     last_name: str
-    #: Middle initial of contact
-    mid_initial: str
     #: First name of contact
     first_name: str
+    #: Middle initial of contact
+    mid_initial: str
     #: Email of contact
     email: str
     #: Phone of contact
@@ -133,7 +141,18 @@ class ContactInfo(NamedTuple):
     #: Affiliation of contact
     affiliation: str
     #: Role of contact
-    role: str
+    role: FreeTextOrTermRef
+    #: Comments
+    comments: Dict[str, str]
+
+
+class DesignDescriptorsInfo(NamedTuple):
+    """Study design descriptors information"""
+
+    #: Design descriptors type
+    type: FreeTextOrTermRef
+    #: Comments
+    comments: Dict[str, str]
 
 
 class FactorInfo(NamedTuple):
@@ -143,6 +162,8 @@ class FactorInfo(NamedTuple):
     name: str
     #: Factor type
     type: FreeTextOrTermRef
+    #: Comments
+    comments: Dict[str, str]
 
 
 class AssayInfo(NamedTuple):
@@ -156,6 +177,8 @@ class AssayInfo(NamedTuple):
     platform: str
     #: Path to assay file
     path: Path
+    #: Comments
+    comments: Dict[str, str]
 
 
 class ProtocolComponentInfo(NamedTuple):
@@ -184,8 +207,8 @@ class ProtocolInfo(NamedTuple):
     parameters: Tuple[FreeTextOrTermRef]
     #: Protocol components
     component: Tuple[ProtocolComponentInfo]
-    #: Protocol contact lists
-    contacts: Tuple[ContactInfo]
+    #: Comments
+    comments: Dict[str, str]
 
 
 class StudyInfo(NamedTuple):
@@ -194,7 +217,7 @@ class StudyInfo(NamedTuple):
     #: Basic study information
     info: BasicInfo
     #: Study designs by name
-    designs: Dict[str, FreeTextOrTermRef]
+    designs: Tuple[FreeTextOrTermRef]
     #: Publication list for study
     publications: Tuple[PublicationInfo]
     #: Study factors by name
