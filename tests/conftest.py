@@ -54,3 +54,9 @@ def full_investigation_file():
     path = os.path.join(os.path.dirname(__file__),
                         "data/i_fullinvest/i_fullinvest.txt")
     return open(path, 'rt')
+
+@pytest.fixture
+def comment_investigation_file():
+    path = os.path.join(os.path.dirname(__file__),
+                        "data/i_comments/i_comments.txt")
+    return open(path, 'rt')
