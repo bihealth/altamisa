@@ -6,9 +6,10 @@ import os
 import csv
 from pathlib import Path
 from typing import Iterator, TextIO
+import warnings
 
 from . import models
-from ..exceptions import ParseIsatabException
+from ..exceptions import ParseIsatabException, ParseIsatabWarning
 
 __author__ = 'Manuel Holtgrewe <manuel.holtgrewe@bihealth.de>'
 
@@ -439,8 +440,15 @@ class InvestigationReader:
         # Create resulting objects
         columns = zip(*(section[k] for k in ONTOLOGY_SOURCE_REF_KEYS))
         for i, (name, file_, version, desc) in enumerate(columns):
+            # If ontology source is empty, skip it
+            # (since ISAcreator always adds a last empty ontology column)
+            if not any((name, file_, version, desc)):
+                tpl = 'Skipping empty ontology source: {}, {}, {}, {}'
+                msg = tpl.format(name, file_, version, desc)
+                warnings.warn(msg, ParseIsatabWarning)
+                continue
             # Check if ontology source is complete
-            if not (name and file_ and version and desc):
+            if not all((name, file_, version, desc)):
                 tpl = 'Incomplete ontology source; found: {}, {}, {}, {}'
                 msg = tpl.format(name, file_, version, desc)
                 raise ParseIsatabException(msg)
