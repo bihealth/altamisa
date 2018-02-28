@@ -204,9 +204,9 @@ class ProtocolInfo(NamedTuple):
     #: Protocol version
     version: str
     #: Protocol parameters
-    parameters: Tuple[FreeTextOrTermRef]
+    parameters: Dict[str, FreeTextOrTermRef]
     #: Protocol components
-    component: Tuple[ProtocolComponentInfo]
+    components: Dict[str, ProtocolComponentInfo]
     #: Comments
     comments: Dict[str, str]
 
