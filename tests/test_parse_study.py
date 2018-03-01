@@ -97,7 +97,7 @@ def test_study_row_reader_small_study(
     rows = list(row_reader.read())
 
     # Check results
-    assert 2 == len(rows)
+    assert 4 == len(rows)
     first_row = rows[0]
     second_row = rows[1]
 
@@ -151,27 +151,50 @@ def test_study_reader_small_study(
     # Check results
     assert str(study.file).endswith('data/i_small/s_small.txt')
     assert 7 == len(study.header)
-    assert 3 == len(study.materials)
-    assert 2 == len(study.processes)
-    assert 4 == len(study.arcs)
+    assert 7 == len(study.materials)
+    assert 4 == len(study.processes)
+    assert 8 == len(study.arcs)
 
-    characteristics = models.Characteristics(
+    characteristics1 = models.Characteristics(
         name='organism',
         value=models.OntologyTermRef(
             name='Mus musculus',
             accession='http://purl.bioontology.org/ontology/NCBITAXON/10090',
             ontology_name='NCBITAXON'),
         unit=None)
+    characteristics2 = models.Characteristics(
+        name='organism',
+        value=models.OntologyTermRef(
+            name='Mus musculus',
+            accession='',
+            ontology_name=''),
+        unit=None)
+    characteristics3 = models.Characteristics(
+        name='organism',
+        value=models.OntologyTermRef('', '', ''),
+        unit=None)
 
     expected = models.Material(
-        'Source Name', 'source-0815', None, (characteristics,), (), (), None)
+        'Source Name', 'source-0815', None, (characteristics1,), (), (), None)
     assert expected == study.materials['source-0815']
+    expected = models.Material(
+        'Source Name', 'source-0816', None, (characteristics2,), (), (), None)
+    assert expected == study.materials['source-0816']
+    expected = models.Material(
+        'Source Name', 'source-0817', None, (characteristics3,), (), (), None)
+    assert expected == study.materials['source-0817']
     expected = models.Material(
         'Sample Name', 'sample-0815-N1', None, (), (), (), None)
     assert expected == study.materials['sample-0815-N1']
     expected = models.Material(
         'Sample Name', 'sample-0815-T1', None, (), (), (), None)
     assert expected == study.materials['sample-0815-T1']
+    expected = models.Material(
+        'Sample Name', 'sample-0816-T1', None, (), (), (), None)
+    assert expected == study.materials['sample-0816-T1']
+    expected = models.Material(
+        'Sample Name', 'sample-0817-T1', None, (), (), (), None)
+    assert expected == study.materials['sample-0817-T1']
 
     expected = models.Process(
         'sample collection', 'sample collection-5-1', date(2018, 2, 2),
@@ -181,11 +204,19 @@ def test_study_reader_small_study(
         'sample collection', 'sample collection-5-2', date(2018, 2, 2),
         'John Doe', (), (), None, None)
     assert expected == study.processes['sample collection-5-2']
+    expected = models.Process(
+        'sample collection', 'sample collection-5-3', date(2018, 2, 2),
+        'John Doe', (), (), None, None)
+    assert expected == study.processes['sample collection-5-3']
 
     expected = (
         models.Arc('source-0815', 'sample collection-5-1'),
         models.Arc('sample collection-5-1', 'sample-0815-N1'),
         models.Arc('source-0815', 'sample collection-5-2'),
         models.Arc('sample collection-5-2', 'sample-0815-T1'),
+        models.Arc('source-0816', 'sample collection-5-3'),
+        models.Arc('sample collection-5-3', 'sample-0816-T1'),
+        models.Arc('source-0817', 'sample collection-5-4'),
+        models.Arc('sample collection-5-4', 'sample-0817-T1'),
     )
     assert expected == study.arcs

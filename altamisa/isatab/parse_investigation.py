@@ -274,7 +274,7 @@ def _parse_comments(section, comment_keys, i=None):
 
 # Helper function to extract protocol parameters
 def _split_study_protocols_parameters(
-    names, name_term_accs, name_term_srcs) -> Iterator[
+    names, name_term_accs, name_term_srcs, ontology_refs) -> Iterator[
         models.OntologyTermRef]:
     names = names.split(';')
     name_term_accs = name_term_accs.split(';')
@@ -288,18 +288,14 @@ def _split_study_protocols_parameters(
         msg = tpl.format(names)
         raise ParseIsatabException(msg)
     for (name, acc, src) in zip(names, name_term_accs, name_term_srcs):
-        if not name and (acc or src):
-            tpl = 'Missing protocol parameter name; found: "{}", "{}", "{}"'
-            msg = tpl.format(name, acc, src)
-            raise ParseIsatabException(msg)
-        # TODO: should yield string, if acc and src are empty?
         if any((name, acc, src)):  # skips empty parameters
-            yield models.OntologyTermRef(name, acc, src)
+            yield models.create_ontology_term_ref(name, acc, src,
+                                                  ontology_refs)
 
 
 # Helper function to extract protocol components
 def _split_study_protocols_components(
-    names, types, type_term_accs, type_term_srcs) -> Iterator[
+    names, types, type_term_accs, type_term_srcs, ontology_refs) -> Iterator[
         models.ProtocolComponentInfo]:
     names = names.split(';')
     types = types.split(';')
@@ -317,15 +313,11 @@ def _split_study_protocols_components(
         raise ParseIsatabException(msg)
     for (name, ctype, acc, src) in zip(
             names, types, type_term_accs, type_term_srcs):
-        if not name and any((ctype, acc, src)):
-            tpl = ('Missing protocol parameter name; '
-                   'found: "{}", "{}", "{}", "{}"')
-            msg = tpl.format(name, ctype, acc, src)
-            raise ParseIsatabException(msg)
-        # TODO: should yield string, if acc and src are empty?
         if any((name, ctype, acc, src)):  # skips empty components
             yield models.ProtocolComponentInfo(
-                name, models.OntologyTermRef(ctype, acc, src))
+                name,
+                models.create_ontology_term_ref(ctype, acc, src,
+                                                ontology_refs))
 
 
 class InvestigationReader:
@@ -343,6 +335,7 @@ class InvestigationReader:
         self._reader = csv.reader(input_file, delimiter='\t', quotechar='"')
         self._line = None
         self._read_next_line()
+        self._ontology_refs = None
 
     def _read_next_line(self):
         """Read next line, skipping comments starting with ``'#'``."""
@@ -371,14 +364,14 @@ class InvestigationReader:
 
     def read(self) -> models.InvestigationInfo:
         """Read investigation file"""
-        ontology_ref = {
+        self._ontology_refs = {
             o.name: o for o in self._read_ontology_source_reference()}
         info = self._read_basic_info()
         publications = list(self._read_publications())
         contacts = list(self._read_contacts())
         studies = list(self._read_studies())
         return models.InvestigationInfo(
-            ontology_ref, info, publications, contacts, studies)
+            self._ontology_refs, info, publications, contacts, studies)
 
     # reader for content of sections with possibly multiple columns
     # i.e. ONTOLOGY SOURCE REFERENCE, INVESTIGATION PUBLICATIONS,
@@ -514,8 +507,9 @@ class InvestigationReader:
         for i, (pubmed_id, doi, authors, title,
                 status_term, status_term_acc, status_term_src) \
                 in enumerate(columns):
-            status = models.OntologyTermRef(
-                status_term, status_term_acc, status_term_src)
+            status = models.create_ontology_term_ref(
+                status_term, status_term_acc,
+                status_term_src, self._ontology_refs)
             comments = _parse_comments(section, comment_keys, i)
             yield models.PublicationInfo(
                 pubmed_id, doi, authors, title, status, comments)
@@ -538,8 +532,8 @@ class InvestigationReader:
         for i, (last_name, first_name, mid_initial, email, phone, fax, address,
                 affiliation, role_term, role_term_acc, role_term_src) in \
                 enumerate(columns):
-            role = models.OntologyTermRef(
-                role_term, role_term_acc, role_term_src)
+            role = models.create_ontology_term_ref(
+                role_term, role_term_acc, role_term_src, self._ontology_refs)
             comments = _parse_comments(section, comment_keys, i)
             yield models.ContactInfo(
                 last_name, first_name, mid_initial, email, phone, fax, address,
@@ -595,8 +589,8 @@ class InvestigationReader:
         # Create resulting objects
         columns = zip(*(section[k] for k in STUDY_DESIGN_DESCR_KEYS))
         for i, (type_term, type_term_acc, type_term_src) in enumerate(columns):
-            otype = models.OntologyTermRef(
-                type_term, type_term_acc, type_term_src)
+            otype = models.create_ontology_term_ref(
+                type_term, type_term_acc, type_term_src, self._ontology_refs)
             comments = _parse_comments(section, comment_keys, i)
             yield models.DesignDescriptorsInfo(otype, comments)
 
@@ -616,8 +610,9 @@ class InvestigationReader:
         columns = zip(*(section[k] for k in STUDY_PUBLICATIONS_KEYS))
         for i, (pubmed_id, doi, authors, title, status_term,
                 status_term_acc, status_term_src) in enumerate(columns):
-            status = models.OntologyTermRef(
-                status_term, status_term_acc, status_term_src)
+            status = models.create_ontology_term_ref(
+                status_term, status_term_acc,
+                status_term_src, self._ontology_refs)
             comments = _parse_comments(section, comment_keys, i)
             yield models.PublicationInfo(
                 pubmed_id, doi, authors, title, status, comments)
@@ -638,8 +633,8 @@ class InvestigationReader:
         columns = zip(*(section[k] for k in STUDY_FACTORS_KEYS))
         for i, (name, type_term, type_term_acc,
                 type_term_src) in enumerate(columns):
-            otype = models.OntologyTermRef(
-                type_term, type_term_acc, type_term_src)
+            otype = models.create_ontology_term_ref(
+                type_term, type_term_acc, type_term_src, self._ontology_refs)
             comments = _parse_comments(section, comment_keys, i)
             yield models.FactorInfo(name, otype, comments)
 
@@ -662,10 +657,12 @@ class InvestigationReader:
                 tpl = 'Expected "a_*.txt" in line {}; found: "{}"'
                 msg = tpl.format(STUDY_ASSAY_FILE_NAME, file_)
                 raise ParseIsatabException(msg)
-            meas = models.OntologyTermRef(
-                meas_type, meas_type_term_acc, meas_type_term_src)
-            tech = models.OntologyTermRef(
-                tech_type, tech_type_term_acc, tech_type_term_src)
+            meas = models.create_ontology_term_ref(
+                meas_type, meas_type_term_acc,
+                meas_type_term_src, self._ontology_refs)
+            tech = models.create_ontology_term_ref(
+                tech_type, tech_type_term_acc,
+                tech_type_term_src, self._ontology_refs)
             comments = _parse_comments(section, comment_keys, i)
             yield models.AssayInfo(
                 meas, tech, tech_plat, Path(file_), comments)
@@ -691,13 +688,14 @@ class InvestigationReader:
                 tpl = 'Expected protocol name in line {}; found: "{}"'
                 msg = tpl.format(STUDY_PROTOCOL_NAME, name)
                 raise ParseIsatabException(msg)
-            type_ont = models.OntologyTermRef(
-                type_term, type_term_acc, type_term_src)
+            type_ont = models.create_ontology_term_ref(
+                type_term, type_term_acc, type_term_src, self._ontology_refs)
             paras = {p.name: p for p in _split_study_protocols_parameters(
-                para_names, para_name_term_accs, para_name_term_srcs)}
+                para_names, para_name_term_accs,
+                para_name_term_srcs, self._ontology_refs)}
             comps = {c.name: c for c in _split_study_protocols_components(
                 comp_names, comp_types, comp_type_term_accs,
-                comp_type_term_srcs)}
+                comp_type_term_srcs, self._ontology_refs)}
             comments = _parse_comments(section, comment_keys, i)
             yield models.ProtocolInfo(name, type_ont, description, uri,
                                       version, paras, comps, comments)
@@ -720,8 +718,8 @@ class InvestigationReader:
         for i, (last_name, first_name, mid_initial, email, phone, fax, address,
                 affiliation, role_term, role_term_acc, role_term_src) in \
                 enumerate(columns):
-            role = models.OntologyTermRef(
-                role_term, role_term_acc, role_term_src)
+            role = models.create_ontology_term_ref(
+                role_term, role_term_acc, role_term_src, self._ontology_refs)
             comments = _parse_comments(section, comment_keys, i)
             yield models.ContactInfo(
                 last_name, first_name, mid_initial, email, phone, fax, address,

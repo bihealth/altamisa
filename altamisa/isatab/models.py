@@ -10,6 +10,7 @@ a list of all materials in a study or all comments for a material).
 from datetime import date
 from pathlib import Path
 from typing import Dict, Tuple, NamedTuple, Union
+from ..exceptions import ParseIsatabException
 
 __author__ = 'Manuel Holtgrewe <manuel.holtgrewe@bihealth.de>'
 
@@ -55,6 +56,31 @@ class OntologyTermRef(NamedTuple):
     accession: str
     #: Name of the ontology (links to ``OntologyRef.name``)
     ontology_name: str
+
+
+# Helper function to control OntologyTermRef creation and validation
+def create_ontology_term_ref(term, accession,
+                             ontology_name, sources) -> OntologyTermRef:
+    # OntologyTermRefs can be created empty or just with term, so they can be
+    # indicate the originally intended type of first level annotations
+
+    # ontology_name and accession maybe both empty
+    # but if at least one of them is available...
+    if ontology_name or accession:
+        # ... both and the term must be available
+        if not all((term, ontology_name, accession)):
+            tpl = ('Incomplete ontology term reference:\n'
+                   'Term: {}\nOntology: {}\nAccession: {}')
+            msg = tpl.format(term if term else '?',
+                             ontology_name if ontology_name else '?',
+                             accession if accession else '?')
+            raise ParseIsatabException(msg)
+        # ... and ontology_name needs to reference a ontology source
+        if ontology_name not in sources:
+            tpl = 'Ontology with name "{}" not defined in investigation!'
+            msg = tpl.format(ontology_name)
+            raise ParseIsatabException(msg)
+    return OntologyTermRef(term, accession, ontology_name)
 
 
 #: Shorcut for the commonly used "free text or reference to a term in an
