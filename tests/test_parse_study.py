@@ -164,14 +164,11 @@ def test_study_reader_small_study(
         unit=None)
     characteristics2 = models.Characteristics(
         name='organism',
-        value=models.OntologyTermRef(
-            name='Mus musculus',
-            accession='',
-            ontology_name=''),
+        value='Mus musculus',
         unit=None)
     characteristics3 = models.Characteristics(
         name='organism',
-        value=models.OntologyTermRef('', '', ''),
+        value=None,
         unit=None)
 
     expected = models.Material(

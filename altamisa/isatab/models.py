@@ -58,14 +58,16 @@ class OntologyTermRef(NamedTuple):
     ontology_name: str
 
 
-# Helper function to control OntologyTermRef creation and validation
-def create_ontology_term_ref(term, accession,
-                             ontology_name, sources) -> OntologyTermRef:
-    # OntologyTermRefs can be created empty or just with term, so they can be
-    # indicate the originally intended type of first level annotations
+#: Shortcut for the commonly used "free text or reference to a term in an
+#: ontology" idiom.
+FreeTextOrTermRef = Union[OntologyTermRef, str]
 
+
+# Helper function for FreeText or OntologyTermRef creation and validation
+def build_freetext_or_term_ref(term, accession,
+                               ontology_name, sources) -> FreeTextOrTermRef:
     # ontology_name and accession maybe both empty
-    # but if at least one of them is available...
+    # but if at least one of them is available... --> OntologyTermRef
     if ontology_name or accession:
         # ... both and the term must be available
         if not all((term, ontology_name, accession)):
@@ -80,12 +82,14 @@ def create_ontology_term_ref(term, accession,
             tpl = 'Ontology with name "{}" not defined in investigation!'
             msg = tpl.format(ontology_name)
             raise ParseIsatabException(msg)
-    return OntologyTermRef(term, accession, ontology_name)
-
-
-#: Shorcut for the commonly used "free text or reference to a term in an
-#: ontology" idiom.
-FreeTextOrTermRef = Union[OntologyTermRef, str]
+        #
+        return OntologyTermRef(term, accession, ontology_name)
+    # Only the term is available --> FreeText
+    elif term:
+        return term
+    # Nothing available
+    else:
+        return None
 
 
 # Types used in investigation files -------------------------------------------
