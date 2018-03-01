@@ -276,24 +276,22 @@ def test_parse_full_investigation(full_investigation_file):
         " Technologies). RNA was quantified using the Nanodrop ultra low "
         "volume spectrophotometer (Nanodrop Technologies).",
         "", "",
-        (models.OntologyTermRef(
-            "rate", "http://purl.obolibrary.org/obo/PATO_0000161", "PATO"), ),
-        (models.ProtocolComponentInfo("",
-                                      models.OntologyTermRef("", "", "")), ),
-        {})
+        {"rate": models.OntologyTermRef(
+            "rate", "http://purl.obolibrary.org/obo/PATO_0000161", "PATO"), },
+        {}, {})
     assert expected == study.protocols["growth protocol"]
     expected = models.ProtocolInfo(
         "metabolite extraction",
         models.OntologyTermRef(
             "extraction", "http://purl.obolibrary.org/obo/OBI_0302884", "OBI"),
         "",  "", "",
-        (models.OntologyTermRef("standard volume", "", ""),
-         models.OntologyTermRef("sample volume", "", "")),
-        (models.ProtocolComponentInfo(
+        {"standard volume": models.OntologyTermRef("standard volume", "", ""),
+         "sample volume": models.OntologyTermRef("sample volume", "", "")},
+        {"pipette": models.ProtocolComponentInfo(
             "pipette", models.OntologyTermRef(
                 "instrument",
                 "http://www.ebi.ac.uk/efo/EFO_0000548",
-                "EFO")), ), {})
+                "EFO")), }, {})
     assert expected == study.protocols["metabolite extraction"]
 
     # Study 1 - Contacts
@@ -398,14 +396,14 @@ def test_parse_full_investigation(full_investigation_file):
             "http://purl.obolibrary.org/obo/OBI_0000623",
             "OBI"),
         "", "", "",
-        (models.OntologyTermRef("", "", ""), ),
-        (models.ProtocolComponentInfo("NMR tubes",
-                                      models.OntologyTermRef("", "", "")),
-         models.ProtocolComponentInfo("Bruker-Av600",
-                                      models.OntologyTermRef(
-                                          "instrument",
-                                          "http://www.ebi.ac.uk/efo/EFO_0000548",
-                                          "EFO"))), {})
+        {},
+        {"NMR tubes": models.ProtocolComponentInfo(
+            "NMR tubes", models.OntologyTermRef("", "", "")),
+         "Bruker-Av600": models.ProtocolComponentInfo(
+             "Bruker-Av600", models.OntologyTermRef(
+                 "instrument",
+                 "http://www.ebi.ac.uk/efo/EFO_0000548",
+                 "EFO"))}, {})
     assert expected == study.protocols["NMR spectroscopy"]
 
     # Study 2 - Contacts
@@ -534,13 +532,13 @@ def test_parse_comment_investigation(comment_investigation_file):
         models.OntologyTermRef(
             "extraction", "http://purl.obolibrary.org/obo/OBI_0302884", "OBI"),
         "", "", "",
-        (models.OntologyTermRef("standard volume", "", ""),
-         models.OntologyTermRef("sample volume", "", "")),
-        (models.ProtocolComponentInfo(
+        {"standard volume": models.OntologyTermRef("standard volume", "", ""),
+         "sample volume": models.OntologyTermRef("sample volume", "", "")},
+        {"pipette": models.ProtocolComponentInfo(
             "pipette", models.OntologyTermRef(
                 "instrument",
                 "http://www.ebi.ac.uk/efo/EFO_0000548",
-                "EFO")),),
+                "EFO"))},
         {"ProtocolsComment": "TestValue01"})
     assert expected == study.protocols["metabolite extraction"]
 

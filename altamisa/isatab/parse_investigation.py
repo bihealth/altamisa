@@ -283,8 +283,18 @@ def _split_study_protocols_parameters(
         tpl = 'Unequal protocol parameter splits; found: "{}", "{}", "{}"'
         msg = tpl.format(names, name_term_accs, name_term_srcs)
         raise ParseIsatabException(msg)
+    if len(names) > len(set(names)):
+        tpl = 'Repeated protocol parameter; found: {}'
+        msg = tpl.format(names)
+        raise ParseIsatabException(msg)
     for (name, acc, src) in zip(names, name_term_accs, name_term_srcs):
-        yield models.OntologyTermRef(name, acc, src)
+        if not name and (acc or src):
+            tpl = 'Missing protocol parameter name; found: "{}", "{}", "{}"'
+            msg = tpl.format(name, acc, src)
+            raise ParseIsatabException(msg)
+        # TODO: should yield string, if acc and src are empty?
+        if any((name, acc, src)):  # skips empty parameters
+            yield models.OntologyTermRef(name, acc, src)
 
 
 # Helper function to extract protocol components
@@ -301,10 +311,21 @@ def _split_study_protocols_components(
                'found: "{}", "{}", "{}", "{}"')
         msg = tpl.format(names, types, type_term_accs, type_term_srcs)
         raise ParseIsatabException(msg)
-    for (name, ctype, acc, src) in zip(names, types, type_term_accs,
-                                       type_term_srcs):
-        yield models.ProtocolComponentInfo(
-            name, models.OntologyTermRef(ctype, acc, src))
+    if len(names) > len(set(names)):
+        tpl = 'Repeated protocol components; found: {}'
+        msg = tpl.format(names)
+        raise ParseIsatabException(msg)
+    for (name, ctype, acc, src) in zip(
+            names, types, type_term_accs, type_term_srcs):
+        if not name and any((ctype, acc, src)):
+            tpl = ('Missing protocol parameter name; '
+                   'found: "{}", "{}", "{}", "{}"')
+            msg = tpl.format(name, ctype, acc, src)
+            raise ParseIsatabException(msg)
+        # TODO: should yield string, if acc and src are empty?
+        if any((name, ctype, acc, src)):  # skips empty components
+            yield models.ProtocolComponentInfo(
+                name, models.OntologyTermRef(ctype, acc, src))
 
 
 class InvestigationReader:
@@ -574,10 +595,10 @@ class InvestigationReader:
         # Create resulting objects
         columns = zip(*(section[k] for k in STUDY_DESIGN_DESCR_KEYS))
         for i, (type_term, type_term_acc, type_term_src) in enumerate(columns):
-            type = models.OntologyTermRef(
+            otype = models.OntologyTermRef(
                 type_term, type_term_acc, type_term_src)
             comments = _parse_comments(section, comment_keys, i)
-            yield models.DesignDescriptorsInfo(type, comments)
+            yield models.DesignDescriptorsInfo(otype, comments)
 
     def _read_study_publications(self) -> Iterator[models.PublicationInfo]:
         # Read STUDY PUBLICATIONS header
@@ -672,11 +693,11 @@ class InvestigationReader:
                 raise ParseIsatabException(msg)
             type_ont = models.OntologyTermRef(
                 type_term, type_term_acc, type_term_src)
-            paras = tuple(_split_study_protocols_parameters(
-                para_names, para_name_term_accs, para_name_term_srcs))
-            comps = tuple(_split_study_protocols_components(
+            paras = {p.name: p for p in _split_study_protocols_parameters(
+                para_names, para_name_term_accs, para_name_term_srcs)}
+            comps = {c.name: c for c in _split_study_protocols_components(
                 comp_names, comp_types, comp_type_term_accs,
-                comp_type_term_srcs))
+                comp_type_term_srcs)}
             comments = _parse_comments(section, comment_keys, i)
             yield models.ProtocolInfo(name, type_ont, description, uri,
                                       version, paras, comps, comments)
