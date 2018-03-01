@@ -313,6 +313,11 @@ def _split_study_protocols_components(
         raise ParseIsatabException(msg)
     for (name, ctype, acc, src) in zip(
             names, types, type_term_accs, type_term_srcs):
+        if not name and any((ctype, acc, src)):
+            tpl = ('Missing protocol component name; '
+                   'found: "{}", "{}", "{}", "{}"')
+            msg = tpl.format(name, ctype, acc, src)
+            raise ParseIsatabException(msg)
         if any((name, ctype, acc, src)):  # skips empty components
             yield models.ProtocolComponentInfo(
                 name,
