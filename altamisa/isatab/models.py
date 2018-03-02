@@ -7,10 +7,11 @@ string names only.  However, the tree is only built within one file (e.g.,
 a list of all materials in a study or all comments for a material).
 """
 
+from collections import namedtuple
 from datetime import date
 from pathlib import Path
 from typing import Dict, Tuple, NamedTuple, Union
-import collections
+
 from ..exceptions import ParseIsatabException
 
 __author__ = 'Manuel Holtgrewe <manuel.holtgrewe@bihealth.de>'
@@ -47,8 +48,8 @@ class AnnotatedStr(str):
             setattr(self, key, value)
 
 
-class OntologyTermRef(collections.namedtuple("OntologyTermRef",
-                                             "name accession ontology_name")):
+class OntologyTermRef(namedtuple("OntologyTermRef",
+                                 "name accession ontology_name")):
     """Reference to a term into an ontology
     """
 
