@@ -294,3 +294,93 @@ def test_assay_reader_small_assay(
                    'S1-A1-somatic variant calling-1-7')
     )
     assert expected == assay.arcs
+
+
+def test_assay_reader_small2_assay(
+        small2_investigation_file, small2_assay_file):
+    """Use ``AssayReader`` to read in small assay file."""
+    # Load investigation (tested elsewhere)
+    investigation = InvestigationReader.from_stream(
+        small2_investigation_file).read()
+
+    # Create new row reader and check read headers
+    reader = AssayReader.from_stream(investigation, small2_assay_file)
+    assert 13 == len(reader.header)
+
+    # Read assay
+    assay = reader.read()
+
+    # Check results
+    assert str(assay.file).endswith('data/i_small2/a_small2.txt')
+    assert 13 == len(assay.header)
+    assert 11 == len(assay.materials)
+    assert 18 == len(assay.processes)
+    assert 34 == len(assay.arcs)
+
+    # Currently expected graph
+    expected = (
+        models.Arc('sample-0815-N1', 'extraction-2-1'),
+        models.Arc('sample-0815-T1', 'extraction-2-2'),
+        models.Arc('sample-0815-N1', 'extraction-2-3'),
+        models.Arc('sample-0815-T1', 'extraction-2-4'),
+        models.Arc('extraction-2-1', '0815-N1-Pro1-COL3'),
+        models.Arc('extraction-2-2', '0815-T1-Pro1-COL3'),
+        models.Arc('extraction-2-3', '0815-N1-Pro1-COL3'),
+        models.Arc('extraction-2-4', '0815-T1-Pro1-COL3'),
+        models.Arc('0815-N1-Pro1-COL3', 'labeling-4-1'),
+        models.Arc('0815-T1-Pro1-COL3', 'labeling-4-2'),
+        models.Arc('0815-N1-Pro1-COL3', 'labeling-4-3'),
+        models.Arc('0815-T1-Pro1-COL3', 'labeling-4-4'),
+        models.Arc('labeling-4-1', '0815-N1-Pro1-A-114-COL5'),
+        models.Arc('labeling-4-2', '0815-T1-Pro1-A-115-COL5'),
+        models.Arc('labeling-4-3', '0815-N1-Pro1-B-114-COL5'),
+        models.Arc('labeling-4-4', '0815-T1-Pro1-B-115-COL5'),
+        models.Arc('0815-N1-Pro1-A-114-COL5', 'chromatography-8-1'),
+        models.Arc('0815-T1-Pro1-A-115-COL5', 'chromatography-8-2'),
+        models.Arc('0815-N1-Pro1-B-114-COL5', 'chromatography-8-3'),
+        models.Arc('0815-T1-Pro1-B-115-COL5', 'chromatography-8-4'),
+        models.Arc('chromatography-8-1', 'poolA'),
+        models.Arc('chromatography-8-2', 'poolA'),
+        models.Arc('chromatography-8-3', 'poolB'),
+        models.Arc('chromatography-8-4', 'poolB'),
+        models.Arc('poolA', 'poolA.raw-COL11'),
+        models.Arc('poolB', 'poolB.raw-COL11'),
+        models.Arc('poolA.raw-COL11', 'data transformation-12-1'),
+        models.Arc('poolA.raw-COL11', 'data transformation-12-2'),
+        models.Arc('poolB.raw-COL11', 'data transformation-12-3'),
+        models.Arc('poolB.raw-COL11', 'data transformation-12-4'),
+        models.Arc('data transformation-12-1', 'results.csv-COL13'),
+        models.Arc('data transformation-12-2', 'results.csv-COL13'),
+        models.Arc('data transformation-12-3', 'results.csv-COL13'),
+        models.Arc('data transformation-12-4', 'results.csv-COL13'))
+    assert sorted(expected) == sorted(assay.arcs)
+
+    # Eventually expected graph
+    # expected = (
+    #     models.Arc('sample-0815-N1', 'extraction-2-1'),
+    #     models.Arc('sample-0815-T1', 'extraction-2-2'),
+    #     models.Arc('extraction-2-1', '0815-N1-Pro1-COL3'),
+    #     models.Arc('extraction-2-2', '0815-T1-Pro1-COL3'),
+    #     models.Arc('0815-N1-Pro1-COL3', 'labeling-4-1'),
+    #     models.Arc('0815-T1-Pro1-COL3', 'labeling-4-2'),
+    #     models.Arc('0815-N1-Pro1-COL3', 'labeling-4-3'),
+    #     models.Arc('0815-T1-Pro1-COL3', 'labeling-4-4'),
+    #     models.Arc('labeling-4-1', '0815-N1-Pro1-A-114-COL5'),
+    #     models.Arc('labeling-4-2', '0815-T1-Pro1-A-115-COL5'),
+    #     models.Arc('labeling-4-3', '0815-N1-Pro1-B-114-COL5'),
+    #     models.Arc('labeling-4-4', '0815-T1-Pro1-B-115-COL5'),
+    #     models.Arc('0815-N1-Pro1-A-114-COL5', 'chromatography-8-1'),
+    #     models.Arc('0815-T1-Pro1-A-115-COL5', 'chromatography-8-2'),
+    #     models.Arc('0815-N1-Pro1-B-114-COL5', 'chromatography-8-3'),
+    #     models.Arc('0815-T1-Pro1-B-115-COL5', 'chromatography-8-4'),
+    #     models.Arc('chromatography-8-1', 'poolA'),
+    #     models.Arc('chromatography-8-2', 'poolA'),
+    #     models.Arc('chromatography-8-3', 'poolB'),
+    #     models.Arc('chromatography-8-4', 'poolB'),
+    #     models.Arc('poolA', 'poolA.raw-COL11'),
+    #     models.Arc('poolB', 'poolB.raw-COL11'),
+    #     models.Arc('poolA.raw-COL11', 'data transformation-12-1'),
+    #     models.Arc('poolB.raw-COL11', 'data transformation-12-3'),
+    #     models.Arc('data transformation-12-1', 'results.csv-COL13'),
+    #     models.Arc('data transformation-12-3', 'results.csv-COL13'))
+    # assert sorted(expected) == sorted(assay.arcs)

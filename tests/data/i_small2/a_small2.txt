@@ -1,0 +1,5 @@
+Sample Name	Protocol REF	Extract Name	Protocol REF	Labeled Extract Name	Comment[Replicate]	Label	Protocol REF	Protocol REF	MS Assay Name	Raw Spectral Data File	Protocol REF	Derived Data File
+0815-N1	extraction	0815-N1-Pro1	labeling	0815-N1-Pro1-A-114	A	iTRAQ reagent 114	chromatography	mass spectrometry	poolA	poolA.raw	data transformation	results.csv
+0815-T1	extraction	0815-T1-Pro1	labeling	0815-T1-Pro1-A-115	A	iTRAQ reagent 115	chromatography	mass spectrometry	poolA	poolA.raw	data transformation	results.csv
+0815-N1	extraction	0815-N1-Pro1	labeling	0815-N1-Pro1-B-114	B	iTRAQ reagent 114	chromatography	mass spectrometry	poolB	poolB.raw	data transformation	results.csv
+0815-T1	extraction	0815-T1-Pro1	labeling	0815-T1-Pro1-B-115	B	iTRAQ reagent 115	chromatography	mass spectrometry	poolB	poolB.raw	data transformation	results.csv
