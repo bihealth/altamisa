@@ -289,8 +289,7 @@ def _split_study_protocols_parameters(
         raise ParseIsatabException(msg)
     for (name, acc, src) in zip(names, name_term_accs, name_term_srcs):
         if any((name, acc, src)):  # skips empty parameters
-            yield models.build_freetext_or_term_ref(name, acc, src,
-                                                    ontology_refs)
+            yield models.OntologyTermRef(name, acc, src, ontology_refs)
 
 
 # Helper function to extract protocol components
@@ -321,8 +320,7 @@ def _split_study_protocols_components(
         if any((name, ctype, acc, src)):  # skips empty components
             yield models.ProtocolComponentInfo(
                 name,
-                models.build_freetext_or_term_ref(ctype, acc, src,
-                                                  ontology_refs))
+                models.OntologyTermRef(ctype, acc, src, ontology_refs))
 
 
 class InvestigationReader:
@@ -512,7 +510,7 @@ class InvestigationReader:
         for i, (pubmed_id, doi, authors, title,
                 status_term, status_term_acc, status_term_src) \
                 in enumerate(columns):
-            status = models.build_freetext_or_term_ref(
+            status = models.OntologyTermRef(
                 status_term, status_term_acc,
                 status_term_src, self._ontology_refs)
             comments = _parse_comments(section, comment_keys, i)
@@ -537,7 +535,7 @@ class InvestigationReader:
         for i, (last_name, first_name, mid_initial, email, phone, fax, address,
                 affiliation, role_term, role_term_acc, role_term_src) in \
                 enumerate(columns):
-            role = models.build_freetext_or_term_ref(
+            role = models.OntologyTermRef(
                 role_term, role_term_acc, role_term_src, self._ontology_refs)
             comments = _parse_comments(section, comment_keys, i)
             yield models.ContactInfo(
@@ -594,7 +592,7 @@ class InvestigationReader:
         # Create resulting objects
         columns = zip(*(section[k] for k in STUDY_DESIGN_DESCR_KEYS))
         for i, (type_term, type_term_acc, type_term_src) in enumerate(columns):
-            otype = models.build_freetext_or_term_ref(
+            otype = models.OntologyTermRef(
                 type_term, type_term_acc, type_term_src, self._ontology_refs)
             comments = _parse_comments(section, comment_keys, i)
             yield models.DesignDescriptorsInfo(otype, comments)
@@ -615,7 +613,7 @@ class InvestigationReader:
         columns = zip(*(section[k] for k in STUDY_PUBLICATIONS_KEYS))
         for i, (pubmed_id, doi, authors, title, status_term,
                 status_term_acc, status_term_src) in enumerate(columns):
-            status = models.build_freetext_or_term_ref(
+            status = models.OntologyTermRef(
                 status_term, status_term_acc,
                 status_term_src, self._ontology_refs)
             comments = _parse_comments(section, comment_keys, i)
@@ -638,7 +636,7 @@ class InvestigationReader:
         columns = zip(*(section[k] for k in STUDY_FACTORS_KEYS))
         for i, (name, type_term, type_term_acc,
                 type_term_src) in enumerate(columns):
-            otype = models.build_freetext_or_term_ref(
+            otype = models.OntologyTermRef(
                 type_term, type_term_acc, type_term_src, self._ontology_refs)
             comments = _parse_comments(section, comment_keys, i)
             yield models.FactorInfo(name, otype, comments)
@@ -662,10 +660,10 @@ class InvestigationReader:
                 tpl = 'Expected "a_*.txt" in line {}; found: "{}"'
                 msg = tpl.format(STUDY_ASSAY_FILE_NAME, file_)
                 raise ParseIsatabException(msg)
-            meas = models.build_freetext_or_term_ref(
+            meas = models.OntologyTermRef(
                 meas_type, meas_type_term_acc,
                 meas_type_term_src, self._ontology_refs)
-            tech = models.build_freetext_or_term_ref(
+            tech = models.OntologyTermRef(
                 tech_type, tech_type_term_acc,
                 tech_type_term_src, self._ontology_refs)
             comments = _parse_comments(section, comment_keys, i)
@@ -693,7 +691,7 @@ class InvestigationReader:
                 tpl = 'Expected protocol name in line {}; found: "{}"'
                 msg = tpl.format(STUDY_PROTOCOL_NAME, name)
                 raise ParseIsatabException(msg)
-            type_ont = models.build_freetext_or_term_ref(
+            type_ont = models.OntologyTermRef(
                 type_term, type_term_acc, type_term_src, self._ontology_refs)
             paras = {p.name if hasattr(p, "name") else p: p
                      for p in _split_study_protocols_parameters(
@@ -724,7 +722,7 @@ class InvestigationReader:
         for i, (last_name, first_name, mid_initial, email, phone, fax, address,
                 affiliation, role_term, role_term_acc, role_term_src) in \
                 enumerate(columns):
-            role = models.build_freetext_or_term_ref(
+            role = models.OntologyTermRef(
                 role_term, role_term_acc, role_term_src, self._ontology_refs)
             comments = _parse_comments(section, comment_keys, i)
             yield models.ContactInfo(

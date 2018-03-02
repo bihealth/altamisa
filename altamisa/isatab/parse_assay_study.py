@@ -236,7 +236,7 @@ class _NodeBuilderBase:
             name = line[header.col_no]
             ontology_name = line[header2.col_no]
             accession = line[header2.col_no + 1]
-            return models.build_freetext_or_term_ref(
+            return models.OntologyTermRef(
                 name, accession, ontology_name, self.ontology_source_refs)
         else:
             return line[header.col_no]

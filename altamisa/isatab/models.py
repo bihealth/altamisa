@@ -10,6 +10,7 @@ a list of all materials in a study or all comments for a material).
 from datetime import date
 from pathlib import Path
 from typing import Dict, Tuple, NamedTuple, Union
+import collections
 from ..exceptions import ParseIsatabException
 
 __author__ = 'Manuel Holtgrewe <manuel.holtgrewe@bihealth.de>'
@@ -46,9 +47,35 @@ class AnnotatedStr(str):
             setattr(self, key, value)
 
 
-class OntologyTermRef(NamedTuple):
+class OntologyTermRef(collections.namedtuple("OntologyTermRef",
+                                             "name accession ontology_name")):
     """Reference to a term into an ontology
     """
+
+    def __new__(cls, name, accession, ontology_name, ontology_refs=None):
+        # If accession or ontology_name is available --> OntologyTermRef
+        if ontology_name or accession:
+            # All three variables must be available
+            if not all((name, ontology_name, accession)):
+                tpl = ('Incomplete ontology term reference:\n'
+                       'name: {}\nOntology: {}\nAccession: {}')
+                msg = tpl.format(name if name else '?',
+                                 ontology_name if ontology_name else '?',
+                                 accession if accession else '?')
+                raise ParseIsatabException(msg)
+            # Ontology_name need to reference an ontology source (if provided)
+            if ontology_refs and ontology_name not in ontology_refs:
+                tpl = 'Ontology with name "{}" not defined in investigation!'
+                msg = tpl.format(ontology_name)
+                raise ParseIsatabException(msg)
+            return super(cls, OntologyTermRef).__new__(
+                cls, name, accession, ontology_name)
+        # Only the name is available --> FreeText
+        elif name:
+            return name
+        # Nothing available
+        else:
+            return None
 
     #: Human-readable name of the term
     name: str
@@ -61,35 +88,6 @@ class OntologyTermRef(NamedTuple):
 #: Shortcut for the commonly used "free text or reference to a term in an
 #: ontology" idiom.
 FreeTextOrTermRef = Union[OntologyTermRef, str]
-
-
-# Helper function for FreeText or OntologyTermRef creation and validation
-def build_freetext_or_term_ref(term, accession,
-                               ontology_name, sources) -> FreeTextOrTermRef:
-    # ontology_name and accession maybe both empty
-    # but if at least one of them is available... --> OntologyTermRef
-    if ontology_name or accession:
-        # ... both and the term must be available
-        if not all((term, ontology_name, accession)):
-            tpl = ('Incomplete ontology term reference:\n'
-                   'Term: {}\nOntology: {}\nAccession: {}')
-            msg = tpl.format(term if term else '?',
-                             ontology_name if ontology_name else '?',
-                             accession if accession else '?')
-            raise ParseIsatabException(msg)
-        # ... and ontology_name needs to reference a ontology source
-        if ontology_name not in sources:
-            tpl = 'Ontology with name "{}" not defined in investigation!'
-            msg = tpl.format(ontology_name)
-            raise ParseIsatabException(msg)
-        #
-        return OntologyTermRef(term, accession, ontology_name)
-    # Only the term is available --> FreeText
-    elif term:
-        return term
-    # Nothing available
-    else:
-        return None
 
 
 # Types used in investigation files -------------------------------------------
