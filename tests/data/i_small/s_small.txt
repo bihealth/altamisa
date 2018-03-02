@@ -1,3 +1,5 @@
 Source Name	Characteristics[organism]	Term Source REF	Term Accession Number	Protocol REF	Performer	Date	Sample Name
 0815	Mus musculus	NCBITAXON	http://purl.bioontology.org/ontology/NCBITAXON/10090	sample collection	John Doe	2018-02-02	0815-N1
 0815	Mus musculus	NCBITAXON	http://purl.bioontology.org/ontology/NCBITAXON/10090	sample collection	John Doe	2018-02-02	0815-T1
+0816	Mus musculus			sample collection	John Doe	2018-02-02	0816-T1
+0817				sample collection	John Doe	2018-02-02	0817-T1

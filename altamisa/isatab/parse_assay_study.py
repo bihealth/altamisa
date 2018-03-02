@@ -229,18 +229,15 @@ class _NodeBuilderBase:
             self,
             header,
             line: List[str]) -> models.FreeTextOrTermRef:
-        if not header or not line[header.col_no]:
+        if not header:
             return None
         elif header.term_source_ref_header:
             header2 = header.term_source_ref_header
             name = line[header.col_no]
             ontology_name = line[header2.col_no]
             accession = line[header2.col_no + 1]
-            if ontology_name not in self.ontology_source_refs:
-                tpl = 'Ontology with name "{}" not defined in investigation!'
-                msg = tpl.format(ontology_name)
-                raise ParseIsatabException(msg)
-            return models.OntologyTermRef(name, accession, ontology_name)
+            return models.OntologyTermRef(
+                name, accession, ontology_name, self.ontology_source_refs)
         else:
             return line[header.col_no]
 
