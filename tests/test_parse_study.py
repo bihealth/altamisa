@@ -91,7 +91,7 @@ def test_study_row_reader_small_study(
 
     # Create new row reader and check read headers
     row_reader = StudyRowReader.from_stream(investigation, small_study_file)
-    assert 7 == len(row_reader.header)
+    assert 10 == len(row_reader.header)
 
     # Read all rows in study
     rows = list(row_reader.read())
@@ -103,19 +103,28 @@ def test_study_row_reader_small_study(
 
     assert 3 == len(first_row)
 
-    characteristics = models.Characteristics(
-        name='organism',
-        value=models.OntologyTermRef(
-            name='Mus musculus',
-            accession='http://purl.bioontology.org/ontology/NCBITAXON/10090',
-            ontology_name='NCBITAXON'),
-        unit=None)
+    unit = models.OntologyTermRef(
+        name='day',
+        accession='http://purl.obolibrary.org/obo/UO_0000033',
+        ontology_name='UO'
+    )
+
+    characteristics = (
+        models.Characteristics(
+            name='organism',
+            value=models.OntologyTermRef(
+                name='Mus musculus',
+                accession='http://purl.bioontology.org/ontology/'
+                          'NCBITAXON/10090',
+                ontology_name='NCBITAXON'),
+            unit=None),
+        models.Characteristics(name='age', value='90', unit=unit))
 
     expected = models.Material(
-        'Source Name', 'source-0815', None, (characteristics,), (), (), None)
+        'Source Name', 'source-0815', None, characteristics, (), (), None)
     assert expected == first_row[0]
     expected = models.Process(
-        'sample collection', 'sample collection-5-1', date(2018, 2, 2),
+        'sample collection', 'sample collection-9-1', date(2018, 2, 2),
         'John Doe', (), (), None, None)
     assert expected == first_row[1]
     expected = models.Material(
@@ -124,10 +133,10 @@ def test_study_row_reader_small_study(
 
     assert 3 == len(second_row)
     expected = models.Material(
-        'Source Name', 'source-0815', None, (characteristics,), (), (), None)
+        'Source Name', 'source-0815', None, characteristics, (), (), None)
     assert expected == second_row[0]
     expected = models.Process(
-        'sample collection', 'sample collection-5-2', date(2018, 2, 2),
+        'sample collection', 'sample collection-9-2', date(2018, 2, 2),
         'John Doe', (), (), None, None)
     assert expected == second_row[1]
     expected = models.Material(
@@ -143,42 +152,55 @@ def test_study_reader_small_study(
 
     # Create new row reader and check read headers
     reader = StudyReader.from_stream(investigation, small_study_file)
-    assert 7 == len(reader.header)
+    assert 10 == len(reader.header)
 
     # Read study
     study = reader.read()
 
     # Check results
     assert str(study.file).endswith('data/i_small/s_small.txt')
-    assert 7 == len(study.header)
+    assert 10 == len(study.header)
     assert 7 == len(study.materials)
     assert 4 == len(study.processes)
     assert 8 == len(study.arcs)
 
-    characteristics1 = models.Characteristics(
-        name='organism',
-        value=models.OntologyTermRef(
-            name='Mus musculus',
-            accession='http://purl.bioontology.org/ontology/NCBITAXON/10090',
-            ontology_name='NCBITAXON'),
-        unit=None)
-    characteristics2 = models.Characteristics(
-        name='organism',
-        value='Mus musculus',
-        unit=None)
-    characteristics3 = models.Characteristics(
-        name='organism',
-        value=None,
-        unit=None)
+    unit = models.OntologyTermRef(
+        name='day',
+        accession='http://purl.obolibrary.org/obo/UO_0000033',
+        ontology_name='UO'
+    )
+
+    characteristics1 = (
+        models.Characteristics(
+            name='organism',
+            value=models.OntologyTermRef(
+                name='Mus musculus',
+                accession='http://purl.bioontology.org/ontology/'
+                          'NCBITAXON/10090',
+                ontology_name='NCBITAXON'),
+            unit=None),
+        models.Characteristics(name='age', value='90', unit=unit))
+    characteristics2 = (
+        models.Characteristics(
+            name='organism',
+            value='Mus musculus',
+            unit=None),
+        models.Characteristics(name='age', value='120', unit=unit))
+    characteristics3 = (
+        models.Characteristics(
+            name='organism',
+            value=None,
+            unit=None),
+        models.Characteristics(name='age', value='150', unit=unit))
 
     expected = models.Material(
-        'Source Name', 'source-0815', None, (characteristics1,), (), (), None)
+        'Source Name', 'source-0815', None, characteristics1, (), (), None)
     assert expected == study.materials['source-0815']
     expected = models.Material(
-        'Source Name', 'source-0816', None, (characteristics2,), (), (), None)
+        'Source Name', 'source-0816', None, characteristics2, (), (), None)
     assert expected == study.materials['source-0816']
     expected = models.Material(
-        'Source Name', 'source-0817', None, (characteristics3,), (), (), None)
+        'Source Name', 'source-0817', None, characteristics3, (), (), None)
     assert expected == study.materials['source-0817']
     expected = models.Material(
         'Sample Name', 'sample-0815-N1', None, (), (), (), None)
@@ -194,26 +216,26 @@ def test_study_reader_small_study(
     assert expected == study.materials['sample-0817-T1']
 
     expected = models.Process(
-        'sample collection', 'sample collection-5-1', date(2018, 2, 2),
+        'sample collection', 'sample collection-9-1', date(2018, 2, 2),
         'John Doe', (), (), None, None)
-    assert expected == study.processes['sample collection-5-1']
+    assert expected == study.processes['sample collection-9-1']
     expected = models.Process(
-        'sample collection', 'sample collection-5-2', date(2018, 2, 2),
+        'sample collection', 'sample collection-9-2', date(2018, 2, 2),
         'John Doe', (), (), None, None)
-    assert expected == study.processes['sample collection-5-2']
+    assert expected == study.processes['sample collection-9-2']
     expected = models.Process(
-        'sample collection', 'sample collection-5-3', date(2018, 2, 2),
+        'sample collection', 'sample collection-9-3', date(2018, 2, 2),
         'John Doe', (), (), None, None)
-    assert expected == study.processes['sample collection-5-3']
+    assert expected == study.processes['sample collection-9-3']
 
     expected = (
-        models.Arc('source-0815', 'sample collection-5-1'),
-        models.Arc('sample collection-5-1', 'sample-0815-N1'),
-        models.Arc('source-0815', 'sample collection-5-2'),
-        models.Arc('sample collection-5-2', 'sample-0815-T1'),
-        models.Arc('source-0816', 'sample collection-5-3'),
-        models.Arc('sample collection-5-3', 'sample-0816-T1'),
-        models.Arc('source-0817', 'sample collection-5-4'),
-        models.Arc('sample collection-5-4', 'sample-0817-T1'),
+        models.Arc('source-0815', 'sample collection-9-1'),
+        models.Arc('sample collection-9-1', 'sample-0815-N1'),
+        models.Arc('source-0815', 'sample collection-9-2'),
+        models.Arc('sample collection-9-2', 'sample-0815-T1'),
+        models.Arc('source-0816', 'sample collection-9-3'),
+        models.Arc('sample collection-9-3', 'sample-0816-T1'),
+        models.Arc('source-0817', 'sample collection-9-4'),
+        models.Arc('sample collection-9-4', 'sample-0817-T1'),
     )
     assert expected == study.arcs

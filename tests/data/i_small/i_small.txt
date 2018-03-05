@@ -1,8 +1,8 @@
 ONTOLOGY SOURCE REFERENCE
-Term Source Name	OBI	NCBITAXON	ROLEO
-Term Source File	http://data.bioontology.org/ontologies/OBI	http://data.bioontology.org/ontologies/NCBITAXON	http://data.bioontology.org/ontologies/ROLEO
-Term Source Version	31	8	1
-Term Source Description	Ontology for Biomedical Investigations	National Center for Biotechnology Information (NCBI) Organismal Classification	Role Ontology
+Term Source Name	OBI	NCBITAXON	ROLEO	UO
+Term Source File	http://data.bioontology.org/ontologies/OBI	http://data.bioontology.org/ontologies/NCBITAXON	http://data.bioontology.org/ontologies/ROLEO	http://data.bioontology.org/ontologies/UO
+Term Source Version	31	8	1	43
+Term Source Description	Ontology for Biomedical Investigations	National Center for Biotechnology Information (NCBI) Organismal Classification	Role Ontology	Units of Measurement Ontology
 INVESTIGATION
 Investigation Identifier	i_small
 Investigation Title	Small Investigation
