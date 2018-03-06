@@ -266,25 +266,25 @@ class _MaterialBuilder(_NodeBuilderBase):
         if line[self.name_header.col_no]:
             # make material/data names unique by column
             if self.name_header.column_type == "Source Name":
-                name = '{}-{}'.format(
+                unique_name = '{}-{}'.format(
                     "source",
                     line[self.name_header.col_no])
             elif self.name_header.column_type == "Sample Name":
                 # use static column identifier "sample-", since the same
                 # samples occur in different columns in study and assay
-                name = '{}-{}'.format(
+                unique_name = '{}-{}'.format(
                     "sample",
                     line[self.name_header.col_no])
             else:
                 # anything else gets the column id
-                name = '{}-COL{}'.format(
+                unique_name = '{}-COL{}'.format(
                     line[self.name_header.col_no],
                     self.name_header.col_no + 1)
         else:
             name_val = '{} {}-{}-{}'.format(
                 TOKEN_EMPTY, self.name_header.column_type,
                 self.name_header.col_no + 1, counter_value)
-            name = models.AnnotatedStr(name_val, was_empty=True)
+            unique_name = models.AnnotatedStr(name_val, was_empty=True)
         extract_label = None
         if self.extract_label_header:
             extract_label = line[self.extract_label_header.col_no]
@@ -301,7 +301,7 @@ class _MaterialBuilder(_NodeBuilderBase):
             self.material_type_header, line)
         # Then, constructing ``Material`` is easy
         return models.Material(
-            type_, name, extract_label, characteristics, comments,
+            type_, unique_name, extract_label, characteristics, comments,
             factor_values, material_type)
 
 
@@ -429,7 +429,7 @@ class _ProcessBuilder(_NodeBuilderBase):
     def build(self, line: List[str]) -> models.Process:
         """Build and return ``Process`` from CSV file."""
         # First, build the individual attributes of ``Process``
-        protocol_ref, name = self._build_protocol_ref_and_name(line)
+        protocol_ref, unique_name = self._build_protocol_ref_and_name(line)
         if self.date_header and line[self.date_header.col_no]:
             try:
                 date = datetime.strptime(
@@ -461,8 +461,8 @@ class _ProcessBuilder(_NodeBuilderBase):
             scan_name = None
         # Then, constructing ``Process`` is easy
         return models.Process(
-            protocol_ref, name, date, performer, parameter_values, comments,
-            array_design_ref, scan_name)
+            protocol_ref, unique_name, date, performer, parameter_values,
+            comments, array_design_ref, scan_name)
 
     def _build_protocol_ref_and_name(self, line: List[str]):
         # At least one of these headers has to be specified
@@ -473,26 +473,26 @@ class _ProcessBuilder(_NodeBuilderBase):
             # Name header is given but value is empty, will use auto-generated
             # value.
             protocol_ref = line[self.protocol_ref_header.col_no]
-            name = '{}-{}-{}'.format(
+            unique_name = '{}-{}-{}'.format(
                 protocol_ref, self.protocol_ref_header.col_no + 1,
                 counter_value)
         elif not self.protocol_ref_header:
             protocol_ref = 'UNKNOWN'
             if line[self.name_header.col_no]:
-                name = line[self.name_header.col_no]
+                unique_name = line[self.name_header.col_no]
             else:  # empty!
                 name_val = '{} {}-{}-{}'.format(
                     TOKEN_ANONYMOUS,
                     self.name_header.column_type.replace(' Name', ''),
                     self.name_header.col_no + 1, counter_value)
-                name = models.AnnotatedStr(name_val, was_empty=True)
+                unique_name = models.AnnotatedStr(name_val, was_empty=True)
         else:  # both are given
             protocol_ref = line[self.protocol_ref_header.col_no]
             if line[self.name_header.col_no]:
-                name = line[self.name_header.col_no]
+                unique_name = line[self.name_header.col_no]
             else:
-                name = '{}-{}'.format(protocol_ref, counter_value)
-        return protocol_ref, name
+                unique_name = '{}-{}'.format(protocol_ref, counter_value)
+        return protocol_ref, unique_name
 
 
 class _ProtocolRefBuilder(_ProcessBuilder):
@@ -668,13 +668,13 @@ def _build_study_assay(file_name, header, rows, klass):
         for i, entry in enumerate(row):
             # Collect entry and materials
             if isinstance(entry, models.Process):
-                processes[entry.name] = entry
+                processes[entry.unique_name] = entry
             else:
                 assert isinstance(entry, models.Material)
-                materials[entry.name] = entry
+                materials[entry.unique_name] = entry
             # Collect arc
             if i > 0:
-                arc = models.Arc(row[i - 1].name, row[i].name)
+                arc = models.Arc(row[i - 1].unique_name, row[i].unique_name)
                 if arc not in arc_set:
                     arc_set.add(arc)
                     arcs.append(arc)

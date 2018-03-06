@@ -365,13 +365,13 @@ class Comment(NamedTuple):
 class Material(NamedTuple):
     """Representation of a Material or Data node."""
     type: str
-    #: The name of the material.
+    #: The unique name of the material node.
     #:
     #: In the case that the label was empty, an ``AnnotatedStr`` is used and
     #: the attribute ``was_empty`` is set to ``True``.  As a ``str`` is used
     #: otherwise, use ``getattr(m.name, 'was_empty', False)`` for obtaining
     #: this information reliably.
-    name: str
+    unique_name: str
     # The label of a Labeled Extract
     extract_label: str
     #: Material characteristics
@@ -389,16 +389,16 @@ class Process(NamedTuple):
 
     #: Referenced to protocol name from investigation
     protocol_ref: str
-    #: The name of the protocol.
+    #: The unique name of the process node.
     #:
     #: When "Protocol REF" is given without a further
     #: qualifying name, this is generated from the protocol reference and
-    #: an auto-incrementing number.  In this case that the label was empty,
+    #: an auto-incrementing number. In this case that the label was empty,
     #: an ``AnnotatedStr`` is used and the attribute ``was_empty`` is set to
-    #: ``True``.  As a ``str`` is used otherwise, use
+    #: ``True``. As a ``str`` is used otherwise, use
     #: ``getattr(m.name, 'was_empty', False)`` for obtaining this information
     #: reliably.
-    name: str
+    unique_name: str
     #: Process date
     date: date
     #: Performer of process
