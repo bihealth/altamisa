@@ -78,7 +78,9 @@ class _NodeBuilderBase:
     def __init__(
             self,
             ontology_source_refs,
-            column_headers: List[ColumnHeader]):
+            column_headers: List[ColumnHeader],
+            study_id: str,
+            assay_id: str):
         #: The definition of the ontology source references
         self.ontology_source_refs = ontology_source_refs
         #: The column descriptions to build ``Material`` from.
@@ -113,8 +115,11 @@ class _NodeBuilderBase:
         self.scan_name_header = None
         #: Current counter value
         self.counter_value = 0
-        # Assign column headers to their roles (properties above)
+        #: Assign column headers to their roles (properties above)
         self._assign_column_headers()
+        #: Study and assay ids used for unique node naming
+        self.study_id = study_id
+        self.assay_id = assay_id
 
     def _next_counter(self):
         """Increment counter value and return"""
@@ -557,9 +562,12 @@ class _RowBuilderBase:
     #: Registry of column header to node builder
     node_builders = None
 
-    def __init__(self, ontology_source_refs, header: List[ColumnHeader]):
+    def __init__(self, ontology_source_refs, header: List[ColumnHeader],
+                 study_id: str, assay_id: str = None):
         self.ontology_source_refs = ontology_source_refs
         self.header = header
+        self.study_id = study_id
+        self.assay_id = assay_id
         self._builders = list(self._make_builders())
 
     def _make_builders(self):
@@ -567,7 +575,8 @@ class _RowBuilderBase:
         breaks = list(self._make_breaks())
         for start, end in zip(breaks, breaks[1:]):
             klass = self.node_builders[self.header[start].column_type]
-            yield klass(self.ontology_source_refs, self.header[start:end])
+            yield klass(self.ontology_source_refs, self.header[start:end],
+                        self.study_id, self.assay_id)
 
     def _make_breaks(self):
         """Build indices to break the columns at
@@ -735,7 +744,7 @@ class StudyRowReader:
     def read(self):
         builder = _StudyRowBuilder(
             self.investigation.ontology_source_refs,
-            self.header)
+            self.header, self.study_id)
         while True:
             line = self._read_next_line()
             if line:
@@ -839,7 +848,7 @@ class AssayRowReader:
     def read(self):
         builder = _AssayRowBuilder(
             self.investigation.ontology_source_refs,
-            self.header)
+            self.header, self.study_id, self.assay_id)
         while True:
             line = self._read_next_line()
             if line:
