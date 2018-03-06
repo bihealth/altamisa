@@ -99,8 +99,8 @@ class _NodeBuilderBase:
         self.array_design_ref = None
         #: The header for array design ref
         self.array_design_ref_header = None
-        #: The header for label type
-        self.label_header = None
+        #: The header for extract label type
+        self.extract_label_header = None
         #: The header for material type
         self.material_type_header = None
         #: The header for the performer
@@ -165,12 +165,12 @@ class _NodeBuilderBase:
                 else:
                     self.array_design_ref_header = header
             elif header.column_type == 'Label':
-                if self.label_header:
+                if self.extract_label_header:
                     tpl = 'Seen "Label" header for same entity in col {}'
                     msg = tpl.format(header.col_no)
                     raise ParseIsatabException(msg)
                 else:
-                    self.label_header = header
+                    self.extract_label_header = header
             elif header.column_type == 'Date':
                 if self.date_header:
                     tpl = 'Seen "Date" header for same entity in col {}'
@@ -285,9 +285,9 @@ class _MaterialBuilder(_NodeBuilderBase):
                 TOKEN_EMPTY, self.name_header.column_type,
                 self.name_header.col_no + 1, counter_value)
             name = models.AnnotatedStr(name_val, was_empty=True)
-        label = None
-        if self.label_header:
-            label = line[self.label_header.col_no]
+        extract_label = None
+        if self.extract_label_header:
+            extract_label = line[self.extract_label_header.col_no]
         characteristics = tuple(
             self._build_complex(hdr, line, models.Characteristics)
             for hdr in self.characteristic_headers)
@@ -301,7 +301,7 @@ class _MaterialBuilder(_NodeBuilderBase):
             self.material_type_header, line)
         # Then, constructing ``Material`` is easy
         return models.Material(
-            type_, name, label, characteristics, comments,
+            type_, name, extract_label, characteristics, comments,
             factor_values, material_type)
 
 

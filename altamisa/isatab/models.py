@@ -372,7 +372,8 @@ class Material(NamedTuple):
     #: otherwise, use ``getattr(m.name, 'was_empty', False)`` for obtaining
     #: this information reliably.
     name: str
-    label: str
+    # The label of a Labeled Extract
+    extract_label: str
     #: Material characteristics
     characteristics: Tuple[Characteristics]
     #: Material comments
