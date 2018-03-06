@@ -17,14 +17,23 @@ def print_dot(
 
     print(indent + '/* materials */', file=outf)
     for name, mat in obj.materials.items():
-        print('{}{} [shape={},color={},fontcolor={}]'.format(
-            indent, json.dumps(name),
+        label = json.dumps('{}:\n{}\n({})'.format(
+            mat.type,
+            mat.name if mat.name else "-",
+            name))
+        print('{}{} [label={},shape={},color={},fontcolor={}]'.format(
+            indent, json.dumps(name), label,
             mat_shape, mat_color, mat_color
         ), file=outf)
     print(indent + '/* processes */', file=outf)
-    for name, _ in obj.processes.items():
-        print('{}{} [shape={},color={},fontcolor={}]'.format(
-            indent, json.dumps(name),
+    for name, proc in obj.processes.items():
+        label = json.dumps('{}:\n{}\n{}\n({})'.format(
+            "Process",
+            proc.protocol_ref if proc.protocol_ref else "-",
+            proc.name if proc.name else "-",
+            name))
+        print('{}{} [label={},shape={},color={},fontcolor={}]'.format(
+            indent, json.dumps(name), label,
             proc_shape, proc_color, proc_color
         ), file=outf)
     print(indent + '/* arcs */', file=outf)
