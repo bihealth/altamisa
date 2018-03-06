@@ -49,14 +49,26 @@ def small_assay_file():
     path = os.path.join(os.path.dirname(__file__), "data/i_small/a_small.txt")
     return open(path, 'rt')
 
+
 @pytest.fixture
 def full_investigation_file():
     path = os.path.join(os.path.dirname(__file__),
                         "data/i_fullinvest/i_fullinvest.txt")
     return open(path, 'rt')
 
+
 @pytest.fixture
 def comment_investigation_file():
     path = os.path.join(os.path.dirname(__file__),
                         "data/i_comments/i_comments.txt")
+    return open(path, 'rt')
+
+
+@pytest.fixture
+def assays_investigation_file():
+    """This file contains two studies with no assays, once with
+    tab-separation (empty column) and once without (no column).
+    """
+    path = os.path.join(os.path.dirname(__file__),
+                        "data/i_assays/i_assays.txt")
     return open(path, 'rt')

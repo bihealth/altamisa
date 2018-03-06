@@ -656,19 +656,28 @@ class InvestigationReader:
         for i, (file_, meas_type, meas_type_term_acc, meas_type_term_src,
                 tech_type, tech_type_term_acc, tech_type_term_src, tech_plat) \
                 in enumerate(columns):
-            if not file_:  # don't allow incomplete assay columns
-                tpl = 'Expected "a_*.txt" in line {}; found: "{}"'
-                msg = tpl.format(STUDY_ASSAY_FILE_NAME, file_)
+            if (not file_ and any((
+                meas_type, meas_type_term_acc, meas_type_term_src, tech_type,
+                tech_type_term_acc, tech_type_term_src, tech_plat))):
+                # don't allow assay columns without assay file
+                tpl = ('Found assay with no {} in {}; found: '
+                      '"{}", "{}", "{}", "{}", "{}", "{}", "{}", "{}"')
+                msg = tpl.format(
+                    STUDY_ASSAY_FILE_NAME, STUDY_ASSAYS, file_, meas_type,
+                    meas_type_term_acc, meas_type_term_src, tech_type,
+                    tech_type_term_acc, tech_type_term_src, tech_plat)
                 raise ParseIsatabException(msg)
-            meas = models.OntologyTermRef(
-                meas_type, meas_type_term_acc,
-                meas_type_term_src, self._ontology_refs)
-            tech = models.OntologyTermRef(
-                tech_type, tech_type_term_acc,
-                tech_type_term_src, self._ontology_refs)
-            comments = _parse_comments(section, comment_keys, i)
-            yield models.AssayInfo(
-                meas, tech, tech_plat, Path(file_), comments)
+            elif file_:  # if at least a file exists --> AssayInfo
+                meas = models.OntologyTermRef(
+                    meas_type, meas_type_term_acc,
+                    meas_type_term_src, self._ontology_refs)
+                tech = models.OntologyTermRef(
+                    tech_type, tech_type_term_acc,
+                    tech_type_term_src, self._ontology_refs)
+                comments = _parse_comments(section, comment_keys, i)
+                yield models.AssayInfo(
+                    meas, tech, tech_plat, Path(file_), comments)
+            # else, i.e. if all assay fields are empty --> Nothing
 
     def _read_study_protocols(self) -> Iterator[models.ProtocolInfo]:
         # Read STUDY PROTOCOLS header

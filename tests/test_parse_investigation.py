@@ -574,3 +574,20 @@ def test_parse_comment_investigation(comment_investigation_file):
                                "ROLEO"),
         {"Study Person REF": "personB"})
     assert expected == study.contacts[1]
+
+
+def test_parse_assays_investigation(assays_investigation_file):
+    # Read Investigation from file-like object
+    reader = InvestigationReader.from_stream(assays_investigation_file)
+    investigation = reader.read()
+
+    # Check results
+    # Investigation
+    assert investigation
+
+    # Studies
+    assert 2 == len(investigation.studies)
+
+    # Assays
+    assert 0 == len(investigation.studies[0].assays)
+    assert 0 == len(investigation.studies[1].assays)
