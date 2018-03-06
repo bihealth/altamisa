@@ -268,25 +268,28 @@ class _MaterialBuilder(_NodeBuilderBase):
         # First, build the individual components
         assert self.name_header or self.protocol_ref_header
         type_ = self.name_header.column_type
+        assay_id = '-{}'.format(self.assay_id) if self.assay_id else ''
         if line[self.name_header.col_no]:
             # make material/data names unique by column
             if self.name_header.column_type == "Source Name":
-                unique_name = '{}-{}'.format(
-                    "source",
+                unique_name = '{}-{}-{}'.format(
+                    self.study_id, "source",
                     line[self.name_header.col_no])
             elif self.name_header.column_type == "Sample Name":
                 # use static column identifier "sample-", since the same
                 # samples occur in different columns in study and assay
-                unique_name = '{}-{}'.format(
-                    "sample",
+                unique_name = '{}-{}-{}'.format(
+                    self.study_id, "sample",
                     line[self.name_header.col_no])
             else:
                 # anything else gets the column id
-                unique_name = '{}-COL{}'.format(
+                unique_name = '{}{}-{}-COL{}'.format(
+                    self.study_id, assay_id,
                     line[self.name_header.col_no],
                     self.name_header.col_no + 1)
         else:
-            name_val = '{} {}-{}-{}'.format(
+            name_val = '{}{}-{} {}-{}-{}'.format(
+                self.study_id, assay_id,
                 TOKEN_EMPTY, self.name_header.column_type,
                 self.name_header.col_no + 1, counter_value)
             unique_name = models.AnnotatedStr(name_val, was_empty=True)
