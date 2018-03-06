@@ -19,7 +19,8 @@ def test_assay_row_reader_minimal_assay(
     investigation = InvestigationReader.from_stream(minimal_investigation_file).read()
 
     # Create new row reader and check read headers
-    row_reader = AssayRowReader.from_stream(investigation, minimal_assay_file)
+    row_reader = AssayRowReader.from_stream(
+        investigation, "S1", "A1", minimal_assay_file)
     assert 5 == len(row_reader.header)
 
     # Read all rows in assay
@@ -59,7 +60,8 @@ def test_assay_reader_minimal_assay(
     investigation = InvestigationReader.from_stream(minimal_investigation_file).read()
 
     # Create new row reader and check read headers
-    reader = AssayReader.from_stream(investigation, minimal_assay_file)
+    reader = AssayReader.from_stream(
+        investigation, "S1", "A1", minimal_assay_file)
     assert 5 == len(reader.header)
 
     # Read assay
@@ -107,7 +109,8 @@ def test_assay_row_reader_small_assay(
     investigation = InvestigationReader.from_stream(small_investigation_file).read()
 
     # Create new row reader and check read headers
-    row_reader = AssayRowReader.from_stream(investigation, small_assay_file)
+    row_reader = AssayRowReader.from_stream(
+        investigation, "S1", "A1", small_assay_file)
     assert 8 == len(row_reader.header)
 
     # Read all rows in assay
@@ -186,7 +189,8 @@ def test_assay_reader_small_assay(
     investigation = InvestigationReader.from_stream(small_investigation_file).read()
 
     # Create new row reader and check read headers
-    reader = AssayReader.from_stream(investigation, small_assay_file)
+    reader = AssayReader.from_stream(
+        investigation, "S1", "A1", small_assay_file)
     assert 8 == len(reader.header)
 
     # Read assay

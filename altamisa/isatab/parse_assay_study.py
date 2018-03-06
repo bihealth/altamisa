@@ -693,15 +693,18 @@ class StudyRowReader:
     def from_stream(
             klass,
             investigation: models.InvestigationInfo,
+            study_id: str,
             input_file: TextIO):
         """Construct from file-like object"""
-        return StudyRowReader(investigation, input_file)
+        return StudyRowReader(investigation, study_id, input_file)
 
     def __init__(
             self,
             investigation: models.InvestigationInfo,
+            study_id: str,
             input_file: TextIO):
         self.investigation = investigation
+        self.study_id = study_id
         self.input_file = input_file
         self._reader = csv.reader(input_file, delimiter='\t', quotechar='"')
         self._line = None
@@ -752,15 +755,18 @@ class StudyReader:
     def from_stream(
             klass,
             investigation: models.InvestigationInfo,
+            study_id: str,
             input_file: TextIO):
         """Construct from file-like object"""
-        return StudyReader(investigation, input_file)
+        return StudyReader(investigation, study_id, input_file)
 
     def __init__(
             self,
             investigation: models.InvestigationInfo,
+            study_id: str,
             input_file: TextIO):
-        self.row_reader = StudyRowReader.from_stream(investigation, input_file)
+        self.row_reader = StudyRowReader.from_stream(
+            investigation, study_id, input_file)
         self.investigation = investigation
         #: The file used for reading from
         self.input_file = input_file
@@ -788,15 +794,21 @@ class AssayRowReader:
     def from_stream(
             klass,
             investigation: models.InvestigationInfo,
+            study_id: str,
+            assay_id: str,
             input_file: TextIO):
         """Construct from file-like object"""
-        return AssayRowReader(investigation, input_file)
+        return AssayRowReader(investigation, study_id, assay_id, input_file)
 
     def __init__(
             self,
             investigation: models.InvestigationInfo,
+            study_id: str,
+            assay_id: str,
             input_file: TextIO):
         self.investigation = investigation
+        self.study_id = study_id
+        self.assay_id = assay_id
         self.input_file = input_file
         self._reader = csv.reader(input_file, delimiter='\t', quotechar='"')
         self._line = None
@@ -847,15 +859,20 @@ class AssayReader:
     def from_stream(
             klass,
             investigation: models.InvestigationInfo,
+            study_id: str,
+            assay_id: str,
             input_file: TextIO):
         """Construct from file-like object"""
-        return AssayReader(investigation, input_file)
+        return AssayReader(investigation, study_id, assay_id, input_file)
 
     def __init__(
             self,
             investigation: models.InvestigationInfo,
+            study_id: str,
+            assay_id: str,
             input_file: TextIO):
-        self.row_reader = AssayRowReader.from_stream(investigation, input_file)
+        self.row_reader = AssayRowReader.from_stream(
+            investigation, study_id, assay_id, input_file)
         self.investigation = investigation
         #: The file used for reading from
         self.input_file = input_file
