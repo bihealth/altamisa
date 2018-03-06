@@ -36,7 +36,7 @@ def test_study_row_reader_minimal_study(
         'Source Name', 'S1-source-0815', '0815', None, (), (), (), None)
     assert expected == first_row[0]
     expected = models.Process(
-        'sample collection', 'S1-sample collection-2-1', None, None,
+        'sample collection', 'S1-sample collection-2-1', None, None, None,
         (), (), None, None)
     assert expected == first_row[1]
     expected = models.Material(
@@ -77,7 +77,7 @@ def test_study_reader_minimal_study(
     assert expected == study.materials['S1-sample-0815-N1']
 
     expected = models.Process(
-        'sample collection', 'S1-sample collection-2-1',
+        'sample collection', 'S1-sample collection-2-1', None,
         None, None, (), (), None, None)
     assert expected == study.processes['S1-sample collection-2-1']
 
@@ -120,8 +120,8 @@ def test_study_row_reader_small_study(
         None, (characteristics,), (), (), None)
     assert expected == first_row[0]
     expected = models.Process(
-        'sample collection', 'S1-sample collection-5-1', date(2018, 2, 2),
-        'John Doe', (), (), None, None)
+        'sample collection', 'S1-sample collection-5-1',  None,
+        date(2018, 2, 2), 'John Doe', (), (), None, None)
     assert expected == first_row[1]
     expected = models.Material(
         'Sample Name', 'S1-sample-0815-N1', '0815-N1',
@@ -134,8 +134,8 @@ def test_study_row_reader_small_study(
         None, (characteristics,), (), (), None)
     assert expected == second_row[0]
     expected = models.Process(
-        'sample collection', 'S1-sample collection-5-2', date(2018, 2, 2),
-        'John Doe', (), (), None, None)
+        'sample collection', 'S1-sample collection-5-2', None,
+        date(2018, 2, 2), 'John Doe', (), (), None, None)
     assert expected == second_row[1]
     expected = models.Material(
         'Sample Name', 'S1-sample-0815-T1', '0815-T1',
@@ -209,16 +209,16 @@ def test_study_reader_small_study(
     assert expected == study.materials['S1-sample-0817-T1']
 
     expected = models.Process(
-        'sample collection', 'S1-sample collection-5-1', date(2018, 2, 2),
-        'John Doe', (), (), None, None)
+        'sample collection', 'S1-sample collection-5-1', None,
+        date(2018, 2, 2), 'John Doe', (), (), None, None)
     assert expected == study.processes['S1-sample collection-5-1']
     expected = models.Process(
-        'sample collection', 'S1-sample collection-5-2', date(2018, 2, 2),
-        'John Doe', (), (), None, None)
+        'sample collection', 'S1-sample collection-5-2', None,
+        date(2018, 2, 2), 'John Doe', (), (), None, None)
     assert expected == study.processes['S1-sample collection-5-2']
     expected = models.Process(
-        'sample collection', 'S1-sample collection-5-3', date(2018, 2, 2),
-        'John Doe', (), (), None, None)
+        'sample collection', 'S1-sample collection-5-3', None,
+        date(2018, 2, 2), 'John Doe', (), (), None, None)
     assert expected == study.processes['S1-sample collection-5-3']
 
     expected = (

@@ -401,6 +401,8 @@ class Process(NamedTuple):
     #: ``getattr(m.name, 'was_empty', False)`` for obtaining this information
     #: reliably.
     unique_name: str
+    # Original name of a process (e.g. from Assay Name etc.)
+    name: str
     #: Process date
     date: date
     #: Performer of process
