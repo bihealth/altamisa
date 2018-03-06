@@ -474,29 +474,44 @@ class _ProcessBuilder(_NodeBuilderBase):
         assert self.name_header or self.protocol_ref_header
         # Perform case distinction on which case is actually true
         counter_value = self._next_counter()
+        assay_id = '-{}'.format(self.assay_id) if self.assay_id else ''
         if not self.name_header:
-            # Name header is given but value is empty, will use auto-generated
-            # value.
+            # Name header is not given, will use auto-generated unique name
+            # based on protocol ref.
             protocol_ref = line[self.protocol_ref_header.col_no]
-            unique_name = '{}-{}-{}'.format(
+            unique_name = '{}{}-{}-{}-{}'.format(
+                self.study_id, assay_id,
                 protocol_ref, self.protocol_ref_header.col_no + 1,
                 counter_value)
         elif not self.protocol_ref_header:
+            # Name header is given, but protocol ref header is not
             protocol_ref = 'UNKNOWN'
-            if line[self.name_header.col_no]:
-                unique_name = line[self.name_header.col_no]
-            else:  # empty!
-                name_val = '{} {}-{}-{}'.format(
+            if line[self.name_header.col_no]:  # Use name if available
+                unique_name = '{}{}-{}-{}'.format(
+                    self.study_id, assay_id,
+                    line[self.name_header.col_no],
+                    self.name_header.col_no + 1)
+            else:  # Empty!
+                name_val = '{}{}-{} {}-{}-{}'.format(
+                    self.study_id, assay_id,
                     TOKEN_ANONYMOUS,
                     self.name_header.column_type.replace(' Name', ''),
                     self.name_header.col_no + 1, counter_value)
                 unique_name = models.AnnotatedStr(name_val, was_empty=True)
-        else:  # both are given
+        else:  # Both header are given
             protocol_ref = line[self.protocol_ref_header.col_no]
             if line[self.name_header.col_no]:
-                unique_name = line[self.name_header.col_no]
+                unique_name = '{}{}-{}-{}'.format(
+                    self.study_id, assay_id,
+                    line[self.name_header.col_no],
+                    self.name_header.col_no + 1)
             else:
-                unique_name = '{}-{}'.format(protocol_ref, counter_value)
+                unique_name = '{}{}-{}-{}'.format(self.study_id, assay_id,
+                                                  protocol_ref, counter_value)
+        if not protocol_ref:
+            tpl = 'Missing protocol reference in column {}'
+            msg = tpl.format(self.protocol_ref_header.col_no + 1)
+            raise ParseIsatabException(msg)
         return protocol_ref, unique_name
 
 

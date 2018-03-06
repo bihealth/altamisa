@@ -36,7 +36,7 @@ def test_study_row_reader_minimal_study(
         'Source Name', 'source-0815', None, (), (), (), None)
     assert expected == first_row[0]
     expected = models.Process(
-        'sample collection', 'sample collection-2-1', None, None,
+        'sample collection', 'S1-sample collection-2-1', None, None,
         (), (), None, None)
     assert expected == first_row[1]
     expected = models.Material(
@@ -77,11 +77,11 @@ def test_study_reader_minimal_study(
     assert expected == study.materials['sample-0815-N1']
 
     expected = models.Process(
-        'sample collection', 'sample collection-2-1', None, None, (), (), None, None)
-    assert expected == study.processes['sample collection-2-1']
+        'sample collection', 'S1-sample collection-2-1', None, None, (), (), None, None)
+    assert expected == study.processes['S1-sample collection-2-1']
 
-    expected = (models.Arc('source-0815', 'sample collection-2-1'),
-                models.Arc('sample collection-2-1', 'sample-0815-N1'))
+    expected = (models.Arc('source-0815', 'S1-sample collection-2-1'),
+                models.Arc('S1-sample collection-2-1', 'sample-0815-N1'))
     assert expected == study.arcs
 
 
@@ -118,7 +118,7 @@ def test_study_row_reader_small_study(
         'Source Name', 'source-0815', None, (characteristics,), (), (), None)
     assert expected == first_row[0]
     expected = models.Process(
-        'sample collection', 'sample collection-5-1', date(2018, 2, 2),
+        'sample collection', 'S1-sample collection-5-1', date(2018, 2, 2),
         'John Doe', (), (), None, None)
     assert expected == first_row[1]
     expected = models.Material(
@@ -130,7 +130,7 @@ def test_study_row_reader_small_study(
         'Source Name', 'source-0815', None, (characteristics,), (), (), None)
     assert expected == second_row[0]
     expected = models.Process(
-        'sample collection', 'sample collection-5-2', date(2018, 2, 2),
+        'sample collection', 'S1-sample collection-5-2', date(2018, 2, 2),
         'John Doe', (), (), None, None)
     assert expected == second_row[1]
     expected = models.Material(
@@ -197,26 +197,26 @@ def test_study_reader_small_study(
     assert expected == study.materials['sample-0817-T1']
 
     expected = models.Process(
-        'sample collection', 'sample collection-5-1', date(2018, 2, 2),
+        'sample collection', 'S1-sample collection-5-1', date(2018, 2, 2),
         'John Doe', (), (), None, None)
-    assert expected == study.processes['sample collection-5-1']
+    assert expected == study.processes['S1-sample collection-5-1']
     expected = models.Process(
-        'sample collection', 'sample collection-5-2', date(2018, 2, 2),
+        'sample collection', 'S1-sample collection-5-2', date(2018, 2, 2),
         'John Doe', (), (), None, None)
-    assert expected == study.processes['sample collection-5-2']
+    assert expected == study.processes['S1-sample collection-5-2']
     expected = models.Process(
-        'sample collection', 'sample collection-5-3', date(2018, 2, 2),
+        'sample collection', 'S1-sample collection-5-3', date(2018, 2, 2),
         'John Doe', (), (), None, None)
-    assert expected == study.processes['sample collection-5-3']
+    assert expected == study.processes['S1-sample collection-5-3']
 
     expected = (
-        models.Arc('source-0815', 'sample collection-5-1'),
-        models.Arc('sample collection-5-1', 'sample-0815-N1'),
-        models.Arc('source-0815', 'sample collection-5-2'),
-        models.Arc('sample collection-5-2', 'sample-0815-T1'),
-        models.Arc('source-0816', 'sample collection-5-3'),
-        models.Arc('sample collection-5-3', 'sample-0816-T1'),
-        models.Arc('source-0817', 'sample collection-5-4'),
-        models.Arc('sample collection-5-4', 'sample-0817-T1'),
+        models.Arc('source-0815', 'S1-sample collection-5-1'),
+        models.Arc('S1-sample collection-5-1', 'sample-0815-N1'),
+        models.Arc('source-0815', 'S1-sample collection-5-2'),
+        models.Arc('S1-sample collection-5-2', 'sample-0815-T1'),
+        models.Arc('source-0816', 'S1-sample collection-5-3'),
+        models.Arc('S1-sample collection-5-3', 'sample-0816-T1'),
+        models.Arc('source-0817', 'S1-sample collection-5-4'),
+        models.Arc('S1-sample collection-5-4', 'sample-0817-T1'),
     )
     assert expected == study.arcs
