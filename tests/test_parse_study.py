@@ -33,14 +33,14 @@ def test_study_row_reader_minimal_study(
     assert 3 == len(first_row)
 
     expected = models.Material(
-        'Source Name', 'S1-source-0815', None, (), (), (), None)
+        'Source Name', 'S1-source-0815', '0815', None, (), (), (), None)
     assert expected == first_row[0]
     expected = models.Process(
         'sample collection', 'S1-sample collection-2-1', None, None,
         (), (), None, None)
     assert expected == first_row[1]
     expected = models.Material(
-        'Sample Name', 'S1-sample-0815-N1', None, (), (), (), None)
+        'Sample Name', 'S1-sample-0815-N1', '0815-N1', None, (), (), (), None)
     assert expected == first_row[2]
 
 
@@ -70,14 +70,15 @@ def test_study_reader_minimal_study(
     assert 2 == len(study.arcs)
 
     expected = models.Material(
-        'Source Name', 'S1-source-0815', None, (), (), (), None)
+        'Source Name', 'S1-source-0815', '0815', None, (), (), (), None)
     assert expected == study.materials['S1-source-0815']
     expected = models.Material(
-        'Sample Name', 'S1-sample-0815-N1', None, (), (), (), None)
+        'Sample Name', 'S1-sample-0815-N1', '0815-N1', None, (), (), (), None)
     assert expected == study.materials['S1-sample-0815-N1']
 
     expected = models.Process(
-        'sample collection', 'S1-sample collection-2-1', None, None, (), (), None, None)
+        'sample collection', 'S1-sample collection-2-1',
+        None, None, (), (), None, None)
     assert expected == study.processes['S1-sample collection-2-1']
 
     expected = (models.Arc('S1-source-0815', 'S1-sample collection-2-1'),
@@ -115,26 +116,30 @@ def test_study_row_reader_small_study(
         unit=None)
 
     expected = models.Material(
-        'Source Name', 'S1-source-0815', None, (characteristics,), (), (), None)
+        'Source Name', 'S1-source-0815', '0815',
+        None, (characteristics,), (), (), None)
     assert expected == first_row[0]
     expected = models.Process(
         'sample collection', 'S1-sample collection-5-1', date(2018, 2, 2),
         'John Doe', (), (), None, None)
     assert expected == first_row[1]
     expected = models.Material(
-        'Sample Name', 'S1-sample-0815-N1', None, (), (), (), None)
+        'Sample Name', 'S1-sample-0815-N1', '0815-N1',
+        None, (), (), (), None)
     assert expected == first_row[2]
 
     assert 3 == len(second_row)
     expected = models.Material(
-        'Source Name', 'S1-source-0815', None, (characteristics,), (), (), None)
+        'Source Name', 'S1-source-0815', '0815',
+        None, (characteristics,), (), (), None)
     assert expected == second_row[0]
     expected = models.Process(
         'sample collection', 'S1-sample collection-5-2', date(2018, 2, 2),
         'John Doe', (), (), None, None)
     assert expected == second_row[1]
     expected = models.Material(
-        'Sample Name', 'S1-sample-0815-T1', None, (), (), (), None)
+        'Sample Name', 'S1-sample-0815-T1', '0815-T1',
+        None, (), (), (), None)
     assert expected == second_row[2]
 
 
@@ -175,25 +180,32 @@ def test_study_reader_small_study(
         unit=None)
 
     expected = models.Material(
-        'Source Name', 'S1-source-0815', None, (characteristics1,), (), (), None)
+        'Source Name', 'S1-source-0815', '0815', None,
+        (characteristics1,), (), (), None)
     assert expected == study.materials['S1-source-0815']
     expected = models.Material(
-        'Source Name', 'S1-source-0816', None, (characteristics2,), (), (), None)
+        'Source Name', 'S1-source-0816', '0816', None,
+        (characteristics2,), (), (),  None)
     assert expected == study.materials['S1-source-0816']
     expected = models.Material(
-        'Source Name', 'S1-source-0817', None, (characteristics3,), (), (), None)
+        'Source Name', 'S1-source-0817', '0817', None,
+        (characteristics3,), (), (), None)
     assert expected == study.materials['S1-source-0817']
     expected = models.Material(
-        'Sample Name', 'S1-sample-0815-N1', None, (), (), (), None)
+        'Sample Name', 'S1-sample-0815-N1', '0815-N1',
+        None, (), (), (), None)
     assert expected == study.materials['S1-sample-0815-N1']
     expected = models.Material(
-        'Sample Name', 'S1-sample-0815-T1', None, (), (), (), None)
+        'Sample Name', 'S1-sample-0815-T1', '0815-T1',
+        None, (), (), (), None)
     assert expected == study.materials['S1-sample-0815-T1']
     expected = models.Material(
-        'Sample Name', 'S1-sample-0816-T1', None, (), (), (), None)
+        'Sample Name', 'S1-sample-0816-T1', '0816-T1',
+        None, (), (), (), None)
     assert expected == study.materials['S1-sample-0816-T1']
     expected = models.Material(
-        'Sample Name', 'S1-sample-0817-T1', None, (), (), (), None)
+        'Sample Name', 'S1-sample-0817-T1', '0817-T1',
+        None, (), (), (), None)
     assert expected == study.materials['S1-sample-0817-T1']
 
     expected = models.Process(

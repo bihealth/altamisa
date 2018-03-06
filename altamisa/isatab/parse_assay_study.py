@@ -269,23 +269,24 @@ class _MaterialBuilder(_NodeBuilderBase):
         assert self.name_header or self.protocol_ref_header
         type_ = self.name_header.column_type
         assay_id = '-{}'.format(self.assay_id) if self.assay_id else ''
-        if line[self.name_header.col_no]:
+        name = line[self.name_header.col_no]
+        if name:
             # make material/data names unique by column
             if self.name_header.column_type == "Source Name":
                 unique_name = '{}-{}-{}'.format(
                     self.study_id, "source",
-                    line[self.name_header.col_no])
+                    name)
             elif self.name_header.column_type == "Sample Name":
                 # use static column identifier "sample-", since the same
                 # samples occur in different columns in study and assay
                 unique_name = '{}-{}-{}'.format(
                     self.study_id, "sample",
-                    line[self.name_header.col_no])
+                    name)
             else:
                 # anything else gets the column id
                 unique_name = '{}{}-{}-COL{}'.format(
                     self.study_id, assay_id,
-                    line[self.name_header.col_no],
+                    name,
                     self.name_header.col_no + 1)
         else:
             name_val = '{}{}-{} {}-{}-{}'.format(
@@ -309,7 +310,7 @@ class _MaterialBuilder(_NodeBuilderBase):
             self.material_type_header, line)
         # Then, constructing ``Material`` is easy
         return models.Material(
-            type_, unique_name, extract_label, characteristics, comments,
+            type_, unique_name, name, extract_label, characteristics, comments,
             factor_values, material_type)
 
 

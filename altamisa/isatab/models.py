@@ -372,6 +372,8 @@ class Material(NamedTuple):
     #: otherwise, use ``getattr(m.name, 'was_empty', False)`` for obtaining
     #: this information reliably.
     unique_name: str
+    # Original name of a material or data file
+    name: str
     # The label of a Labeled Extract
     extract_label: str
     #: Material characteristics

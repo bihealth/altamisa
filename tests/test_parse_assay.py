@@ -33,7 +33,8 @@ def test_assay_row_reader_minimal_assay(
     assert 4 == len(first_row)
 
     expected = models.Material(
-        'Sample Name', 'S1-sample-0815-N1', None, (), (), (), None)
+        'Sample Name', 'S1-sample-0815-N1', '0815-N1',
+        None, (), (), (), None)
     assert expected == first_row[0]
     expected = models.Process(
         'nucleic acid sequencing', 'S1-A1-0815-N1-DNA1-WES1-3', None,
@@ -41,10 +42,12 @@ def test_assay_row_reader_minimal_assay(
     assert expected == first_row[1]
     expected = models.Material(
         'Raw Data File', 'S1-A1-0815-N1-DNA1-WES1_L???_???_R1.fastq.gz-COL4',
+        '0815-N1-DNA1-WES1_L???_???_R1.fastq.gz',
         None, (), (), (), None)
     assert expected == first_row[2]
     expected = models.Material(
         'Raw Data File', 'S1-A1-0815-N1-DNA1-WES1_L???_???_R2.fastq.gz-COL5',
+        '0815-N1-DNA1-WES1_L???_???_R2.fastq.gz',
         None, (), (), (), None)
     assert expected == first_row[3]
 
@@ -75,15 +78,18 @@ def test_assay_reader_minimal_assay(
     assert 3 == len(assay.arcs)
 
     expected = models.Material(
-        'Sample Name', 'S1-sample-0815-N1', None, (), (), (), None)
+        'Sample Name', 'S1-sample-0815-N1', '0815-N1',
+        None, (), (), (), None)
     assert expected == assay.materials['S1-sample-0815-N1']
     expected = models.Material(
         'Raw Data File', 'S1-A1-0815-N1-DNA1-WES1_L???_???_R1.fastq.gz-COL4',
+        '0815-N1-DNA1-WES1_L???_???_R1.fastq.gz',
         None, (), (), (), None)
     assert expected == assay.materials[
         'S1-A1-0815-N1-DNA1-WES1_L???_???_R1.fastq.gz-COL4']
     expected = models.Material(
         'Raw Data File', 'S1-A1-0815-N1-DNA1-WES1_L???_???_R2.fastq.gz-COL5',
+        '0815-N1-DNA1-WES1_L???_???_R2.fastq.gz',
         None, (), (), (), None)
     assert expected == assay.materials[
         'S1-A1-0815-N1-DNA1-WES1_L???_???_R2.fastq.gz-COL5']
@@ -125,7 +131,8 @@ def test_assay_row_reader_small_assay(
     assert 7 == len(first_row)
 
     expected = models.Material(
-        'Sample Name', 'S1-sample-0815-N1', None, (), (), (), None)
+        'Sample Name', 'S1-sample-0815-N1', '0815-N1',
+        None, (), (), (), None)
     assert expected == first_row[0]
     expected = models.Process(
         'library preparation', 'S1-A1-library preparation-2-1', None,
@@ -137,10 +144,12 @@ def test_assay_row_reader_small_assay(
     assert expected == first_row[2]
     expected = models.Material(
         'Raw Data File', 'S1-A1-0815-N1-DNA1-WES1_L???_???_R1.fastq.gz-COL5',
+        '0815-N1-DNA1-WES1_L???_???_R1.fastq.gz',
         None, (), (), (), None)
     assert expected == first_row[3]
     expected = models.Material(
         'Raw Data File', 'S1-A1-0815-N1-DNA1-WES1_L???_???_R2.fastq.gz-COL6',
+        '0815-N1-DNA1-WES1_L???_???_R2.fastq.gz',
         None, (), (), (), None)
     assert expected == first_row[4]
     expected = models.Process(
@@ -149,13 +158,15 @@ def test_assay_row_reader_small_assay(
     assert expected == first_row[5]
     expected = models.Material(
         'Derived Data File', 'S1-A1-0815-somatic.vcf.gz-COL8',
+        '0815-somatic.vcf.gz',
         None, (), (), (), None)
     assert expected == first_row[6]
 
     assert 7 == len(second_row)
 
     expected = models.Material(
-        'Sample Name', 'S1-sample-0815-T1', None, (), (), (), None)
+        'Sample Name', 'S1-sample-0815-T1', '0815-T1',
+        None, (), (), (), None)
     assert expected == second_row[0]
     expected = models.Process(
         'library preparation', 'S1-A1-library preparation-2-2', None,
@@ -167,10 +178,12 @@ def test_assay_row_reader_small_assay(
     assert expected == second_row[2]
     expected = models.Material(
         'Raw Data File', 'S1-A1-0815-T1-DNA1-WES1_L???_???_R1.fastq.gz-COL5',
+        '0815-T1-DNA1-WES1_L???_???_R1.fastq.gz',
         None, (), (), (), None)
     assert expected == second_row[3]
     expected = models.Material(
         'Raw Data File', 'S1-A1-0815-T1-DNA1-WES1_L???_???_R2.fastq.gz-COL6',
+        '0815-T1-DNA1-WES1_L???_???_R2.fastq.gz',
         None, (), (), (), None)
     assert expected == second_row[4]
     expected = models.Process(
@@ -179,6 +192,7 @@ def test_assay_row_reader_small_assay(
     assert expected == second_row[5]
     expected = models.Material(
         'Derived Data File', 'S1-A1-0815-somatic.vcf.gz-COL8',
+        '0815-somatic.vcf.gz',
         None, (), (), (), None)
     assert expected == second_row[6]
 
@@ -205,33 +219,40 @@ def test_assay_reader_small_assay(
     assert 11 == len(assay.arcs)
 
     expected = models.Material(
-        'Sample Name', 'S1-sample-0815-N1', None, (), (), (), None)
+        'Sample Name', 'S1-sample-0815-N1', '0815-N1',
+        None, (), (), (), None)
     assert expected == assay.materials['S1-sample-0815-N1']
     expected = models.Material(
-        'Sample Name', 'S1-sample-0815-T1', None, (), (), (), None)
+        'Sample Name', 'S1-sample-0815-T1', '0815-T1',
+        None, (), (), (), None)
     assert expected == assay.materials['S1-sample-0815-T1']
     expected = models.Material(
         'Raw Data File', 'S1-A1-0815-N1-DNA1-WES1_L???_???_R1.fastq.gz-COL5',
+        '0815-N1-DNA1-WES1_L???_???_R1.fastq.gz',
         None, (), (), (), None)
     assert expected == assay.materials[
         'S1-A1-0815-N1-DNA1-WES1_L???_???_R1.fastq.gz-COL5']
     expected = models.Material(
         'Raw Data File', 'S1-A1-0815-N1-DNA1-WES1_L???_???_R2.fastq.gz-COL6',
+        '0815-N1-DNA1-WES1_L???_???_R2.fastq.gz',
         None, (), (), (), None)
     assert expected == assay.materials[
         'S1-A1-0815-N1-DNA1-WES1_L???_???_R2.fastq.gz-COL6']
     expected = models.Material(
         'Raw Data File', 'S1-A1-0815-T1-DNA1-WES1_L???_???_R1.fastq.gz-COL5',
+        '0815-T1-DNA1-WES1_L???_???_R1.fastq.gz',
         None, (), (), (), None)
     assert expected == assay.materials[
         'S1-A1-0815-T1-DNA1-WES1_L???_???_R1.fastq.gz-COL5']
     expected = models.Material(
         'Raw Data File', 'S1-A1-0815-T1-DNA1-WES1_L???_???_R2.fastq.gz-COL6',
+        '0815-T1-DNA1-WES1_L???_???_R2.fastq.gz',
         None, (), (), (), None)
     assert expected == assay.materials[
         'S1-A1-0815-T1-DNA1-WES1_L???_???_R2.fastq.gz-COL6']
     expected = models.Material(
         'Derived Data File', 'S1-A1-0815-somatic.vcf.gz-COL8',
+        '0815-somatic.vcf.gz',
         None, (), (), (), None)
     assert expected == assay.materials['S1-A1-0815-somatic.vcf.gz-COL8']
 
