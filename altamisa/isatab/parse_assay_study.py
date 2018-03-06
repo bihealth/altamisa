@@ -421,7 +421,7 @@ class _ProcessBuilder(_NodeBuilderBase):
         # Primary annotations (not parametrized)
         'Performer', 'Date', 'Array Design REF', 'Scan Name',
         # Primary annotations (parametrized)
-        'Parameter Value', 'Characteristics', 'Comment',
+        'Parameter Value', 'Comment',
         # Secondary annotations
         'Term Source REF', 'Unit')
 
