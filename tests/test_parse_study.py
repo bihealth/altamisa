@@ -189,11 +189,7 @@ def test_study_reader_small_study(
             unit=None),
         models.Characteristics(name='age', value='120', unit=unit))
     characteristics3 = (
-        models.Characteristics(
-            name='organism',
-            value=None,
-            unit=None),
-        models.Characteristics(name='age', value='150', unit=unit))
+        models.Characteristics(name='age', value='150', unit=unit), )
 
     expected = models.Material(
         'Source Name', 'source-0815', None, characteristics1, (), (), None)
