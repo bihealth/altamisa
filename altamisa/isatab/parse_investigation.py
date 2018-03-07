@@ -658,10 +658,10 @@ class InvestigationReader:
                 in enumerate(columns):
             if (not file_ and any((
                 meas_type, meas_type_term_acc, meas_type_term_src, tech_type,
-                tech_type_term_acc, tech_type_term_src, tech_plat))):
+                    tech_type_term_acc, tech_type_term_src, tech_plat))):
                 # don't allow assay columns without assay file
                 tpl = ('Found assay with no {} in {}; found: '
-                      '"{}", "{}", "{}", "{}", "{}", "{}", "{}", "{}"')
+                       '"{}", "{}", "{}", "{}", "{}", "{}", "{}", "{}"')
                 msg = tpl.format(
                     STUDY_ASSAY_FILE_NAME, STUDY_ASSAYS, file_, meas_type,
                     meas_type_term_acc, meas_type_term_src, tech_type,
