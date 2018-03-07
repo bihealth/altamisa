@@ -51,7 +51,7 @@ def test_parse_small_investigation(small_investigation_file):
     assert investigation
 
     # Ontology sources
-    assert 3 == len(investigation.ontology_source_refs)
+    assert 4 == len(investigation.ontology_source_refs)
     expected = models.OntologyRef(
         'OBI', 'http://data.bioontology.org/ontologies/OBI',
         '31', 'Ontology for Biomedical Investigations', {})

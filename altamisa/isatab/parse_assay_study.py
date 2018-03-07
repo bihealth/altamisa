@@ -209,7 +209,7 @@ class _NodeBuilderBase:
                     prev.term_source_ref_header = header
                     is_secondary = True
             elif header.column_type == 'Unit':
-                if prev.term_source_ref_header:
+                if prev.unit_header or prev.column_type == 'Unit':
                     tpl = 'Seen "Unit" header for same entity in col {}'
                     msg = tpl.format(header.col_no)
                     raise ParseIsatabException(msg)
@@ -217,7 +217,6 @@ class _NodeBuilderBase:
                     # The previous non-secondary header is annotated with a
                     # unit.
                     prev.unit_header = header
-                    is_secondary = True
             # Update is secondary flag or not
             if not is_secondary:
                 prev = header
@@ -431,7 +430,7 @@ class _ProcessBuilder(_NodeBuilderBase):
         # Primary annotations (not parametrized)
         'Performer', 'Date', 'Array Design REF', 'Scan Name',
         # Primary annotations (parametrized)
-        'Parameter Value', 'Characteristics', 'Comment',
+        'Parameter Value', 'Comment',
         # Secondary annotations
         'Term Source REF', 'Unit')
 
