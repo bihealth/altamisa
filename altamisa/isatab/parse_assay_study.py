@@ -222,7 +222,10 @@ class _NodeBuilderBase:
         value = self._build_freetext_or_term_ref(header, line)
         unit = self._build_freetext_or_term_ref(header.unit_header, line)
         # Then, constructing ``klass`` is easy
-        return klass(header.label, value, unit)
+        if value or unit:
+            return klass(header.label, value, unit)
+        else:
+            return None
 
     def _build_freetext_or_term_ref(
             self,
@@ -289,13 +292,16 @@ class _MaterialBuilder(_NodeBuilderBase):
             label = line[self.label_header.col_no]
         characteristics = tuple(
             self._build_complex(hdr, line, models.Characteristics)
-            for hdr in self.characteristic_headers)
+            for hdr in self.characteristic_headers
+            if self._build_complex(hdr, line, models.Characteristics))
         comments = tuple(
             self._build_complex(hdr, line, models.Comment)
-            for hdr in self.comment_headers)
+            for hdr in self.comment_headers
+            if self._build_complex(hdr, line, models.Comment))
         factor_values = tuple(
             self._build_complex(hdr, line, models.FactorValue)
-            for hdr in self.factor_value_headers)
+            for hdr in self.factor_value_headers
+            if self._build_complex(hdr, line, models.FactorValue))
         material_type = self._build_freetext_or_term_ref(
             self.material_type_header, line)
         # Then, constructing ``Material`` is easy
@@ -445,10 +451,12 @@ class _ProcessBuilder(_NodeBuilderBase):
             performer = None
         comments = tuple(
             self._build_complex(hdr, line, models.Comment)
-            for hdr in self.comment_headers)
+            for hdr in self.comment_headers
+            if self._build_complex(hdr, line, models.Comment))
         parameter_values = tuple(
             self._build_complex(hdr, line, models.ParameterValue)
-            for hdr in self.parameter_value_headers)
+            for hdr in self.parameter_value_headers
+            if self._build_complex(hdr, line, models.ParameterValue))
         if self.array_design_ref_header:
             array_design_ref = line[self.array_design_ref_header.col_no]
         else:
