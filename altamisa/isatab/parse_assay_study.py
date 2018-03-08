@@ -307,6 +307,14 @@ class _MaterialBuilder(_NodeBuilderBase):
             for hdr in self.factor_value_headers)
         material_type = self._build_freetext_or_term_ref(
             self.material_type_header, line)
+        # Don't accept unnamed materials/data files if there are annotations
+        if not name and any((extract_label, characteristics, comments,
+                             factor_values, material_type)):
+            tpl = ('Found annotated material/file without name: '
+                   '"{}", "{}", "{}", "{}", "{}", "{}", "{}"')
+            msg = tpl.format(type_, name, extract_label, characteristics,
+                             comments, factor_values, material_type)
+            raise ParseIsatabException(msg)
         # Then, constructing ``Material`` is easy
         return models.Material(
             type_, unique_name, name, extract_label, characteristics, comments,
