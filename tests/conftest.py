@@ -75,6 +75,7 @@ def assays_investigation_file():
     """
     path = os.path.join(os.path.dirname(__file__),
                         "data/i_assays/i_assays.txt")
+    return open(path, 'rt')
 
 
 @pytest.fixture

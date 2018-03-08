@@ -484,10 +484,11 @@ class _ProcessBuilder(_NodeBuilderBase):
             # Name header is not given, will use auto-generated unique name
             # based on protocol ref.
             protocol_ref = line[self.protocol_ref_header.col_no]
-            unique_name = '{}{}-{}-{}-{}'.format(
+            name_val = '{}{}-{}-{}-{}'.format(
                 self.study_id, assay_id,
                 protocol_ref, self.protocol_ref_header.col_no + 1,
                 counter_value)
+            unique_name = models.AnnotatedStr(name_val, was_empty=True)
         elif not self.protocol_ref_header:
             # Name header is given, but protocol ref header is not
             protocol_ref = 'UNKNOWN'
@@ -688,28 +689,75 @@ class _AssayRowBuilder(_RowBuilderBase):
     }
 
 
-def _build_study_assay(file_name, header, rows, klass):
-    """Helper for building ``Study`` and ``Assay`` objects.
-    """
-    materials = {}
-    processes = {}
-    arcs = []
-    arc_set = set()
-    for row in rows:
-        for i, entry in enumerate(row):
-            # Collect entry and materials
-            if isinstance(entry, models.Process):
-                processes[entry.unique_name] = entry
-            else:
-                assert isinstance(entry, models.Material)
-                materials[entry.unique_name] = entry
-            # Collect arc
-            if i > 0:
-                arc = models.Arc(row[i - 1].unique_name, row[i].unique_name)
-                if arc not in arc_set:
-                    arc_set.add(arc)
-                    arcs.append(arc)
-    return klass(Path(file_name), header, materials, processes, tuple(arcs))
+class _AssayAndStudyBuilder:
+    """Helper for building ``Assay`` and ``Study`` objects."""
+
+    def __init__(self, file_name, header, klass):
+        self.file_name = file_name
+        self.header = header
+        self.klass = klass
+
+    def build(self, rows):
+        return self._construct(self._postprocess_rows(rows))
+
+    def _postprocess_rows(self, rows):
+        """Postprocess the ``rows``.
+
+        Right now we are looking for processes where the name is an ``AnnotatedString`` and which
+        has the ``was_empty`` attribute set to ``True``, they should be flanked with ``Material``
+        nodes.  We then assign the same unique names for all where the unique name of the leading
+        and trailing material is the same.
+
+        It is yet unclear whether this postprocessing is sufficient but this is the place to build
+        upon the postprocessing for further refinement.
+        """
+        # Get the indices of the ``Process`` nodes to postprocess from first row.
+        idxs = []  # indices we are collecting
+        first_row = rows[0]
+        for idx, entry in enumerate(first_row):
+            if idx == 0 and idx + 1 >= len(first_row):
+                continue  # skip first and last
+            if hasattr(entry, 'protocol_ref'):  # is process, now check ifi flanked by Material
+                if hasattr(first_row[idx - 1], 'type') and hasattr(first_row[idx + 1], 'type'):
+                    idxs.append(idx)
+        # Check that the Material-Process-Material pattern is the same in all rows.
+        for row in rows:
+            for idx in idxs:
+                assert hasattr(row[idx - 1], 'type')
+                assert hasattr(row[idx], 'protocol_ref')
+                assert hasattr(row[idx + 1], 'type')
+        # Perform the change
+        for idx in idxs:
+            the_protocols = {}
+            for row in rows:
+                key = (row[idx - 1].unique_name, row[idx + 1].unique_name)
+                if key in the_protocols:
+                    row[idx] = the_protocols[key]
+                else:
+                    the_protocols[key] = row[idx]
+        return rows
+
+    def _construct(self, rows):
+        """Construct the ``Assay`` or ``Study`` object."""
+        materials = {}
+        processes = {}
+        arcs = []
+        arc_set = set()
+        for row in rows:
+            for i, entry in enumerate(row):
+                # Collect entry and materials
+                if isinstance(entry, models.Process):
+                    processes[entry.unique_name] = entry
+                else:
+                    assert isinstance(entry, models.Material)
+                    materials[entry.unique_name] = entry
+                # Collect arc
+                if i > 0:
+                    arc = models.Arc(row[i - 1].unique_name, row[i].unique_name)
+                    if arc not in arc_set:
+                        arc_set.add(arc)
+                        arcs.append(arc)
+        return self.klass(Path(self.file_name), self.header, materials, processes, tuple(arcs))
 
 
 class StudyRowReader:
@@ -805,9 +853,8 @@ class StudyReader:
         self.header = self.row_reader.header
 
     def read(self):
-        return _build_study_assay(
-            self.input_file.name, self.header, list(self.row_reader.read()),
-            models.Study)
+        return _AssayAndStudyBuilder(
+            self.input_file.name, self.header, models.Study).build(list(self.row_reader.read()),)
 
 
 # TODO: extract common parts of {Assay,Study}[Row]Reader into two base classes
@@ -911,6 +958,5 @@ class AssayReader:
         self.header = self.row_reader.header
 
     def read(self):
-        return _build_study_assay(
-            self.input_file.name, self.header, list(self.row_reader.read()),
-            models.Assay)
+        return _AssayAndStudyBuilder(
+            self.input_file.name, self.header, models.Assay).build(list(self.row_reader.read()))
