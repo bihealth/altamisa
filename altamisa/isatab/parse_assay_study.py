@@ -78,7 +78,9 @@ class _NodeBuilderBase:
     def __init__(
             self,
             ontology_source_refs,
-            column_headers: List[ColumnHeader]):
+            column_headers: List[ColumnHeader],
+            study_id: str,
+            assay_id: str):
         #: The definition of the ontology source references
         self.ontology_source_refs = ontology_source_refs
         #: The column descriptions to build ``Material`` from.
@@ -99,8 +101,8 @@ class _NodeBuilderBase:
         self.array_design_ref = None
         #: The header for array design ref
         self.array_design_ref_header = None
-        #: The header for label type
-        self.label_header = None
+        #: The header for extract label type
+        self.extract_label_header = None
         #: The header for material type
         self.material_type_header = None
         #: The header for the performer
@@ -113,8 +115,11 @@ class _NodeBuilderBase:
         self.scan_name_header = None
         #: Current counter value
         self.counter_value = 0
-        # Assign column headers to their roles (properties above)
+        #: Assign column headers to their roles (properties above)
         self._assign_column_headers()
+        #: Study and assay ids used for unique node naming
+        self.study_id = study_id
+        self.assay_id = assay_id
 
     def _next_counter(self):
         """Increment counter value and return"""
@@ -165,12 +170,12 @@ class _NodeBuilderBase:
                 else:
                     self.array_design_ref_header = header
             elif header.column_type == 'Label':
-                if self.label_header:
+                if self.extract_label_header:
                     tpl = 'Seen "Label" header for same entity in col {}'
                     msg = tpl.format(header.col_no)
                     raise ParseIsatabException(msg)
                 else:
-                    self.label_header = header
+                    self.extract_label_header = header
             elif header.column_type == 'Date':
                 if self.date_header:
                     tpl = 'Seen "Date" header for same entity in col {}'
@@ -262,31 +267,35 @@ class _MaterialBuilder(_NodeBuilderBase):
         # First, build the individual components
         assert self.name_header or self.protocol_ref_header
         type_ = self.name_header.column_type
-        if line[self.name_header.col_no]:
+        assay_id = '-{}'.format(self.assay_id) if self.assay_id else ''
+        name = line[self.name_header.col_no]
+        if name:
             # make material/data names unique by column
             if self.name_header.column_type == "Source Name":
-                name = '{}-{}'.format(
-                    "source",
-                    line[self.name_header.col_no])
+                unique_name = '{}-{}-{}'.format(
+                    self.study_id, "source",
+                    name)
             elif self.name_header.column_type == "Sample Name":
                 # use static column identifier "sample-", since the same
                 # samples occur in different columns in study and assay
-                name = '{}-{}'.format(
-                    "sample",
-                    line[self.name_header.col_no])
+                unique_name = '{}-{}-{}'.format(
+                    self.study_id, "sample",
+                    name)
             else:
                 # anything else gets the column id
-                name = '{}-COL{}'.format(
-                    line[self.name_header.col_no],
+                unique_name = '{}{}-{}-COL{}'.format(
+                    self.study_id, assay_id,
+                    name,
                     self.name_header.col_no + 1)
         else:
-            name_val = '{} {}-{}-{}'.format(
+            name_val = '{}{}-{} {}-{}-{}'.format(
+                self.study_id, assay_id,
                 TOKEN_EMPTY, self.name_header.column_type,
                 self.name_header.col_no + 1, counter_value)
-            name = models.AnnotatedStr(name_val, was_empty=True)
-        label = None
-        if self.label_header:
-            label = line[self.label_header.col_no]
+            unique_name = models.AnnotatedStr(name_val, was_empty=True)
+        extract_label = None
+        if self.extract_label_header:
+            extract_label = line[self.extract_label_header.col_no]
         characteristics = tuple(
             self._build_complex(hdr, line, models.Characteristics)
             for hdr in self.characteristic_headers)
@@ -300,7 +309,7 @@ class _MaterialBuilder(_NodeBuilderBase):
             self.material_type_header, line)
         # Then, constructing ``Material`` is easy
         return models.Material(
-            type_, name, label, characteristics, comments,
+            type_, unique_name, name, extract_label, characteristics, comments,
             factor_values, material_type)
 
 
@@ -428,7 +437,8 @@ class _ProcessBuilder(_NodeBuilderBase):
     def build(self, line: List[str]) -> models.Process:
         """Build and return ``Process`` from CSV file."""
         # First, build the individual attributes of ``Process``
-        protocol_ref, name = self._build_protocol_ref_and_name(line)
+        protocol_ref, unique_name, name = self._build_protocol_ref_and_name(
+            line)
         if self.date_header and line[self.date_header.col_no]:
             try:
                 date = datetime.strptime(
@@ -460,38 +470,56 @@ class _ProcessBuilder(_NodeBuilderBase):
             scan_name = None
         # Then, constructing ``Process`` is easy
         return models.Process(
-            protocol_ref, name, date, performer, parameter_values, comments,
-            array_design_ref, scan_name)
+            protocol_ref, unique_name, name, date, performer, parameter_values,
+            comments, array_design_ref, scan_name)
 
     def _build_protocol_ref_and_name(self, line: List[str]):
         # At least one of these headers has to be specified
         assert self.name_header or self.protocol_ref_header
         # Perform case distinction on which case is actually true
         counter_value = self._next_counter()
+        assay_id = '-{}'.format(self.assay_id) if self.assay_id else ''
+        name = None
         if not self.name_header:
-            # Name header is given but value is empty, will use auto-generated
-            # value.
+            # Name header is not given, will use auto-generated unique name
+            # based on protocol ref.
             protocol_ref = line[self.protocol_ref_header.col_no]
-            name = '{}-{}-{}'.format(
+            unique_name = '{}{}-{}-{}-{}'.format(
+                self.study_id, assay_id,
                 protocol_ref, self.protocol_ref_header.col_no + 1,
                 counter_value)
         elif not self.protocol_ref_header:
+            # Name header is given, but protocol ref header is not
             protocol_ref = 'UNKNOWN'
-            if line[self.name_header.col_no]:
-                name = line[self.name_header.col_no]
-            else:  # empty!
-                name_val = '{} {}-{}-{}'.format(
+            name = line[self.name_header.col_no]
+            if name:  # Use name if available
+                unique_name = '{}{}-{}-{}'.format(
+                    self.study_id, assay_id,
+                    name,
+                    self.name_header.col_no + 1)
+            else:  # Empty!
+                name_val = '{}{}-{} {}-{}-{}'.format(
+                    self.study_id, assay_id,
                     TOKEN_ANONYMOUS,
                     self.name_header.column_type.replace(' Name', ''),
                     self.name_header.col_no + 1, counter_value)
-                name = models.AnnotatedStr(name_val, was_empty=True)
-        else:  # both are given
+                unique_name = models.AnnotatedStr(name_val, was_empty=True)
+        else:  # Both header are given
             protocol_ref = line[self.protocol_ref_header.col_no]
-            if line[self.name_header.col_no]:
-                name = line[self.name_header.col_no]
+            name = line[self.name_header.col_no]
+            if name:
+                unique_name = '{}{}-{}-{}'.format(
+                    self.study_id, assay_id,
+                    name,
+                    self.name_header.col_no + 1)
             else:
-                name = '{}-{}'.format(protocol_ref, counter_value)
-        return protocol_ref, name
+                unique_name = '{}{}-{}-{}'.format(self.study_id, assay_id,
+                                                  protocol_ref, counter_value)
+        if not protocol_ref:
+            tpl = 'Missing protocol reference in column {}'
+            msg = tpl.format(self.protocol_ref_header.col_no + 1)
+            raise ParseIsatabException(msg)
+        return protocol_ref, unique_name, name
 
 
 class _ProtocolRefBuilder(_ProcessBuilder):
@@ -556,9 +584,12 @@ class _RowBuilderBase:
     #: Registry of column header to node builder
     node_builders = None
 
-    def __init__(self, ontology_source_refs, header: List[ColumnHeader]):
+    def __init__(self, ontology_source_refs, header: List[ColumnHeader],
+                 study_id: str, assay_id: str = None):
         self.ontology_source_refs = ontology_source_refs
         self.header = header
+        self.study_id = study_id
+        self.assay_id = assay_id
         self._builders = list(self._make_builders())
 
     def _make_builders(self):
@@ -566,7 +597,8 @@ class _RowBuilderBase:
         breaks = list(self._make_breaks())
         for start, end in zip(breaks, breaks[1:]):
             klass = self.node_builders[self.header[start].column_type]
-            yield klass(self.ontology_source_refs, self.header[start:end])
+            yield klass(self.ontology_source_refs, self.header[start:end],
+                        self.study_id, self.assay_id)
 
     def _make_breaks(self):
         """Build indices to break the columns at
@@ -667,13 +699,13 @@ def _build_study_assay(file_name, header, rows, klass):
         for i, entry in enumerate(row):
             # Collect entry and materials
             if isinstance(entry, models.Process):
-                processes[entry.name] = entry
+                processes[entry.unique_name] = entry
             else:
                 assert isinstance(entry, models.Material)
-                materials[entry.name] = entry
+                materials[entry.unique_name] = entry
             # Collect arc
             if i > 0:
-                arc = models.Arc(row[i - 1].name, row[i].name)
+                arc = models.Arc(row[i - 1].unique_name, row[i].unique_name)
                 if arc not in arc_set:
                     arc_set.add(arc)
                     arcs.append(arc)
@@ -692,15 +724,18 @@ class StudyRowReader:
     def from_stream(
             klass,
             investigation: models.InvestigationInfo,
+            study_id: str,
             input_file: TextIO):
         """Construct from file-like object"""
-        return StudyRowReader(investigation, input_file)
+        return StudyRowReader(investigation, study_id, input_file)
 
     def __init__(
             self,
             investigation: models.InvestigationInfo,
+            study_id: str,
             input_file: TextIO):
         self.investigation = investigation
+        self.study_id = study_id
         self.input_file = input_file
         self._reader = csv.reader(input_file, delimiter='\t', quotechar='"')
         self._line = None
@@ -731,7 +766,7 @@ class StudyRowReader:
     def read(self):
         builder = _StudyRowBuilder(
             self.investigation.ontology_source_refs,
-            self.header)
+            self.header, self.study_id)
         while True:
             line = self._read_next_line()
             if line:
@@ -751,15 +786,18 @@ class StudyReader:
     def from_stream(
             klass,
             investigation: models.InvestigationInfo,
+            study_id: str,
             input_file: TextIO):
         """Construct from file-like object"""
-        return StudyReader(investigation, input_file)
+        return StudyReader(investigation, study_id, input_file)
 
     def __init__(
             self,
             investigation: models.InvestigationInfo,
+            study_id: str,
             input_file: TextIO):
-        self.row_reader = StudyRowReader.from_stream(investigation, input_file)
+        self.row_reader = StudyRowReader.from_stream(
+            investigation, study_id, input_file)
         self.investigation = investigation
         #: The file used for reading from
         self.input_file = input_file
@@ -787,15 +825,21 @@ class AssayRowReader:
     def from_stream(
             klass,
             investigation: models.InvestigationInfo,
+            study_id: str,
+            assay_id: str,
             input_file: TextIO):
         """Construct from file-like object"""
-        return AssayRowReader(investigation, input_file)
+        return AssayRowReader(investigation, study_id, assay_id, input_file)
 
     def __init__(
             self,
             investigation: models.InvestigationInfo,
+            study_id: str,
+            assay_id: str,
             input_file: TextIO):
         self.investigation = investigation
+        self.study_id = study_id
+        self.assay_id = assay_id
         self.input_file = input_file
         self._reader = csv.reader(input_file, delimiter='\t', quotechar='"')
         self._line = None
@@ -826,7 +870,7 @@ class AssayRowReader:
     def read(self):
         builder = _AssayRowBuilder(
             self.investigation.ontology_source_refs,
-            self.header)
+            self.header, self.study_id, self.assay_id)
         while True:
             line = self._read_next_line()
             if line:
@@ -846,15 +890,20 @@ class AssayReader:
     def from_stream(
             klass,
             investigation: models.InvestigationInfo,
+            study_id: str,
+            assay_id: str,
             input_file: TextIO):
         """Construct from file-like object"""
-        return AssayReader(investigation, input_file)
+        return AssayReader(investigation, study_id, assay_id, input_file)
 
     def __init__(
             self,
             investigation: models.InvestigationInfo,
+            study_id: str,
+            assay_id: str,
             input_file: TextIO):
-        self.row_reader = AssayRowReader.from_stream(investigation, input_file)
+        self.row_reader = AssayRowReader.from_stream(
+            investigation, study_id, assay_id, input_file)
         self.investigation = investigation
         #: The file used for reading from
         self.input_file = input_file

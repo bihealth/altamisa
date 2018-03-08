@@ -19,7 +19,8 @@ def test_study_row_reader_minimal_study(
     investigation = InvestigationReader.from_stream(minimal_investigation_file).read()
 
     # Create new row reader and check read headers
-    row_reader = StudyRowReader.from_stream(investigation, minimal_study_file)
+    row_reader = StudyRowReader.from_stream(
+        investigation, "S1", minimal_study_file)
     assert 3 == len(row_reader.header)
 
     # Read all rows in study
@@ -32,14 +33,14 @@ def test_study_row_reader_minimal_study(
     assert 3 == len(first_row)
 
     expected = models.Material(
-        'Source Name', 'source-0815', None, (), (), (), None)
+        'Source Name', 'S1-source-0815', '0815', None, (), (), (), None)
     assert expected == first_row[0]
     expected = models.Process(
-        'sample collection', 'sample collection-2-1', None, None,
+        'sample collection', 'S1-sample collection-2-1', None, None, None,
         (), (), None, None)
     assert expected == first_row[1]
     expected = models.Material(
-        'Sample Name', 'sample-0815-N1', None, (), (), (), None)
+        'Sample Name', 'S1-sample-0815-N1', '0815-N1', None, (), (), (), None)
     assert expected == first_row[2]
 
 
@@ -54,7 +55,8 @@ def test_study_reader_minimal_study(
     investigation = InvestigationReader.from_stream(minimal_investigation_file).read()
 
     # Create new row reader and check read headers
-    reader = StudyReader.from_stream(investigation, minimal_study_file)
+    reader = StudyReader.from_stream(
+        investigation, "S1", minimal_study_file)
     assert 3 == len(reader.header)
 
     # Read study
@@ -68,18 +70,19 @@ def test_study_reader_minimal_study(
     assert 2 == len(study.arcs)
 
     expected = models.Material(
-        'Source Name', 'source-0815', None, (), (), (), None)
-    assert expected == study.materials['source-0815']
+        'Source Name', 'S1-source-0815', '0815', None, (), (), (), None)
+    assert expected == study.materials['S1-source-0815']
     expected = models.Material(
-        'Sample Name', 'sample-0815-N1', None, (), (), (), None)
-    assert expected == study.materials['sample-0815-N1']
+        'Sample Name', 'S1-sample-0815-N1', '0815-N1', None, (), (), (), None)
+    assert expected == study.materials['S1-sample-0815-N1']
 
     expected = models.Process(
-        'sample collection', 'sample collection-2-1', None, None, (), (), None, None)
-    assert expected == study.processes['sample collection-2-1']
+        'sample collection', 'S1-sample collection-2-1', None,
+        None, None, (), (), None, None)
+    assert expected == study.processes['S1-sample collection-2-1']
 
-    expected = (models.Arc('source-0815', 'sample collection-2-1'),
-                models.Arc('sample collection-2-1', 'sample-0815-N1'))
+    expected = (models.Arc('S1-source-0815', 'S1-sample collection-2-1'),
+                models.Arc('S1-sample collection-2-1', 'S1-sample-0815-N1'))
     assert expected == study.arcs
 
 
@@ -90,7 +93,8 @@ def test_study_row_reader_small_study(
     investigation = InvestigationReader.from_stream(small_investigation_file).read()
 
     # Create new row reader and check read headers
-    row_reader = StudyRowReader.from_stream(investigation, small_study_file)
+    row_reader = StudyRowReader.from_stream(
+        investigation, "S1", small_study_file)
     assert 11 == len(row_reader.header)
 
     # Read all rows in study
@@ -121,28 +125,30 @@ def test_study_row_reader_small_study(
         models.Characteristics(name='age', value='90', unit=unit))
 
     expected = models.Material(
-        'Source Name', 'source-0815', None, characteristics, (), (), None)
+        'Source Name', 'S1-source-0815', '0815',
+        None, characteristics, (), (), None)
     assert expected == first_row[0]
     expected = models.Process(
-        'sample collection', 'sample collection-9-1', date(2018, 2, 2),
-        'John Doe', (), (), None, None)
+        'sample collection', 'S1-sample collection-9-1',  None,
+        date(2018, 2, 2), 'John Doe', (), (), None, None)
     assert expected == first_row[1]
     expected = models.Material(
-        'Sample Name', 'sample-0815-N1', None,
-        (models.Characteristics('status', '0', None), ), (), (), None)
+        'Sample Name', 'S1-sample-0815-N1', '0815-N1',
+        None, (models.Characteristics('status', '0', None), ), (), (), None)
     assert expected == first_row[2]
 
     assert 3 == len(second_row)
     expected = models.Material(
-        'Source Name', 'source-0815', None, characteristics, (), (), None)
+        'Source Name', 'S1-source-0815', '0815',
+        None, characteristics, (), (), None)
     assert expected == second_row[0]
     expected = models.Process(
-        'sample collection', 'sample collection-9-2', date(2018, 2, 2),
-        'John Doe', (), (), None, None)
+        'sample collection', 'S1-sample collection-9-2', None,
+        date(2018, 2, 2), 'John Doe', (), (), None, None)
     assert expected == second_row[1]
     expected = models.Material(
-        'Sample Name', 'sample-0815-T1', None,
-        (models.Characteristics('status', '2', None), ), (), (), None)
+        'Sample Name', 'S1-sample-0815-T1', '0815-T1',
+        None,  (models.Characteristics('status', '2', None), ), (), (), None)
     assert expected == second_row[2]
 
 
@@ -153,7 +159,7 @@ def test_study_reader_small_study(
     investigation = InvestigationReader.from_stream(small_investigation_file).read()
 
     # Create new row reader and check read headers
-    reader = StudyReader.from_stream(investigation, small_study_file)
+    reader = StudyReader.from_stream(investigation, "S1", small_study_file)
     assert 11 == len(reader.header)
 
     # Read study
@@ -196,53 +202,55 @@ def test_study_reader_small_study(
         models.Characteristics(name='age', value='150', unit=unit))
 
     expected = models.Material(
-        'Source Name', 'source-0815', None, characteristics1, (), (), None)
-    assert expected == study.materials['source-0815']
+        'Source Name', 'S1-source-0815', '0815', None,
+        characteristics1, (), (), None)
+    assert expected == study.materials['S1-source-0815']
     expected = models.Material(
-        'Source Name', 'source-0816', None, characteristics2, (), (), None)
-    assert expected == study.materials['source-0816']
+        'Source Name', 'S1-source-0816', '0816', None,
+        characteristics2, (), (),  None)
+    assert expected == study.materials['S1-source-0816']
     expected = models.Material(
-        'Source Name', 'source-0817', None, characteristics3, (), (), None)
-    assert expected == study.materials['source-0817']
+        'Source Name', 'S1-source-0817', '0817', None,
+        characteristics3, (), (), None)
+    assert expected == study.materials['S1-source-0817']
+    expected = models.Material(
+        'Sample Name', 'S1-sample-0815-N1', '0815-N1',
+        None, (models.Characteristics('status', '0', None), ), (), (), None)
+    assert expected == study.materials['S1-sample-0815-N1']
+    expected = models.Material(
+        'Sample Name', 'S1-sample-0815-T1', '0815-T1',
+        None, (models.Characteristics('status', '2', None),), (), (), None)
+    assert expected == study.materials['S1-sample-0815-T1']
+    expected = models.Material(
+        'Sample Name', 'S1-sample-0816-T1', '0816-T1',
+        None, (models.Characteristics('status', '1', None),), (), (), None)
+    assert expected == study.materials['S1-sample-0816-T1']
+    expected = models.Material(
+        'Sample Name', 'S1-sample-0817-T1', '0817-T1',
+        None, (models.Characteristics('status', '2', None),), (), (), None)
+    assert expected == study.materials['S1-sample-0817-T1']
 
-    expected = models.Material(
-        'Sample Name', 'sample-0815-N1', None,
-        (models.Characteristics('status', '0', None), ), (), (), None)
-    assert expected == study.materials['sample-0815-N1']
-    expected = models.Material(
-        'Sample Name', 'sample-0815-T1', None,
-        (models.Characteristics('status', '2', None),), (), (), None)
-    assert expected == study.materials['sample-0815-T1']
-    expected = models.Material(
-        'Sample Name', 'sample-0816-T1', None,
-        (models.Characteristics('status', '1', None),), (), (), None)
-    assert expected == study.materials['sample-0816-T1']
-    expected = models.Material(
-        'Sample Name', 'sample-0817-T1', None,
-        (models.Characteristics('status', '2', None),), (), (), None)
-    assert expected == study.materials['sample-0817-T1']
-
     expected = models.Process(
-        'sample collection', 'sample collection-9-1', date(2018, 2, 2),
-        'John Doe', (), (), None, None)
-    assert expected == study.processes['sample collection-9-1']
+        'sample collection', 'S1-sample collection-9-1', None,
+        date(2018, 2, 2), 'John Doe', (), (), None, None)
+    assert expected == study.processes['S1-sample collection-9-1']
     expected = models.Process(
-        'sample collection', 'sample collection-9-2', date(2018, 2, 2),
-        'John Doe', (), (), None, None)
-    assert expected == study.processes['sample collection-9-2']
+        'sample collection', 'S1-sample collection-9-2', None,
+        date(2018, 2, 2), 'John Doe', (), (), None, None)
+    assert expected == study.processes['S1-sample collection-9-2']
     expected = models.Process(
-        'sample collection', 'sample collection-9-3', date(2018, 2, 2),
-        'John Doe', (), (), None, None)
-    assert expected == study.processes['sample collection-9-3']
+        'sample collection', 'S1-sample collection-9-3', None,
+        date(2018, 2, 2), 'John Doe', (), (), None, None)
+    assert expected == study.processes['S1-sample collection-9-3']
 
     expected = (
-        models.Arc('source-0815', 'sample collection-9-1'),
-        models.Arc('sample collection-9-1', 'sample-0815-N1'),
-        models.Arc('source-0815', 'sample collection-9-2'),
-        models.Arc('sample collection-9-2', 'sample-0815-T1'),
-        models.Arc('source-0816', 'sample collection-9-3'),
-        models.Arc('sample collection-9-3', 'sample-0816-T1'),
-        models.Arc('source-0817', 'sample collection-9-4'),
-        models.Arc('sample collection-9-4', 'sample-0817-T1'),
+        models.Arc('S1-source-0815', 'S1-sample collection-9-1'),
+        models.Arc('S1-sample collection-9-1', 'S1-sample-0815-N1'),
+        models.Arc('S1-source-0815', 'S1-sample collection-9-2'),
+        models.Arc('S1-sample collection-9-2', 'S1-sample-0815-T1'),
+        models.Arc('S1-source-0816', 'S1-sample collection-9-3'),
+        models.Arc('S1-sample collection-9-3', 'S1-sample-0816-T1'),
+        models.Arc('S1-source-0817', 'S1-sample collection-9-4'),
+        models.Arc('S1-sample collection-9-4', 'S1-sample-0817-T1'),
     )
     assert expected == study.arcs

@@ -11,33 +11,37 @@ from altamisa.isatab import InvestigationReader, StudyReader, AssayReader
 
 
 def print_dot(
-        obj, outf, studyid, assayid='', indent='    ',
+        obj, outf, indent='    ',
         mat_shape='box', mat_color='black',
         proc_shape='ellipse', proc_color='blue'):
 
     print(indent + '/* materials */', file=outf)
     for name, mat in obj.materials.items():
-        assayid_mat = assayid if mat.type != "Sample Name" else ''
-        print('{}{} [shape={},color={},fontcolor={}]'.format(
-            indent, json.dumps('{} ({}{})'.format(name, studyid, assayid_mat)),
+        label = json.dumps('{}:\n{}\n({})'.format(
+            mat.type,
+            mat.name if mat.name else "-",
+            name))
+        print('{}{} [label={},shape={},color={},fontcolor={}]'.format(
+            indent, json.dumps(name), label,
             mat_shape, mat_color, mat_color
         ), file=outf)
     print(indent + '/* processes */', file=outf)
-    for name, _ in obj.processes.items():
-        print('{}{} [shape={},color={},fontcolor={}]'.format(
-            indent, json.dumps('{} ({}{})'.format(name, studyid, assayid)),
+    for name, proc in obj.processes.items():
+        label = json.dumps('{}:\n{}\n{}\n({})'.format(
+            "Process",
+            proc.protocol_ref if proc.protocol_ref else "-",
+            proc.name if proc.name else "-",
+            name))
+        print('{}{} [label={},shape={},color={},fontcolor={}]'.format(
+            indent, json.dumps(name), label,
             proc_shape, proc_color, proc_color
         ), file=outf)
     print(indent + '/* arcs */', file=outf)
     for arc in obj.arcs:
-        assayid_tail = assayid
-        if (arc.tail in obj.materials
-                and obj.materials[arc.tail].type == "Sample Name"):
-            assayid_tail = ''
         print('{}{} -> {};'.format(
             indent,
-            json.dumps('{} ({}{})'.format(arc.tail, studyid, assayid_tail)),
-            json.dumps('{} ({}{})'.format(arc.head, studyid, assayid))
+            json.dumps(arc.tail),
+            json.dumps(arc.head)
         ), file=outf)
 
 
@@ -52,26 +56,30 @@ def run(args):
 
     for s, studyInfo in enumerate(investigation.studies):
         with open(os.path.join(path, studyInfo.info.path), 'rt') as inputf:
-            study = StudyReader.from_stream(investigation, inputf).read()
+            study = StudyReader.from_stream(investigation,
+                                            "S{}".format(s+1),
+                                            inputf).read()
         print('  /* study {} */'.format(studyInfo.info.path),
               file=args.output_file)
         print('  subgraph clusterStudy{} {{'.format(s), file=args.output_file)
         print('    label = "Study: {}"'.format(studyInfo.info.path),
               file=args.output_file)
-        print_dot(study, args.output_file, 'S{}'.format(s))
+        print_dot(study, args.output_file)
         print('  }', file=args.output_file)
 
         for a, assayInfo in enumerate(studyInfo.assays.values()):
             with open(os.path.join(path, assayInfo.path), 'rt') as inputf:
-                assay = AssayReader.from_stream(investigation, inputf).read()
+                assay = AssayReader.from_stream(investigation,
+                                                "S{}".format(s+1),
+                                                "A{}".format(a+1),
+                                                inputf).read()
             print('  /* assay {} */'.format(assayInfo.path),
                   file=args.output_file)
             print('  subgraph clusterAssayS{}A{} {{'.format(s, a),
                   file=args.output_file)
             print('    label = "Assay: {}"'.format(assayInfo.path),
                   file=args.output_file)
-            print_dot(assay, args.output_file,
-                      'S{}'.format(s), 'A{}'.format(a))
+            print_dot(assay, args.output_file)
             print('  }', file=args.output_file)
 
     print('}', file=args.output_file)
