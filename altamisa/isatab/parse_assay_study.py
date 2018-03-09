@@ -712,24 +712,29 @@ class _AssayAndStudyBuilder:
     def _postprocess_rows(self, rows):
         """Postprocess the ``rows``.
 
-        Right now we are looking for processes where the name is an ``AnnotatedString`` and which
-        has the ``was_empty`` attribute set to ``True``, they should be flanked with ``Material``
-        nodes.  We then assign the same unique names for all where the unique name of the leading
-        and trailing material is the same.
+        Right now we are looking for processes where the name is an
+        ``AnnotatedString`` and which has the ``was_empty`` attribute set to
+        ``True``, they should be flanked with ``Material`` nodes.  We then
+        assign the same unique names for all where the unique name of the
+        leading and trailing material is the same.
 
-        It is yet unclear whether this postprocessing is sufficient but this is the place to build
-        upon the postprocessing for further refinement.
+        It is yet unclear whether this postprocessing is sufficient but this is
+        the place to build upon the postprocessing for further refinement.
         """
-        # Get the indices of the ``Process`` nodes to postprocess from first row.
+        # Get the indices of the ``Process`` nodes to postprocess from first
+        # row.
         idxs = []  # indices we are collecting
         first_row = rows[0]
         for idx, entry in enumerate(first_row):
             if idx == 0 and idx + 1 >= len(first_row):
                 continue  # skip first and last
-            if hasattr(entry, 'protocol_ref'):  # is process, now check ifi flanked by Material
-                if hasattr(first_row[idx - 1], 'type') and hasattr(first_row[idx + 1], 'type'):
+            if hasattr(entry, 'protocol_ref'):
+                # is process, now check if flanked by Material
+                if (hasattr(first_row[idx - 1], 'type')
+                        and hasattr(first_row[idx + 1], 'type')):
                     idxs.append(idx)
-        # Check that the Material-Process-Material pattern is the same in all rows.
+        # Check that the Material-Process-Material pattern is the same in all
+        # rows.
         for row in rows:
             for idx in idxs:
                 assert hasattr(row[idx - 1], 'type')
@@ -774,11 +779,13 @@ class _AssayAndStudyBuilder:
                     materials[entry.unique_name] = entry
                 # Collect arc
                 if i > 0:
-                    arc = models.Arc(row[i - 1].unique_name, row[i].unique_name)
+                    arc = models.Arc(row[i - 1].unique_name,
+                                     row[i].unique_name)
                     if arc not in arc_set:
                         arc_set.add(arc)
                         arcs.append(arc)
-        return self.klass(Path(self.file_name), self.header, materials, processes, tuple(arcs))
+        return self.klass(Path(self.file_name), self.header,
+                          materials, processes, tuple(arcs))
 
 
 class StudyRowReader:
@@ -875,7 +882,8 @@ class StudyReader:
 
     def read(self):
         return _AssayAndStudyBuilder(
-            self.input_file.name, self.header, models.Study).build(list(self.row_reader.read()),)
+            self.input_file.name, self.header, models.Study).build(
+                list(self.row_reader.read()),)
 
 
 # TODO: extract common parts of {Assay,Study}[Row]Reader into two base classes
@@ -980,4 +988,5 @@ class AssayReader:
 
     def read(self):
         return _AssayAndStudyBuilder(
-            self.input_file.name, self.header, models.Assay).build(list(self.row_reader.read()))
+            self.input_file.name, self.header, models.Assay).build(
+                list(self.row_reader.read()))
