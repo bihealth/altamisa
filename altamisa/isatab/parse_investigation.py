@@ -264,11 +264,13 @@ def _parse_comments(section, comment_keys, i=None):
         return tok[1:-1]
 
     if i is not None:
-        comments = {_parse_comment_header(k):
-                    section[k][i] for k in comment_keys}
+        comments = tuple(models.Comment(_parse_comment_header(k),
+                                        section[k][i],
+                                        None) for k in comment_keys)
     else:
-        comments = {_parse_comment_header(k):
-                    section[k] for k in comment_keys}
+        comments = tuple(models.Comment(_parse_comment_header(k),
+                                        section[k],
+                                        None) for k in comment_keys)
     return comments
 
 
@@ -382,13 +384,13 @@ class InvestigationReader:
     # STUDY FACTORS, STUDY ASSAYS, STUDY PROTOCOLS, STUDY CONTACTS
     def _read_multi_column_section(self, prefix, ref_keys, section_name):
         section = {}
-        comment_keys = set()
+        comment_keys = list()
         while (self._next_line_startswith(prefix) or
                self._next_line_startswith_comment()):
             line = self._read_next_line()
             key = line[0]
             if key.startswith('Comment'):
-                comment_keys.add(key)
+                comment_keys.append(key)
             elif key not in ref_keys:
                 tpl = 'Line must start with one of {} but is {}'
                 msg = tpl.format(ref_keys, line)
@@ -415,7 +417,7 @@ class InvestigationReader:
     def _read_single_column_section(self, prefix, ref_keys, section_name):
         # Read the lines in this section.
         section = {}
-        comment_keys = set()
+        comment_keys = list()
         while (self._next_line_startswith(prefix) or
                self._next_line_startswith_comment()):
             line = self._read_next_line()
@@ -425,7 +427,7 @@ class InvestigationReader:
                 raise ParseIsatabException(msg)
             key = line[0]
             if key.startswith('Comment'):
-                comment_keys.add(key)
+                comment_keys.append(key)
             elif key not in ref_keys:
                 tpl = 'Line must start with one of {} but is {}'
                 msg = tpl.format(ref_keys, line)
