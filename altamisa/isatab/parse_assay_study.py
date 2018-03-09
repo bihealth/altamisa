@@ -522,9 +522,10 @@ class _ProcessBuilder(_NodeBuilderBase):
                     name,
                     self.name_header.col_no + 1)
             else:
-                unique_name = '{}{}-{}-{}-{}'.format(
+                name_val = '{}{}-{}-{}-{}'.format(
                     self.study_id, assay_id, protocol_ref,
                     self.protocol_ref_header.col_no + 1, counter_value)
+                unique_name = models.AnnotatedStr(name_val, was_empty=True)
         if not protocol_ref:
             tpl = 'Missing protocol reference in column {}'
             msg = tpl.format(self.protocol_ref_header.col_no + 1)
