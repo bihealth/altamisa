@@ -314,8 +314,8 @@ def test_assay_reader_small2_assay(
     assert str(assay.file).endswith('data/i_small2/a_small2.txt')
     assert 13 == len(assay.header)
     assert 11 == len(assay.materials)
-    assert 14 == len(assay.processes)
-    assert 26 == len(assay.arcs)
+    assert 15 == len(assay.processes)
+    assert 27 == len(assay.arcs)
 
     # Eventually expected graph
     expected = (
@@ -337,10 +337,11 @@ def test_assay_reader_small2_assay(
         models.Arc('S1-A1-0815-T1-Pro1-B-115-COL5', 'S1-A1-chromatography-8-4'),
         models.Arc('S1-A1-chromatography-8-1', 'S1-A1-poolA-10'),
         models.Arc('S1-A1-chromatography-8-2', 'S1-A1-poolA-10'),
-        models.Arc('S1-A1-chromatography-8-3', 'S1-A1-poolB-10'),
-        models.Arc('S1-A1-chromatography-8-4', 'S1-A1-poolB-10'),
+        models.Arc('S1-A1-chromatography-8-3', 'S1-A1-mass spectrometry-9-3'),
+        models.Arc('S1-A1-chromatography-8-4', 'S1-A1-mass spectrometry-9-4'),
         models.Arc('S1-A1-poolA-10', 'S1-A1-poolA.raw-COL11'),
-        models.Arc('S1-A1-poolB-10', 'S1-A1-poolB.raw-COL11'),
+        models.Arc('S1-A1-mass spectrometry-9-3', 'S1-A1-poolB.raw-COL11'),
+        models.Arc('S1-A1-mass spectrometry-9-4', 'S1-A1-poolB.raw-COL11'),
         models.Arc('S1-A1-poolA.raw-COL11', 'S1-A1-data transformation-12-1'),
         models.Arc('S1-A1-poolB.raw-COL11', 'S1-A1-data transformation-12-3'),
         models.Arc('S1-A1-data transformation-12-1', 'S1-A1-results.csv-COL13'),
