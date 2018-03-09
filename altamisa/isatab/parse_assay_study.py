@@ -713,43 +713,52 @@ class _AssayAndStudyBuilder:
     def _postprocess_rows(self, rows):
         """Postprocess the ``rows``.
 
-        Right now we are looking for processes where the name is an
-        ``AnnotatedString`` and which has the ``was_empty`` attribute set to
-        ``True``, they should be flanked with ``Material`` nodes.  We then
-        assign the same unique names for all where the unique name of the
-        leading and trailing material is the same.
+        Right now we are looking for nodes (material of process) without an
+        original name (which would be equivalent to unique_name being an
+        ``AnnotatedString`` and having the ``was_empty`` attribute set to
+        ``True``) and their previous and next nodes with an original name. We
+        then assign the same unique names for all where the unique names of the
+        previous and next nodes with an original name is the same.
 
         It is yet unclear whether this postprocessing is sufficient but this is
         the place to build upon the postprocessing for further refinement.
         """
-        # Get the indices of the ``Process`` nodes to postprocess from first
-        # row.
-        idxs = []  # indices we are collecting
-        first_row = rows[0]
-        for idx, entry in enumerate(first_row):
-            if idx == 0 and idx + 1 >= len(first_row):
-                continue  # skip first and last
-            if hasattr(entry, 'protocol_ref'):
-                # is process, now check if flanked by Material
-                if (hasattr(first_row[idx - 1], 'type')
-                        and hasattr(first_row[idx + 1], 'type')):
-                    idxs.append(idx)
-        # Check that the Material-Process-Material pattern is the same in all
-        # rows.
+
+        node_context = {}
         for row in rows:
-            for idx in idxs:
-                assert hasattr(row[idx - 1], 'type')
-                assert hasattr(row[idx], 'protocol_ref')
-                assert hasattr(row[idx + 1], 'type')
-        # Perform the change
-        for idx in idxs:
-            the_protocols = {}
-            for row in rows:
-                key = (row[idx - 1].unique_name, row[idx + 1].unique_name)
-                if key in the_protocols:
-                    row[idx] = the_protocols[key]
-                else:
-                    the_protocols[key] = row[idx]
+            for idx, entry in enumerate(row):
+                # Skip first entry
+                if idx == 0:
+                    # But make sure rows start with originally named nodes
+                    # (i.e. a named source in study or a named sample in assay)
+                    if not entry.name:
+                        tpl = ('Found start node without original name: {}')
+                        msg = tpl.format(row[idx].unique_name)
+                        raise ParseIsatabException(msg)
+                    continue
+                # Process nodes without an original name
+                if not entry.name:
+                    # Find previous originally named node
+                    ext = 0
+                    while not row[idx-ext-1].name:
+                        ext += 1
+                    start_entry = row[idx-ext-1].unique_name
+                    # Find next originally named node
+                    # (may stay None, if a bubble is not closed at the end)
+                    end_entry = None
+                    ext = 0
+                    while idx+ext+1 < len(row) and not row[idx+ext+1].name:
+                        ext += 1
+                    if idx+ext+1 < len(row) and row[idx+ext+1].name:
+                        end_entry = row[idx+ext+1].unique_name
+                    # Compare idx, start and end with previous rows
+                    # and perform the change if appropriate
+                    key = (idx, start_entry, end_entry)
+                    if key in node_context:
+                        # TODO: complain if annotations differ?
+                        row[idx] = node_context[key]
+                    else:
+                        node_context[key] = row[idx]
         return rows
 
     def _construct(self, rows):
