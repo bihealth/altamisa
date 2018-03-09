@@ -91,6 +91,17 @@ class OntologyTermRef(namedtuple("OntologyTermRef",
 FreeTextOrTermRef = Union[OntologyTermRef, str]
 
 
+class Comment(NamedTuple):
+    """Representation of a ``Comment[*]`` cell."""
+
+    #: Comment name
+    name: str
+    #: Comment value
+    value: FreeTextOrTermRef
+    #: Comment unit
+    unit: FreeTextOrTermRef
+
+
 # Types used in investigation files -------------------------------------------
 
 
@@ -107,7 +118,7 @@ class OntologyRef(NamedTuple):
     #: Description of the ontology
     description: str
     #: Comments
-    comments: Dict[str, str]
+    comments: Tuple[Comment]
 
 
 class BasicInfo(NamedTuple):
@@ -128,7 +139,7 @@ class BasicInfo(NamedTuple):
     #: Investigation/Study public release date
     public_release_date: date
     #: Comments
-    comments: Dict[str, str]
+    comments: Tuple[Comment]
 
 
 class PublicationInfo(NamedTuple):
@@ -147,7 +158,7 @@ class PublicationInfo(NamedTuple):
     #: Publication status
     status: FreeTextOrTermRef
     #: Comments
-    comments: Dict[str, str]
+    comments: Tuple[Comment]
 
 
 class ContactInfo(NamedTuple):
@@ -172,7 +183,7 @@ class ContactInfo(NamedTuple):
     #: Role of contact
     role: FreeTextOrTermRef
     #: Comments
-    comments: Dict[str, str]
+    comments: Tuple[Comment]
 
 
 class DesignDescriptorsInfo(NamedTuple):
@@ -181,7 +192,7 @@ class DesignDescriptorsInfo(NamedTuple):
     #: Design descriptors type
     type: FreeTextOrTermRef
     #: Comments
-    comments: Dict[str, str]
+    comments: Tuple[Comment]
 
 
 class FactorInfo(NamedTuple):
@@ -192,7 +203,7 @@ class FactorInfo(NamedTuple):
     #: Factor type
     type: FreeTextOrTermRef
     #: Comments
-    comments: Dict[str, str]
+    comments: Tuple[Comment]
 
 
 class AssayInfo(NamedTuple):
@@ -207,7 +218,7 @@ class AssayInfo(NamedTuple):
     #: Path to assay file
     path: Path
     #: Comments
-    comments: Dict[str, str]
+    comments: Tuple[Comment]
 
 
 class ProtocolComponentInfo(NamedTuple):
@@ -237,7 +248,7 @@ class ProtocolInfo(NamedTuple):
     #: Protocol components
     components: Dict[str, ProtocolComponentInfo]
     #: Comments
-    comments: Dict[str, str]
+    comments: Tuple[Comment]
 
 
 class StudyInfo(NamedTuple):
@@ -348,17 +359,6 @@ class ParameterValue(NamedTuple):
     #: Parameter value
     value: FreeTextOrTermRef
     #: Parameter value unit
-    unit: FreeTextOrTermRef
-
-
-class Comment(NamedTuple):
-    """Representation of a ``Comment[*]`` cell."""
-
-    #: Comment name
-    name: str
-    #: Comment value
-    value: FreeTextOrTermRef
-    #: Comment unit
     unit: FreeTextOrTermRef
 
 
