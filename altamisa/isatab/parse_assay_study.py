@@ -753,11 +753,23 @@ class _AssayAndStudyBuilder:
         arc_set = set()
         for row in rows:
             for i, entry in enumerate(row):
-                # Collect entry and materials
+                # Collect processes and materials
                 if isinstance(entry, models.Process):
+                    if (entry.unique_name in processes
+                            and entry != processes[entry.unique_name]):
+                        tpl = ('Found processes with same name but different '
+                               'annotation:\nprocess 1: {}\nprocess 2: {}')
+                        msg = tpl.format(entry, processes[entry.unique_name])
+                        raise ParseIsatabException(msg)
                     processes[entry.unique_name] = entry
                 else:
                     assert isinstance(entry, models.Material)
+                    if (entry.unique_name in materials
+                            and entry != materials[entry.unique_name]):
+                        tpl = ('Found materials with same name but different '
+                               'annotation:\nmaterial 1: {}\nmaterial 2: {}')
+                        msg = tpl.format(entry, materials[entry.unique_name])
+                        raise ParseIsatabException(msg)
                     materials[entry.unique_name] = entry
                 # Collect arc
                 if i > 0:
