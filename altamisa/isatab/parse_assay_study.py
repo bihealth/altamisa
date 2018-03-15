@@ -764,7 +764,7 @@ class StudyRowReader:
         except StopIteration:
             msg = 'Study file has no header!'
             raise ParseIsatabException(msg)
-        return list(StudyHeaderParser(line).run())
+        return list(StudyHeaderParser(line, self.study.factors).run())
 
     def _read_next_line(self):
         """Read next line, skipping comments starting with ``'#'``."""
@@ -875,7 +875,7 @@ class AssayRowReader:
         except StopIteration:
             msg = 'Study file has no header!'
             raise ParseIsatabException(msg)
-        return list(AssayHeaderParser(line).run())
+        return list(AssayHeaderParser(line, self.study.factors).run())
 
     def _read_next_line(self):
         """Read next line, skipping comments starting with ``'#'``."""
