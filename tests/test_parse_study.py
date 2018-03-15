@@ -194,7 +194,7 @@ def test_study_reader_small_study(
             name='organism',
             value='Mus musculus',
             unit=None),
-        models.Characteristics(name='age', value='120', unit=unit))
+        models.Characteristics(name='age', value=None, unit=unit))
     characteristics3 = (
         models.Characteristics(
             name='organism',

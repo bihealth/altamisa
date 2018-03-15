@@ -248,7 +248,7 @@ class _NodeBuilderBase:
             return models.OntologyTermRef(
                 name, accession, ontology_name, self.ontology_source_refs)
         else:
-            return line[header.col_no]
+            return line[header.col_no] if line[header.col_no] else None
 
 
 class _MaterialBuilder(_NodeBuilderBase):

@@ -1,5 +1,5 @@
 Source Name	Characteristics[organism]	Term Source REF	Term Accession Number	Characteristics[age]	Unit	Term Source REF	Term Accession Number	Protocol REF	Performer	Date	Sample Name	Characteristics[status]
 0815	Mus musculus	NCBITAXON	http://purl.bioontology.org/ontology/NCBITAXON/10090	90	day	UO	http://purl.obolibrary.org/obo/UO_0000033	sample collection	John Doe	2018-02-02	0815-N1	0
 0815	Mus musculus	NCBITAXON	http://purl.bioontology.org/ontology/NCBITAXON/10090	90	day	UO	http://purl.obolibrary.org/obo/UO_0000033	sample collection	John Doe	2018-02-02	0815-T1	2
-0816	Mus musculus			120	day	UO	http://purl.obolibrary.org/obo/UO_0000033	sample collection	John Doe	2018-02-02	0816-T1	1
+0816	Mus musculus				day	UO	http://purl.obolibrary.org/obo/UO_0000033	sample collection	John Doe	2018-02-02	0816-T1	1
 0817				150	day	UO	http://purl.obolibrary.org/obo/UO_0000033	sample collection	John Doe	2018-02-02	0817-T1	2
