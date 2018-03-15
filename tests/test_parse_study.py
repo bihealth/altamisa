@@ -20,7 +20,7 @@ def test_study_row_reader_minimal_study(
 
     # Create new row reader and check read headers
     row_reader = StudyRowReader.from_stream(
-        investigation, "S1", minimal_study_file)
+        investigation, investigation.studies[0], "S1", minimal_study_file)
     assert 3 == len(row_reader.header)
 
     # Read all rows in study
@@ -56,7 +56,7 @@ def test_study_reader_minimal_study(
 
     # Create new row reader and check read headers
     reader = StudyReader.from_stream(
-        investigation, "S1", minimal_study_file)
+        investigation, investigation.studies[0], "S1", minimal_study_file)
     assert 3 == len(reader.header)
 
     # Read study
@@ -94,7 +94,7 @@ def test_study_row_reader_small_study(
 
     # Create new row reader and check read headers
     row_reader = StudyRowReader.from_stream(
-        investigation, "S1", small_study_file)
+        investigation, investigation.studies[0], "S1", small_study_file)
     assert 11 == len(row_reader.header)
 
     # Read all rows in study
@@ -159,7 +159,8 @@ def test_study_reader_small_study(
     investigation = InvestigationReader.from_stream(small_investigation_file).read()
 
     # Create new row reader and check read headers
-    reader = StudyReader.from_stream(investigation, "S1", small_study_file)
+    reader = StudyReader.from_stream(
+        investigation, investigation.studies[0], "S1", small_study_file)
     assert 11 == len(reader.header)
 
     # Read study
