@@ -95,7 +95,7 @@ def test_study_row_reader_small_study(
     # Create new row reader and check read headers
     row_reader = StudyRowReader.from_stream(
         investigation, investigation.studies[0], "S1", small_study_file)
-    assert 12 == len(row_reader.header)
+    assert 13 == len(row_reader.header)
 
     # Read all rows in study
     rows = list(row_reader.read())
@@ -130,12 +130,14 @@ def test_study_row_reader_small_study(
     assert expected == first_row[0]
     expected = models.Process(
         'sample collection', 'S1-sample collection-9-1',  None,
-        date(2018, 2, 2), 'John Doe', (), (), None, None)
+        date(2018, 2, 2), 'John Doe',
+        (models.ParameterValue('instrument', 'scalpel', None), ),
+        (), None, None)
     assert expected == first_row[1]
     expected = models.Material(
         'Sample Name', 'S1-sample-0815-N1', '0815-N1',
         None, (models.Characteristics('status', '0', None), ), (),
-        (models.FactorValue("treatment", "yes", None), ), None)
+        (models.FactorValue('treatment', 'yes', None), ), None)
     assert expected == first_row[2]
 
     assert 3 == len(second_row)
@@ -145,12 +147,14 @@ def test_study_row_reader_small_study(
     assert expected == second_row[0]
     expected = models.Process(
         'sample collection', 'S1-sample collection-9-2', None,
-        date(2018, 2, 2), 'John Doe', (), (), None, None)
+        date(2018, 2, 2), 'John Doe',
+        (models.ParameterValue('instrument', 'scalpel', None), ),
+        (), None, None)
     assert expected == second_row[1]
     expected = models.Material(
         'Sample Name', 'S1-sample-0815-T1', '0815-T1',
         None,  (models.Characteristics('status', '2', None), ), (),
-        (models.FactorValue("treatment", None, None), ), None)
+        (models.FactorValue('treatment', None, None), ), None)
     assert expected == second_row[2]
 
 
@@ -162,15 +166,15 @@ def test_study_reader_small_study(
 
     # Create new row reader and check read headers
     reader = StudyReader.from_stream(
-        investigation, investigation.studies[0], "S1", small_study_file)
-    assert 12 == len(reader.header)
+        investigation, investigation.studies[0], 'S1', small_study_file)
+    assert 13 == len(reader.header)
 
     # Read study
     study = reader.read()
 
     # Check results
     assert str(study.file).endswith('data/i_small/s_small.txt')
-    assert 12 == len(study.header)
+    assert 13 == len(study.header)
     assert 7 == len(study.materials)
     assert 4 == len(study.processes)
     assert 8 == len(study.arcs)
@@ -239,15 +243,21 @@ def test_study_reader_small_study(
 
     expected = models.Process(
         'sample collection', 'S1-sample collection-9-1', None,
-        date(2018, 2, 2), 'John Doe', (), (), None, None)
+        date(2018, 2, 2), 'John Doe',
+        (models.ParameterValue('instrument', 'scalpel', None), ),
+        (), None, None)
     assert expected == study.processes['S1-sample collection-9-1']
     expected = models.Process(
         'sample collection', 'S1-sample collection-9-2', None,
-        date(2018, 2, 2), 'John Doe', (), (), None, None)
+        date(2018, 2, 2), 'John Doe',
+        (models.ParameterValue('instrument', 'scalpel', None), ),
+        (), None, None)
     assert expected == study.processes['S1-sample collection-9-2']
     expected = models.Process(
         'sample collection', 'S1-sample collection-9-3', None,
-        date(2018, 2, 2), 'John Doe', (), (), None, None)
+        date(2018, 2, 2), 'John Doe',
+        (models.ParameterValue('instrument', 'scalpel', None), ),
+        (), None, None)
     assert expected == study.processes['S1-sample collection-9-3']
 
     expected = (

@@ -440,7 +440,7 @@ class StudyHeaderParser(HeaderParserBase):
         # Simple headers
         'Date', 'Performer',
         # Labeled headers
-        'Characteristics', 'Comment', 'Factor Value',
+        'Characteristics', 'Comment', 'Parameter Value', 'Factor Value',
         # Secondary annotations
         'Term Source REF', 'Unit')
 
