@@ -444,6 +444,7 @@ class _ProcessBuilder(_NodeBuilderBase):
         # First, build the individual attributes of ``Process``
         protocol_ref, unique_name, name = self._build_protocol_ref_and_name(
             line)
+        # Check if protocol is declared in corresponding study
         if (protocol_ref != TOKEN_UNKNOWN
                 and protocol_ref not in self.protocol_refs):
             tpl = 'Protocol "{}" not declared in investigation file'
@@ -469,6 +470,13 @@ class _ProcessBuilder(_NodeBuilderBase):
         parameter_values = tuple(
             self._build_complex(hdr, line, models.ParameterValue)
             for hdr in self.parameter_value_headers)
+        # Check if parameter value is declared in corresponding protocol
+        for pv in parameter_values:
+            if pv.name not in self.protocol_refs[protocol_ref].parameters:
+                tpl = ('Parameter Value "{}" not declared for Protocol "{}" '
+                       'in investigation file')
+                msg = tpl.format(pv.name, protocol_ref)
+                raise ParseIsatabException(msg)
         if self.array_design_ref_header:
             array_design_ref = line[self.array_design_ref_header.col_no]
         else:
