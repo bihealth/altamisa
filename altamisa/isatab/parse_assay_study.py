@@ -20,6 +20,8 @@ __author__ = 'Manuel Holtgrewe <manuel.holtgrewe@bihealth.de>'
 TOKEN_ANONYMOUS = 'Anonymous'
 #: Used for marking empty/unnamed Data
 TOKEN_EMPTY = 'Empty'
+#: Used for named Processes without protocol reference
+TOKEN_UNKNOWN = 'Unknown'
 
 # We define constants for the headers in the assay and study files as a typo in
 # the code below can then be caught as "unknown identifier" instead of having
@@ -78,11 +80,14 @@ class _NodeBuilderBase:
     def __init__(
             self,
             ontology_source_refs,
+            protocol_refs,
             column_headers: List[ColumnHeader],
             study_id: str,
             assay_id: str):
         #: The definition of the ontology source references
         self.ontology_source_refs = ontology_source_refs
+        #: The definition of the protocol references
+        self.protocol_refs = protocol_refs
         #: The column descriptions to build ``Material`` from.
         self.column_headers = column_headers
         #: The "Protocol REF" header, if any
@@ -243,7 +248,7 @@ class _NodeBuilderBase:
             return models.OntologyTermRef(
                 name, accession, ontology_name, self.ontology_source_refs)
         else:
-            return line[header.col_no]
+            return line[header.col_no] if line[header.col_no] else None
 
 
 class _MaterialBuilder(_NodeBuilderBase):
@@ -447,6 +452,12 @@ class _ProcessBuilder(_NodeBuilderBase):
         # First, build the individual attributes of ``Process``
         protocol_ref, unique_name, name = self._build_protocol_ref_and_name(
             line)
+        # Check if protocol is declared in corresponding study
+        if (protocol_ref != TOKEN_UNKNOWN
+                and protocol_ref not in self.protocol_refs):
+            tpl = 'Protocol "{}" not declared in investigation file'
+            msg = tpl.format(protocol_ref)
+            raise ParseIsatabException(msg)
         if self.date_header and line[self.date_header.col_no]:
             try:
                 date = datetime.strptime(
@@ -467,6 +478,13 @@ class _ProcessBuilder(_NodeBuilderBase):
         parameter_values = tuple(
             self._build_complex(hdr, line, models.ParameterValue)
             for hdr in self.parameter_value_headers)
+        # Check if parameter value is declared in corresponding protocol
+        for pv in parameter_values:
+            if pv.name not in self.protocol_refs[protocol_ref].parameters:
+                tpl = ('Parameter Value "{}" not declared for Protocol "{}" '
+                       'in investigation file')
+                msg = tpl.format(pv.name, protocol_ref)
+                raise ParseIsatabException(msg)
         if self.array_design_ref_header:
             array_design_ref = line[self.array_design_ref_header.col_no]
         else:
@@ -499,7 +517,7 @@ class _ProcessBuilder(_NodeBuilderBase):
             unique_name = models.AnnotatedStr(name_val, was_empty=True)
         elif not self.protocol_ref_header:
             # Name header is given, but protocol ref header is not
-            protocol_ref = 'UNKNOWN'
+            protocol_ref = TOKEN_UNKNOWN
             name = line[self.name_header.col_no]
             if name:  # Use name if available
                 unique_name = '{}{}-{}-{}'.format(
@@ -595,9 +613,11 @@ class _RowBuilderBase:
     #: Registry of column header to node builder
     node_builders = None
 
-    def __init__(self, ontology_source_refs, header: List[ColumnHeader],
+    def __init__(self, ontology_source_refs, protocol_refs,
+                 header: List[ColumnHeader],
                  study_id: str, assay_id: str = None):
         self.ontology_source_refs = ontology_source_refs
+        self.protocol_refs = protocol_refs
         self.header = header
         self.study_id = study_id
         self.assay_id = assay_id
@@ -608,8 +628,8 @@ class _RowBuilderBase:
         breaks = list(self._make_breaks())
         for start, end in zip(breaks, breaks[1:]):
             klass = self.node_builders[self.header[start].column_type]
-            yield klass(self.ontology_source_refs, self.header[start:end],
-                        self.study_id, self.assay_id)
+            yield klass(self.ontology_source_refs, self.protocol_refs,
+                        self.header[start:end], self.study_id, self.assay_id)
 
     def _make_breaks(self):
         """Build indices to break the columns at
@@ -810,17 +830,20 @@ class StudyRowReader:
     def from_stream(
             klass,
             investigation: models.InvestigationInfo,
+            study: models.StudyInfo,
             study_id: str,
             input_file: TextIO):
         """Construct from file-like object"""
-        return StudyRowReader(investigation, study_id, input_file)
+        return StudyRowReader(investigation, study, study_id, input_file)
 
     def __init__(
             self,
             investigation: models.InvestigationInfo,
+            study: models.StudyInfo,
             study_id: str,
             input_file: TextIO):
         self.investigation = investigation
+        self.study = study
         self.study_id = study_id
         self.input_file = input_file
         self._reader = csv.reader(input_file, delimiter='\t', quotechar='"')
@@ -835,7 +858,7 @@ class StudyRowReader:
         except StopIteration:
             msg = 'Study file has no header!'
             raise ParseIsatabException(msg)
-        return list(StudyHeaderParser(line).run())
+        return list(StudyHeaderParser(line, self.study.factors).run())
 
     def _read_next_line(self):
         """Read next line, skipping comments starting with ``'#'``."""
@@ -851,7 +874,7 @@ class StudyRowReader:
 
     def read(self):
         builder = _StudyRowBuilder(
-            self.investigation.ontology_source_refs,
+            self.investigation.ontology_source_refs, self.study.protocols,
             self.header, self.study_id)
         while True:
             line = self._read_next_line()
@@ -872,19 +895,22 @@ class StudyReader:
     def from_stream(
             klass,
             investigation: models.InvestigationInfo,
+            study: models.StudyInfo,
             study_id: str,
             input_file: TextIO):
         """Construct from file-like object"""
-        return StudyReader(investigation, study_id, input_file)
+        return StudyReader(investigation, study, study_id, input_file)
 
     def __init__(
             self,
             investigation: models.InvestigationInfo,
+            study: models.StudyInfo,
             study_id: str,
             input_file: TextIO):
         self.row_reader = StudyRowReader.from_stream(
-            investigation, study_id, input_file)
+            investigation, study, study_id, input_file)
         self.investigation = investigation
+        self.study = study
         #: The file used for reading from
         self.input_file = input_file
         #: The header of the ISA study file
@@ -911,19 +937,23 @@ class AssayRowReader:
     def from_stream(
             klass,
             investigation: models.InvestigationInfo,
+            study: models.StudyInfo,
             study_id: str,
             assay_id: str,
             input_file: TextIO):
         """Construct from file-like object"""
-        return AssayRowReader(investigation, study_id, assay_id, input_file)
+        return AssayRowReader(investigation, study,
+                              study_id, assay_id, input_file)
 
     def __init__(
             self,
             investigation: models.InvestigationInfo,
+            study: models.StudyInfo,
             study_id: str,
             assay_id: str,
             input_file: TextIO):
         self.investigation = investigation
+        self.study = study
         self.study_id = study_id
         self.assay_id = assay_id
         self.input_file = input_file
@@ -939,7 +969,7 @@ class AssayRowReader:
         except StopIteration:
             msg = 'Study file has no header!'
             raise ParseIsatabException(msg)
-        return list(AssayHeaderParser(line).run())
+        return list(AssayHeaderParser(line, self.study.factors).run())
 
     def _read_next_line(self):
         """Read next line, skipping comments starting with ``'#'``."""
@@ -955,7 +985,7 @@ class AssayRowReader:
 
     def read(self):
         builder = _AssayRowBuilder(
-            self.investigation.ontology_source_refs,
+            self.investigation.ontology_source_refs, self.study.protocols,
             self.header, self.study_id, self.assay_id)
         while True:
             line = self._read_next_line()
@@ -976,21 +1006,25 @@ class AssayReader:
     def from_stream(
             klass,
             investigation: models.InvestigationInfo,
+            study: models.StudyInfo,
             study_id: str,
             assay_id: str,
             input_file: TextIO):
         """Construct from file-like object"""
-        return AssayReader(investigation, study_id, assay_id, input_file)
+        return AssayReader(investigation, study,
+                           study_id, assay_id, input_file)
 
     def __init__(
             self,
             investigation: models.InvestigationInfo,
+            study: models.StudyInfo,
             study_id: str,
             assay_id: str,
             input_file: TextIO):
         self.row_reader = AssayRowReader.from_stream(
-            investigation, study_id, assay_id, input_file)
+            investigation, study, study_id, assay_id, input_file)
         self.investigation = investigation
+        self.study = study
         #: The file used for reading from
         self.input_file = input_file
         #: The header of the ISA assay file

@@ -57,6 +57,7 @@ def run(args):
     for s, studyInfo in enumerate(investigation.studies):
         with open(os.path.join(path, studyInfo.info.path), 'rt') as inputf:
             study = StudyReader.from_stream(investigation,
+                                            studyInfo,
                                             "S{}".format(s+1),
                                             inputf).read()
         print('  /* study {} */'.format(studyInfo.info.path),
@@ -70,6 +71,7 @@ def run(args):
         for a, assayInfo in enumerate(studyInfo.assays.values()):
             with open(os.path.join(path, assayInfo.path), 'rt') as inputf:
                 assay = AssayReader.from_stream(investigation,
+                                                studyInfo,
                                                 "S{}".format(s+1),
                                                 "A{}".format(a+1),
                                                 inputf).read()

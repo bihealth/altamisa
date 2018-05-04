@@ -20,7 +20,8 @@ def test_assay_row_reader_minimal_assay(
 
     # Create new row reader and check read headers
     row_reader = AssayRowReader.from_stream(
-        investigation, "S1", "A1", minimal_assay_file)
+        investigation, investigation.studies[0],
+        "S1", "A1", minimal_assay_file)
     assert 5 == len(row_reader.header)
 
     # Read all rows in assay
@@ -64,7 +65,8 @@ def test_assay_reader_minimal_assay(
 
     # Create new row reader and check read headers
     reader = AssayReader.from_stream(
-        investigation, "S1", "A1", minimal_assay_file)
+        investigation, investigation.studies[0],
+        "S1", "A1", minimal_assay_file)
     assert 5 == len(reader.header)
 
     # Read assay
@@ -117,7 +119,7 @@ def test_assay_row_reader_small_assay(
 
     # Create new row reader and check read headers
     row_reader = AssayRowReader.from_stream(
-        investigation, "S1", "A1", small_assay_file)
+        investigation, investigation.studies[0], "S1", "A1", small_assay_file)
     assert 8 == len(row_reader.header)
 
     # Read all rows in assay
@@ -153,7 +155,7 @@ def test_assay_row_reader_small_assay(
         None, (), (), (), None)
     assert expected == first_row[4]
     expected = models.Process(
-        'UNKNOWN', 'S1-A1-somatic variant calling-1-7',
+        'Unknown', 'S1-A1-somatic variant calling-1-7',
         'somatic variant calling-1', None, None, (), (), None, None)
     assert expected == first_row[5]
     expected = models.Material(
@@ -187,7 +189,7 @@ def test_assay_row_reader_small_assay(
         None, (), (), (), None)
     assert expected == second_row[4]
     expected = models.Process(
-        'UNKNOWN', 'S1-A1-somatic variant calling-1-7',
+        'Unknown', 'S1-A1-somatic variant calling-1-7',
         'somatic variant calling-1', None, None, (), (), None, None)
     assert expected == second_row[5]
     expected = models.Material(
@@ -205,7 +207,7 @@ def test_assay_reader_small_assay(
 
     # Create new row reader and check read headers
     reader = AssayReader.from_stream(
-        investigation, "S1", "A1", small_assay_file)
+        investigation, investigation.studies[0], "S1", "A1", small_assay_file)
     assert 8 == len(reader.header)
 
     # Read assay

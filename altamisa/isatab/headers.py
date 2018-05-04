@@ -356,8 +356,9 @@ class HeaderParserBase:
         'Parameter Value': ParameterValueHeader,
     }
 
-    def __init__(self, tokens):
+    def __init__(self, tokens, factor_refs):
         self.tokens = tokens
+        self.factor_refs = factor_refs
         self.it = iter(tokens)
         self.col_no = 0
 
@@ -418,6 +419,10 @@ class HeaderParserBase:
             tpl = 'Problem parsing labeled header {}'
             msg = tpl.format(tpl.format(val))
             raise ParseIsatabException(msg)
+        if key == 'Factor Value' and tok[1:-1] not in self.factor_refs:
+            tpl = 'Factor "{}" not declared in investigation file'
+            msg = tpl.format(tok[1:-1])
+            raise ParseIsatabException(msg)
         self.col_no += 1
         return type_(self.col_no - 1, tok[1:-1])
 
@@ -435,7 +440,7 @@ class StudyHeaderParser(HeaderParserBase):
         # Simple headers
         'Date', 'Performer',
         # Labeled headers
-        'Characteristics', 'Comment', 'Factor Value',
+        'Characteristics', 'Comment', 'Parameter Value', 'Factor Value',
         # Secondary annotations
         'Term Source REF', 'Unit')
 
