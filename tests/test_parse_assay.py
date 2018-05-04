@@ -294,3 +294,139 @@ def test_assay_reader_small_assay(
                    'S1-A1-somatic variant calling-1-7')
     )
     assert expected == assay.arcs
+
+
+def test_assay_reader_small2_assay(
+        small2_investigation_file, small2_assay_file):
+    """Use ``AssayReader`` to read in small assay file."""
+    # Load investigation (tested elsewhere)
+    investigation = InvestigationReader.from_stream(
+        small2_investigation_file).read()
+
+    # Create new row reader and check read headers
+    reader = AssayReader.from_stream(investigation, 'S1',
+                                     'A1', small2_assay_file)
+    assert 14 == len(reader.header)
+
+    # Read assay
+    assay = reader.read()
+
+    # Check results
+    assert str(assay.file).endswith('data/i_small2/a_small2.txt')
+    assert 14 == len(assay.header)
+    assert 25 == len(assay.materials)
+    assert 41 == len(assay.processes)
+    assert 74 == len(assay.arcs)
+
+    # Expected arcs
+    expected = (
+        models.Arc('S1-sample-0815-N1', 'S1-A1-extraction-2-1'),
+        models.Arc('S1-sample-0815-T1', 'S1-A1-extraction-2-2'),
+
+        models.Arc('S1-A1-extraction-2-1', 'S1-A1-0815-N1-Pro1-COL3'),
+        models.Arc('S1-A1-extraction-2-2', 'S1-A1-0815-T1-Pro1-COL3'),
+
+        models.Arc('S1-A1-0815-N1-Pro1-COL3', 'S1-A1-labeling-4-1'),
+        models.Arc('S1-A1-0815-T1-Pro1-COL3', 'S1-A1-labeling-4-2'),
+        models.Arc('S1-A1-0815-N1-Pro1-COL3', 'S1-A1-labeling-4-3'),
+        models.Arc('S1-A1-0815-T1-Pro1-COL3', 'S1-A1-labeling-4-4'),
+        models.Arc('S1-A1-0815-N1-Pro1-COL3', 'S1-A1-labeling-4-5'),
+        models.Arc('S1-A1-0815-T1-Pro1-COL3', 'S1-A1-labeling-4-6'),
+        models.Arc('S1-A1-0815-N1-Pro1-COL3', 'S1-A1-labeling-4-7'),
+        models.Arc('S1-A1-0815-T1-Pro1-COL3', 'S1-A1-labeling-4-8'),
+        models.Arc('S1-A1-0815-N1-Pro1-COL3', 'S1-A1-labeling-4-9'),
+        models.Arc('S1-A1-0815-T1-Pro1-COL3', 'S1-A1-labeling-4-10'),
+        models.Arc('S1-A1-0815-N1-Pro1-COL3', 'S1-A1-labeling-4-11'),
+        models.Arc('S1-A1-0815-T1-Pro1-COL3', 'S1-A1-labeling-4-12'),
+
+        models.Arc('S1-A1-labeling-4-1', 'S1-A1-0815-N1-Pro1-A-114-COL5'),
+        models.Arc('S1-A1-labeling-4-2', 'S1-A1-0815-T1-Pro1-A-115-COL5'),
+        models.Arc('S1-A1-labeling-4-3', 'S1-A1-0815-N1-Pro1-B-114-COL5'),
+        models.Arc('S1-A1-labeling-4-4', 'S1-A1-0815-T1-Pro1-B-115-COL5'),
+        models.Arc('S1-A1-labeling-4-5', 'S1-A1-0815-N1-Pro1-C-114-COL5'),
+        models.Arc('S1-A1-labeling-4-6', 'S1-A1-0815-T1-Pro1-C-115-COL5'),
+        models.Arc('S1-A1-labeling-4-7', 'S1-A1-0815-N1-Pro1-D-114-COL5'),
+        models.Arc('S1-A1-labeling-4-8', 'S1-A1-0815-T1-Pro1-D-115-COL5'),
+        models.Arc('S1-A1-labeling-4-9', 'S1-A1-0815-N1-Pro1-E-114-COL5'),
+        models.Arc('S1-A1-labeling-4-10', 'S1-A1-0815-T1-Pro1-E-115-COL5'),
+        models.Arc('S1-A1-labeling-4-11', 'S1-A1-0815-N1-Pro1-F-114-COL5'),
+        models.Arc('S1-A1-labeling-4-12', 'S1-A1-0815-T1-Pro1-F-115-COL5'),
+
+        models.Arc('S1-A1-0815-N1-Pro1-A-114-COL5',
+                   'S1-A1-chromatography-8-1'),
+        models.Arc('S1-A1-0815-T1-Pro1-A-115-COL5',
+                   'S1-A1-chromatography-8-2'),
+        models.Arc('S1-A1-0815-N1-Pro1-B-114-COL5',
+                   'S1-A1-chromatography-8-3'),
+        models.Arc('S1-A1-0815-T1-Pro1-B-115-COL5',
+                   'S1-A1-chromatography-8-4'),
+        models.Arc('S1-A1-0815-N1-Pro1-C-114-COL5',
+                   'S1-A1-chromatography-8-5'),
+        models.Arc('S1-A1-0815-T1-Pro1-C-115-COL5',
+                   'S1-A1-chromatography-8-6'),
+        models.Arc('S1-A1-0815-N1-Pro1-D-114-COL5',
+                   'S1-A1-chromatography-8-7'),
+        models.Arc('S1-A1-0815-T1-Pro1-D-115-COL5',
+                   'S1-A1-chromatography-8-8'),
+        models.Arc('S1-A1-0815-N1-Pro1-E-114-COL5',
+                   'S1-A1-chromatography-8-9'),
+        models.Arc('S1-A1-0815-T1-Pro1-E-115-COL5',
+                   'S1-A1-chromatography-8-10'),
+        models.Arc('S1-A1-0815-N1-Pro1-F-114-COL5',
+                   'S1-A1-chromatography-8-11'),
+        models.Arc('S1-A1-0815-T1-Pro1-F-115-COL5',
+                   'S1-A1-chromatography-8-12'),
+
+        models.Arc('S1-A1-chromatography-8-1', 'S1-A1-poolA-10'),
+        models.Arc('S1-A1-chromatography-8-2', 'S1-A1-poolA-10'),
+        models.Arc('S1-A1-chromatography-8-3', 'S1-A1-mass spectrometry-9-3'),
+        models.Arc('S1-A1-chromatography-8-4', 'S1-A1-mass spectrometry-9-4'),
+        models.Arc('S1-A1-chromatography-8-5', 'S1-A1-poolC-10'),
+        models.Arc('S1-A1-chromatography-8-6', 'S1-A1-poolC-10'),
+        models.Arc('S1-A1-chromatography-8-7', 'S1-A1-mass spectrometry-9-7'),
+        models.Arc('S1-A1-chromatography-8-8', 'S1-A1-mass spectrometry-9-8'),
+        models.Arc('S1-A1-chromatography-8-9', 'S1-A1-poolE-10'),
+        models.Arc('S1-A1-chromatography-8-10', 'S1-A1-poolE-10'),
+        models.Arc('S1-A1-chromatography-8-11', 'S1-A1-poolF-10'),
+        models.Arc('S1-A1-chromatography-8-12', 'S1-A1-poolF-10'),
+
+        models.Arc('S1-A1-poolA-10', 'S1-A1-poolA.raw-COL11'),
+        models.Arc('S1-A1-mass spectrometry-9-3', 'S1-A1-poolB.raw-COL11'),
+        models.Arc('S1-A1-mass spectrometry-9-4', 'S1-A1-poolB.raw-COL11'),
+        models.Arc('S1-A1-poolC-10',
+                   'S1-A1-Empty Raw Spectral Data File-11-5'),
+        models.Arc('S1-A1-mass spectrometry-9-7',
+                   'S1-A1-Empty Raw Spectral Data File-11-7'),
+        models.Arc('S1-A1-mass spectrometry-9-8',
+                   'S1-A1-Empty Raw Spectral Data File-11-8'),
+        models.Arc('S1-A1-poolE-10', 'S1-A1-poolE.raw-COL11'),
+        models.Arc('S1-A1-poolF-10',
+                   'S1-A1-Empty Raw Spectral Data File-11-11'),
+
+        models.Arc('S1-A1-poolA.raw-COL11', 'S1-A1-data transformation-12-1'),
+        models.Arc('S1-A1-poolB.raw-COL11', 'S1-A1-data transformation-12-3'),
+        models.Arc('S1-A1-Empty Raw Spectral Data File-11-5',
+                   'S1-A1-data transformation-12-5'),
+        models.Arc('S1-A1-Empty Raw Spectral Data File-11-7',
+                   'S1-A1-data transformation-12-7'),
+        models.Arc('S1-A1-Empty Raw Spectral Data File-11-8',
+                   'S1-A1-data transformation-12-8'),
+        models.Arc('S1-A1-poolE.raw-COL11', 'S1-A1-data transformation-12-9'),
+        models.Arc('S1-A1-Empty Raw Spectral Data File-11-11',
+                   'S1-A1-data analysis-13'),
+
+        models.Arc('S1-A1-data transformation-12-1',
+                   'S1-A1-results.csv-COL14'),
+        models.Arc('S1-A1-data transformation-12-3',
+                   'S1-A1-results.csv-COL14'),
+        models.Arc('S1-A1-data transformation-12-5',
+                   'S1-A1-results.csv-COL14'),
+        models.Arc('S1-A1-data transformation-12-7',
+                   'S1-A1-results.csv-COL14'),
+        models.Arc('S1-A1-data transformation-12-8',
+                   'S1-A1-results.csv-COL14'),
+        models.Arc('S1-A1-data transformation-12-9',
+                   'S1-A1-Empty Derived Data File-14-9'),
+        models.Arc('S1-A1-data analysis-13',
+                   'S1-A1-results.csv-COL14'))
+    assert sorted(expected) == sorted(assay.arcs)

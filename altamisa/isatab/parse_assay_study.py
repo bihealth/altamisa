@@ -307,6 +307,14 @@ class _MaterialBuilder(_NodeBuilderBase):
             for hdr in self.factor_value_headers)
         material_type = self._build_freetext_or_term_ref(
             self.material_type_header, line)
+        # Don't accept unnamed materials/data files if there are annotations
+        if not name and any((extract_label, characteristics, comments,
+                             factor_values, material_type)):
+            tpl = ('Found annotated material/file without name: '
+                   '"{}", "{}", "{}", "{}", "{}", "{}", "{}"')
+            msg = tpl.format(type_, name, extract_label, characteristics,
+                             comments, factor_values, material_type)
+            raise ParseIsatabException(msg)
         # Then, constructing ``Material`` is easy
         return models.Material(
             type_, unique_name, name, extract_label, characteristics, comments,
@@ -484,10 +492,11 @@ class _ProcessBuilder(_NodeBuilderBase):
             # Name header is not given, will use auto-generated unique name
             # based on protocol ref.
             protocol_ref = line[self.protocol_ref_header.col_no]
-            unique_name = '{}{}-{}-{}-{}'.format(
+            name_val = '{}{}-{}-{}-{}'.format(
                 self.study_id, assay_id,
                 protocol_ref, self.protocol_ref_header.col_no + 1,
                 counter_value)
+            unique_name = models.AnnotatedStr(name_val, was_empty=True)
         elif not self.protocol_ref_header:
             # Name header is given, but protocol ref header is not
             protocol_ref = 'UNKNOWN'
@@ -513,8 +522,10 @@ class _ProcessBuilder(_NodeBuilderBase):
                     name,
                     self.name_header.col_no + 1)
             else:
-                unique_name = '{}{}-{}-{}'.format(self.study_id, assay_id,
-                                                  protocol_ref, counter_value)
+                name_val = '{}{}-{}-{}-{}'.format(
+                    self.study_id, assay_id, protocol_ref,
+                    self.protocol_ref_header.col_no + 1, counter_value)
+                unique_name = models.AnnotatedStr(name_val, was_empty=True)
         if not protocol_ref:
             tpl = 'Missing protocol reference in column {}'
             msg = tpl.format(self.protocol_ref_header.col_no + 1)
@@ -688,28 +699,103 @@ class _AssayRowBuilder(_RowBuilderBase):
     }
 
 
-def _build_study_assay(file_name, header, rows, klass):
-    """Helper for building ``Study`` and ``Assay`` objects.
-    """
-    materials = {}
-    processes = {}
-    arcs = []
-    arc_set = set()
-    for row in rows:
-        for i, entry in enumerate(row):
-            # Collect entry and materials
-            if isinstance(entry, models.Process):
-                processes[entry.unique_name] = entry
-            else:
-                assert isinstance(entry, models.Material)
-                materials[entry.unique_name] = entry
-            # Collect arc
-            if i > 0:
-                arc = models.Arc(row[i - 1].unique_name, row[i].unique_name)
-                if arc not in arc_set:
-                    arc_set.add(arc)
-                    arcs.append(arc)
-    return klass(Path(file_name), header, materials, processes, tuple(arcs))
+class _AssayAndStudyBuilder:
+    """Helper for building ``Assay`` and ``Study`` objects."""
+
+    def __init__(self, file_name, header, klass):
+        self.file_name = file_name
+        self.header = header
+        self.klass = klass
+
+    def build(self, rows):
+        return self._construct(self._postprocess_rows(rows))
+
+    def _postprocess_rows(self, rows):
+        """Postprocess the ``rows``.
+
+        Right now we are looking for nodes (material of process) without an
+        original name (which would be equivalent to unique_name being an
+        ``AnnotatedString`` and having the ``was_empty`` attribute set to
+        ``True``) and their previous and next nodes with an original name. We
+        then assign the same unique names for all where the unique names of the
+        previous and next nodes with an original name is the same.
+
+        It is yet unclear whether this postprocessing is sufficient but this is
+        the place to build upon the postprocessing for further refinement.
+        """
+
+        node_context = {}
+        for row in rows:
+            for idx, entry in enumerate(row):
+                # Skip first entry
+                if idx == 0:
+                    # But make sure rows start with originally named nodes
+                    # (i.e. a named source in study or a named sample in assay)
+                    if not entry.name:
+                        tpl = ('Found start node without original name: {}')
+                        msg = tpl.format(row[idx].unique_name)
+                        raise ParseIsatabException(msg)
+                    continue
+                # Process nodes without an original name
+                if not entry.name:
+                    # Find previous originally named node
+                    ext = 0
+                    while not row[idx-ext-1].name:
+                        ext += 1
+                    start_entry = row[idx-ext-1].unique_name
+                    # Find next originally named node
+                    # (may stay None, if a bubble is not closed at the end)
+                    end_entry = None
+                    ext = 0
+                    while idx+ext+1 < len(row) and not row[idx+ext+1].name:
+                        ext += 1
+                    if idx+ext+1 < len(row) and row[idx+ext+1].name:
+                        end_entry = row[idx+ext+1].unique_name
+                    # Compare idx, start and end with previous rows
+                    # and perform the change if appropriate
+                    key = (idx, start_entry, end_entry)
+                    if key in node_context:
+                        # TODO: complain if annotations differ?
+                        row[idx] = node_context[key]
+                    else:
+                        node_context[key] = row[idx]
+        return rows
+
+    def _construct(self, rows):
+        """Construct the ``Assay`` or ``Study`` object."""
+        materials = {}
+        processes = {}
+        arcs = []
+        arc_set = set()
+        for row in rows:
+            for i, entry in enumerate(row):
+                # Collect processes and materials
+                if isinstance(entry, models.Process):
+                    if (entry.unique_name in processes
+                            and entry != processes[entry.unique_name]):
+                        tpl = ('Found processes with same name but different '
+                               'annotation:\nprocess 1: {}\nprocess 2: {}')
+                        msg = tpl.format(entry, processes[entry.unique_name])
+                        raise ParseIsatabException(msg)
+                    processes[entry.unique_name] = entry
+                else:
+                    assert isinstance(entry, models.Material)
+                    if (entry.unique_name in materials
+                            and entry != materials[entry.unique_name]):
+                        tpl = ('Found materials with same name but different '
+                               'annotation:\nmaterial 1: {}\nmaterial 2: {}')
+                        msg = tpl.format(entry, materials[entry.unique_name])
+                        raise ParseIsatabException(msg)
+                    materials[entry.unique_name] = entry
+                # Collect arc
+                if i > 0:
+                    arc = models.Arc(row[i - 1].unique_name,
+                                     row[i].unique_name)
+                    if arc not in arc_set:
+                        arc_set.add(arc)
+                        arcs.append(arc)
+        return self.klass(Path(self.file_name), self.header,
+                          materials, processes, tuple(arcs))
 
 
 class StudyRowReader:
@@ -805,9 +891,9 @@ class StudyReader:
         self.header = self.row_reader.header
 
     def read(self):
-        return _build_study_assay(
-            self.input_file.name, self.header, list(self.row_reader.read()),
-            models.Study)
+        return _AssayAndStudyBuilder(
+            self.input_file.name, self.header, models.Study).build(
+                list(self.row_reader.read()),)
 
 
 # TODO: extract common parts of {Assay,Study}[Row]Reader into two base classes
@@ -911,6 +997,6 @@ class AssayReader:
         self.header = self.row_reader.header
 
     def read(self):
-        return _build_study_assay(
-            self.input_file.name, self.header, list(self.row_reader.read()),
-            models.Assay)
+        return _AssayAndStudyBuilder(
+            self.input_file.name, self.header, models.Assay).build(
+                list(self.row_reader.read()))

@@ -52,6 +52,8 @@ def small_assay_file():
 
 @pytest.fixture
 def full_investigation_file():
+    """This file contains values for each normal investigation section and key.
+    """
     path = os.path.join(os.path.dirname(__file__),
                         "data/i_fullinvest/i_fullinvest.txt")
     return open(path, 'rt')
@@ -59,6 +61,8 @@ def full_investigation_file():
 
 @pytest.fixture
 def comment_investigation_file():
+    """This file contains comments for each investigation section.
+    """
     path = os.path.join(os.path.dirname(__file__),
                         "data/i_comments/i_comments.txt")
     return open(path, 'rt')
@@ -71,4 +75,27 @@ def assays_investigation_file():
     """
     path = os.path.join(os.path.dirname(__file__),
                         "data/i_assays/i_assays.txt")
+    return open(path, 'rt')
+
+
+@pytest.fixture
+def small2_investigation_file():
+    path = os.path.join(os.path.dirname(__file__),
+                        "data/i_small2/i_small2.txt")
+    return open(path, 'rt')
+
+
+@pytest.fixture
+def small2_study_file():
+    path = os.path.join(os.path.dirname(__file__),
+                        "data/i_small2/s_small2.txt")
+    return open(path, 'rt')
+
+
+@pytest.fixture
+def small2_assay_file():
+    """This file contains splitting and pooling examples.
+    """
+    path = os.path.join(os.path.dirname(__file__),
+                        "data/i_small2/a_small2.txt")
     return open(path, 'rt')
