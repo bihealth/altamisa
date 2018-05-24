@@ -306,8 +306,8 @@ def test_assay_reader_small2_assay(
         small2_investigation_file).read()
 
     # Create new row reader and check read headers
-    reader = AssayReader.from_stream(investigation, 'S1',
-                                     'A1', small2_assay_file)
+    reader = AssayReader.from_stream(investigation, investigation.studies[0],
+                                     'S1', 'A1', small2_assay_file)
     assert 14 == len(reader.header)
 
     # Read assay
