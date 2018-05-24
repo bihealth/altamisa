@@ -313,12 +313,16 @@ class _MaterialBuilder(_NodeBuilderBase):
         material_type = self._build_freetext_or_term_ref(
             self.material_type_header, line)
         # Don't accept unnamed materials/data files if there are annotations
-        if not name and any((extract_label, characteristics, comments,
-                             factor_values, material_type)):
+        any_char = any([(char.value or char.unit) for char in characteristics])
+        any_comm = any([(comm.value or comm.unit) for comm in comments])
+        any_fact = any([(fact.value or fact.unit) for fact in factor_values])
+        if not name and any((any_char, any_comm, any_fact,
+                             extract_label, material_type)):
             tpl = ('Found annotated material/file without name: '
-                   '"{}", "{}", "{}", "{}", "{}", "{}", "{}"')
-            msg = tpl.format(type_, name, extract_label, characteristics,
-                             comments, factor_values, material_type)
+                   '{}, {}, {}, {}, {}, {}, {}')
+            msg = tpl.format(type_, unique_name, extract_label,
+                             characteristics, comments, factor_values,
+                             material_type)
             raise ParseIsatabException(msg)
         # Then, constructing ``Material`` is easy
         return models.Material(
