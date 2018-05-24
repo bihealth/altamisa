@@ -236,10 +236,10 @@ def test_study_reader_small_study(
         (models.FactorValue("treatment", "yes", None),), None)
     assert expected == study.materials['S1-sample-0816-T1']
     expected = models.Material(
-        'Sample Name', 'S1-sample-0817-T1', '0817-T1',
-        None, (models.Characteristics('status', '2', None),), (),
-        (models.FactorValue("treatment", "no", None),), None)
-    assert expected == study.materials['S1-sample-0817-T1']
+        'Sample Name', 'S1-Empty Sample Name-13-4', '', None,
+        (models.Characteristics('status', None, None),), (),
+        (models.FactorValue("treatment", None, None),), None)
+    assert expected == study.materials['S1-Empty Sample Name-13-4']
 
     expected = models.Process(
         'sample collection', 'S1-sample collection-9-1', None,
@@ -268,6 +268,6 @@ def test_study_reader_small_study(
         models.Arc('S1-source-0816', 'S1-sample collection-9-3'),
         models.Arc('S1-sample collection-9-3', 'S1-sample-0816-T1'),
         models.Arc('S1-source-0817', 'S1-sample collection-9-4'),
-        models.Arc('S1-sample collection-9-4', 'S1-sample-0817-T1'),
+        models.Arc('S1-sample collection-9-4', 'S1-Empty Sample Name-13-4'),
     )
     assert expected == study.arcs
