@@ -43,6 +43,7 @@ _MATERIAL_NAME_HEADERS = (
     'Labeled Extract Name',
     'Source Name',
     'Sample Name',
+    'Material Name',
     # Data
     'Array Data File',
     'Array Data Matrix File',
@@ -272,6 +273,8 @@ class _MaterialBuilder(_NodeBuilderBase):
         # First, build the individual components
         assert self.name_header or self.protocol_ref_header
         type_ = self.name_header.column_type
+        if hasattr(self.name_header, 'column_name'):
+            type_ = self.name_header.column_name
         assay_id = '-{}'.format(self.assay_id) if self.assay_id else ''
         name = line[self.name_header.col_no]
         if name:
@@ -684,6 +687,7 @@ class _StudyRowBuilder(_RowBuilderBase):
         # Material node builders
         'Source Name': _SourceBuilder,
         'Sample Name': _SampleBuilder,
+        'Material Name': _MaterialBuilder,
         # Process node builders
         'Protocol REF': _ProcessBuilder,
     }
@@ -697,6 +701,7 @@ class _AssayRowBuilder(_RowBuilderBase):
         'Sample Name': _SampleBuilder,
         'Extract Name': _ExtractBuilder,
         'Labeled Extract Name': _LabeledExtractBuilder,
+        'Material Name': _MaterialBuilder,
         # Data node builders
         'Array Data File': _ArrayDataBuilder,
         'Array Data Matrix File': _ArrayDataMatrixBuilder,

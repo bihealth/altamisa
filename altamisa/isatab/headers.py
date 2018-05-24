@@ -44,6 +44,16 @@ class SimpleColumnHeader(ColumnHeader):
         super().__init__(self.column_type, col_no, 1)
 
 
+class MaterialHeader(SimpleColumnHeader):
+    """Material header in a study or assay"""
+
+    column_type = 'Material Name'
+
+    def __init__(self, column_name, col_no):
+        self.column_name = column_name
+        super().__init__(col_no)
+
+
 class SourceHeader(SimpleColumnHeader):
     """Source header in a study or assay"""
 
@@ -305,6 +315,7 @@ class HeaderParserBase:
     #: Headers that are mapped to ``SimpleColumnHeader``s
     simple_headers = {
         # Material headers
+        'Material Name': MaterialHeader,
         'Sample Name': SampleHeader,
         'Source Name': SourceHeader,
         'Extract Name': ExtractHeader,
@@ -384,6 +395,9 @@ class HeaderParserBase:
                 raise ParseIsatabException(msg)
             return self._parse_simple_column_header(
                 val, self.simple_headers[val])
+        elif val.endswith(" Name"):
+            return self._parse_material_column_header(
+                val, self.simple_headers["Material Name"])
         else:
             for label, type_ in self.labeled_headers.items():
                 if val.startswith(label):
@@ -426,6 +440,10 @@ class HeaderParserBase:
         self.col_no += 1
         return type_(self.col_no - 1, tok[1:-1])
 
+    def _parse_material_column_header(self, val, type_):
+        self.col_no += 1
+        return type_(val, self.col_no - 1)
+
 
 class StudyHeaderParser(HeaderParserBase):
     """Helper class for parsing header of a study or assay."""
@@ -452,7 +470,7 @@ class AssayHeaderParser(HeaderParserBase):
 
     allowed_headers = (
         # Material names
-        'Extract Name', 'Labeled Extract Name', 'Material Name', 'Sample Name',
+        'Extract Name', 'Labeled Extract Name', 'Sample Name',
         # Data names
         'Array Data File', 'Array Data Matrix File', 'Derived Array Data File',
         'Derived Data File', 'Derived Spectral Data File',
