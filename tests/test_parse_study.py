@@ -7,6 +7,7 @@
 from datetime import date
 
 import pytest  # noqa
+import os
 
 from altamisa.isatab import models
 from altamisa.isatab import InvestigationReader, StudyRowReader, StudyReader
@@ -63,7 +64,8 @@ def test_study_reader_minimal_study(
     study = reader.read()
 
     # Check results
-    assert str(study.file).endswith('data/i_minimal/s_minimal.txt')
+    assert os.path.normpath(str(study.file)).endswith(
+        os.path.normpath('data/i_minimal/s_minimal.txt'))
     assert 3 == len(study.header)
     assert 2 == len(study.materials)
     assert 1 == len(study.processes)
@@ -173,7 +175,8 @@ def test_study_reader_small_study(
     study = reader.read()
 
     # Check results
-    assert str(study.file).endswith('data/i_small/s_small.txt')
+    assert os.path.normpath(str(study.file)).endswith(os.path.normpath(
+        'data/i_small/s_small.txt'))
     assert 13 == len(study.header)
     assert 7 == len(study.materials)
     assert 4 == len(study.processes)

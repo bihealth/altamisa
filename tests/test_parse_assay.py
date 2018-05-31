@@ -5,6 +5,7 @@
 # TODO: test with secondary annotation (i.e., further qualify with term) or even tertiary (qualify with unit and qualify unit with term)
 
 import pytest  # noqa
+import os
 
 from altamisa.isatab import models
 from altamisa.isatab import InvestigationReader, AssayRowReader, AssayReader
@@ -71,7 +72,8 @@ def test_assay_reader_minimal_assay(
     assay = reader.read()
 
     # Check results
-    assert str(assay.file).endswith('data/i_minimal/a_minimal.txt')
+    assert os.path.normpath(str(assay.file)).endswith(
+        os.path.normpath('data/i_minimal/a_minimal.txt'))
     assert 5 == len(assay.header)
     assert 3 == len(assay.materials)
     assert 1 == len(assay.processes)
@@ -212,7 +214,8 @@ def test_assay_reader_small_assay(
     assay = reader.read()
 
     # Check results
-    assert str(assay.file).endswith('data/i_small/a_small.txt')
+    assert os.path.normpath(str(assay.file)).endswith(
+        os.path.normpath('data/i_small/a_small.txt'))
     assert 8 == len(assay.header)
     assert 7 == len(assay.materials)
     assert 5 == len(assay.processes)
@@ -312,7 +315,8 @@ def test_assay_reader_small2_assay(
     assay = reader.read()
 
     # Check results
-    assert str(assay.file).endswith('data/i_small2/a_small2.txt')
+    assert os.path.normpath(str(assay.file)).endswith(
+        os.path.normpath('data/i_small2/a_small2.txt'))
     assert 14 == len(assay.header)
     assert 25 == len(assay.materials)
     assert 41 == len(assay.processes)
