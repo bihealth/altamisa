@@ -852,6 +852,8 @@ class StudyRowReader:
         self.study = study
         self.study_id = study_id
         self.input_file = input_file
+        self.unique_rows = set()
+        self.duplicate_rows = list()
         self._reader = csv.reader(input_file, delimiter='\t', quotechar='"')
         self._line = None
         self._read_next_line()
@@ -874,6 +876,11 @@ class StudyRowReader:
             while self._line is not None and (
                     not self._line or self._line[0].startswith('#')):
                 self._line = self.input_file.next()
+            # Test and collect row duplicates
+            if '\t'.join(self._line) in self.unique_rows:
+                self.duplicate_rows.append('\t'.join(self._line))
+            else:
+                self.unique_rows.add('\t'.join(self._line))
         except StopIteration:
             self._line = None
         return prev_line
@@ -888,6 +895,13 @@ class StudyRowReader:
                 yield builder.build(line)
             else:
                 break
+        # Check if duplicated rows exist
+        if self.duplicate_rows:
+            lines = '\n{}' * len(self.duplicate_rows)
+            tpl = ('Found duplicated rows in study {}:{}')
+            msg = tpl.format(self.study_id,
+                             lines.format(*self.duplicate_rows))
+            raise ParseIsatabException(msg)
 
 
 class StudyReader:
@@ -963,6 +977,8 @@ class AssayRowReader:
         self.study_id = study_id
         self.assay_id = assay_id
         self.input_file = input_file
+        self.unique_rows = set()
+        self.duplicate_rows = list()
         self._reader = csv.reader(input_file, delimiter='\t', quotechar='"')
         self._line = None
         self._read_next_line()
@@ -973,7 +989,7 @@ class AssayRowReader:
         try:
             line = self._read_next_line()
         except StopIteration as e:
-            msg = 'Study file has no header!'
+            msg = 'Assay file has no header!'
             raise ParseIsatabException(msg) from e
         return list(AssayHeaderParser(line, self.study.factors).run())
 
@@ -985,6 +1001,11 @@ class AssayRowReader:
             while self._line is not None and (
                     not self._line or self._line[0].startswith('#')):
                 self._line = self.input_file.next()
+            # Test and collect row duplicates
+            if '\t'.join(self._line) in self.unique_rows:
+                self.duplicate_rows.append('\t'.join(self._line))
+            else:
+                self.unique_rows.add('\t'.join(self._line))
         except StopIteration:
             self._line = None
         return prev_line
@@ -999,6 +1020,13 @@ class AssayRowReader:
                 yield builder.build(line)
             else:
                 break
+        # Check if duplicated rows exist
+        if self.duplicate_rows:
+            lines = '\n{}' * len(self.duplicate_rows)
+            tpl = ('Found duplicated rows in assay {} of study {}:{}')
+            msg = tpl.format(self.assay_id, self.study_id,
+                             lines.format(*self.duplicate_rows))
+            raise ParseIsatabException(msg)
 
 
 class AssayReader:
