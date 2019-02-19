@@ -2,6 +2,8 @@
 """Code for parsing investigation files.
 """
 
+from __future__ import generator_stop
+
 import os
 import csv
 from pathlib import Path
@@ -385,8 +387,8 @@ class InvestigationReader:
     def _read_multi_column_section(self, prefix, ref_keys, section_name):
         section = {}
         comment_keys = list()
-        while (self._next_line_startswith(prefix) or
-               self._next_line_startswith_comment()):
+        while (self._next_line_startswith(prefix)
+               or self._next_line_startswith_comment()):
             line = self._read_next_line()
             key = line[0]
             if key.startswith('Comment'):
@@ -418,8 +420,8 @@ class InvestigationReader:
         # Read the lines in this section.
         section = {}
         comment_keys = list()
-        while (self._next_line_startswith(prefix) or
-               self._next_line_startswith_comment()):
+        while (self._next_line_startswith(prefix)
+               or self._next_line_startswith_comment()):
             line = self._read_next_line()
             if len(line) > 2:
                 tpl = 'Line {} contains more than one value: {}'

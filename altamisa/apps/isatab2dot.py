@@ -58,7 +58,7 @@ def run(args):
         with open(os.path.join(path, studyInfo.info.path), 'rt') as inputf:
             study = StudyReader.from_stream(investigation,
                                             studyInfo,
-                                            "S{}".format(s+1),
+                                            "S{}".format(s + 1),
                                             inputf).read()
         print('  /* study {} */'.format(studyInfo.info.path),
               file=args.output_file)
@@ -72,8 +72,8 @@ def run(args):
             with open(os.path.join(path, assayInfo.path), 'rt') as inputf:
                 assay = AssayReader.from_stream(investigation,
                                                 studyInfo,
-                                                "S{}".format(s+1),
-                                                "A{}".format(a+1),
+                                                "S{}".format(s + 1),
+                                                "A{}".format(a + 1),
                                                 inputf).read()
             print('  /* assay {} */'.format(assayInfo.path),
                   file=args.output_file)

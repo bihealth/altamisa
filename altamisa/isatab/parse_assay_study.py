@@ -4,6 +4,8 @@
 
 # TODO: validate whether protocol is known in investigation
 
+from __future__ import generator_stop
+
 import csv
 from datetime import datetime
 from pathlib import Path
@@ -131,14 +133,14 @@ class _NodeBuilderBase:
         self.counter_value += 1
         return self.counter_value
 
-    def _assign_column_headers(self):
+    def _assign_column_headers(self):  # noqa: C901
         # Record the last column header that is a primary annotation (e.g.,
         # "Characteristics[*]" is but "Term Source REF" is not.
         prev = None
         # Interpret the full sequence of column headers.
         for no, header in enumerate(self.column_headers):
-            if (header.column_type not in self.name_headers and
-                    header.column_type not in self.allowed_column_types):
+            if (header.column_type not in self.name_headers
+                    and header.column_type not in self.allowed_column_types):
                 tpl = 'Invalid column type occured "{}" not in {}'
                 msg = tpl.format(header.column_type, self.allowed_column_types)
                 raise ParseIsatabException(msg)
@@ -465,11 +467,11 @@ class _ProcessBuilder(_NodeBuilderBase):
         if self.date_header and line[self.date_header.col_no]:
             try:
                 date = datetime.strptime(
-                        line[self.date_header.col_no], '%Y-%m-%d').date()
-            except ValueError:
+                    line[self.date_header.col_no], '%Y-%m-%d').date()
+            except ValueError as e:
                 tpl = 'Invalid ISO8601 date "{}"'
                 msg = tpl.format(line[self.date_header.col_no])
-                raise ParseIsatabException(msg)
+                raise ParseIsatabException(msg) from e
         else:
             date = None
         if self.performer_header:
@@ -764,17 +766,17 @@ class _AssayAndStudyBuilder:
                 if not entry.name:
                     # Find previous originally named node
                     ext = 0
-                    while not row[idx-ext-1].name:
+                    while not row[idx - ext - 1].name:
                         ext += 1
-                    start_entry = row[idx-ext-1].unique_name
+                    start_entry = row[idx - ext - 1].unique_name
                     # Find next originally named node
                     # (may stay None, if a bubble is not closed at the end)
                     end_entry = None
                     ext = 0
-                    while idx+ext+1 < len(row) and not row[idx+ext+1].name:
+                    while idx + ext + 1 < len(row) and not row[idx + ext + 1].name:
                         ext += 1
-                    if idx+ext+1 < len(row) and row[idx+ext+1].name:
-                        end_entry = row[idx+ext+1].unique_name
+                    if idx + ext + 1 < len(row) and row[idx + ext + 1].name:
+                        end_entry = row[idx + ext + 1].unique_name
                     # Compare idx, start and end with previous rows
                     # and perform the change if appropriate
                     key = (idx, start_entry, end_entry)
@@ -859,9 +861,9 @@ class StudyRowReader:
         """Read first line with header"""
         try:
             line = self._read_next_line()
-        except StopIteration:
+        except StopIteration as e:
             msg = 'Study file has no header!'
-            raise ParseIsatabException(msg)
+            raise ParseIsatabException(msg) from e
         return list(StudyHeaderParser(line, self.study.factors).run())
 
     def _read_next_line(self):
@@ -970,9 +972,9 @@ class AssayRowReader:
         """Read first line with header"""
         try:
             line = self._read_next_line()
-        except StopIteration:
+        except StopIteration as e:
             msg = 'Study file has no header!'
-            raise ParseIsatabException(msg)
+            raise ParseIsatabException(msg) from e
         return list(AssayHeaderParser(line, self.study.factors).run())
 
     def _read_next_line(self):

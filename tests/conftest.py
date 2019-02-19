@@ -2,7 +2,6 @@
 """Shared code for the tests.
 """
 
-import io
 import os.path
 
 import pytest
