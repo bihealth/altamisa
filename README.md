@@ -1,3 +1,4 @@
+[![Codacy Badge](https://api.codacy.com/project/badge/Grade/0b1fffdb6914474395c06910a7f9fc8d)](https://app.codacy.com/app/manuel-holtgrewe/altamisa?utm_source=github.com&utm_medium=referral&utm_content=bihealth/altamisa&utm_campaign=Badge_Grade_Dashboard)
 [![Build Status](https://img.shields.io/travis/bihealth/altamisa.svg?branch=master)](https://travis-ci.org/bihealth/altamisa)
 
 # AltamISA
