@@ -6,7 +6,7 @@
 
 from datetime import date
 
-import pytest  # noqa
+import pytest  # noqa # pylint: disable=unused-import
 import os
 
 from altamisa.isatab import models

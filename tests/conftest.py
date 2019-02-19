@@ -4,7 +4,7 @@
 
 import os.path
 
-import pytest
+import pytest  # noqa # pylint: disable=unused-import
 
 
 @pytest.fixture

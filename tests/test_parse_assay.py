@@ -4,7 +4,7 @@
 # TODO: test with one annotation for each source, extraction, sample
 # TODO: test with secondary annotation (i.e., further qualify with term) or even tertiary (qualify with unit and qualify unit with term)
 
-import pytest  # noqa
+import pytest  # noqa # pylint: disable=unused-import
 import os
 
 from altamisa.isatab import models

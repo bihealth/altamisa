@@ -343,7 +343,6 @@ class HeaderParserBase:
         # Secondary annotations
         "Unit": UnitHeader,
         "Performer": PerformerHeader,
-        "Date": DateHeader,
     }
 
     #: Labeled headers

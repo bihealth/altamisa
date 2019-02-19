@@ -141,7 +141,7 @@ class _NodeBuilderBase:
         # "Characteristics[*]" is but "Term Source REF" is not.
         prev = None
         # Interpret the full sequence of column headers.
-        for no, header in enumerate(self.column_headers):
+        for header in self.column_headers:
             if (
                 header.column_type not in self.name_headers
                 and header.column_type not in self.allowed_column_types
