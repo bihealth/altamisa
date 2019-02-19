@@ -14,6 +14,10 @@ AltamISA
     :target: https://www.codacy.com/app/bihealth/altamisa?utm_source=github.com&utm_medium=referral&utm_content=bihealth/altamisa&utm_campaign=Badge_Coverage
     :alt: Coverage Badge
 
+.. image:: https://readthedocs.org/projects/altamisa/badge/?version=latest
+	:target: https://altamisa.readthedocs.io/en/latest/?badge=latest
+	:alt: Documentation Status
+
 .. image:: docs/images/Peruvian_Ragweed-small.png
     :width: 200
     :height: 312
