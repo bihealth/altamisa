@@ -18,9 +18,13 @@ def test_parse_minimal_investigation(minimal_investigation_file):
     # Ontology sources
     assert 1 == len(investigation.ontology_source_refs)
     expected = models.OntologyRef(
-        'OBI', 'http://data.bioontology.org/ontologies/OBI',
-        '31', 'Ontology for Biomedical Investigations', ())
-    assert expected == investigation.ontology_source_refs['OBI']
+        "OBI",
+        "http://data.bioontology.org/ontologies/OBI",
+        "31",
+        "Ontology for Biomedical Investigations",
+        (),
+    )
+    assert expected == investigation.ontology_source_refs["OBI"]
 
     # Basic info
     assert "Minimal Investigation" == investigation.info.title
@@ -53,18 +57,25 @@ def test_parse_small_investigation(small_investigation_file):
     # Ontology sources
     assert 4 == len(investigation.ontology_source_refs)
     expected = models.OntologyRef(
-        'OBI', 'http://data.bioontology.org/ontologies/OBI',
-        '31', 'Ontology for Biomedical Investigations', ())
-    assert expected == investigation.ontology_source_refs['OBI']
+        "OBI",
+        "http://data.bioontology.org/ontologies/OBI",
+        "31",
+        "Ontology for Biomedical Investigations",
+        (),
+    )
+    assert expected == investigation.ontology_source_refs["OBI"]
     expected = models.OntologyRef(
-        'NCBITAXON', 'http://data.bioontology.org/ontologies/NCBITAXON', '8',
-        ('National Center for Biotechnology Information (NCBI) Organismal '
-         'Classification'), ())
-    assert expected == investigation.ontology_source_refs['NCBITAXON']
+        "NCBITAXON",
+        "http://data.bioontology.org/ontologies/NCBITAXON",
+        "8",
+        ("National Center for Biotechnology Information (NCBI) Organismal " "Classification"),
+        (),
+    )
+    assert expected == investigation.ontology_source_refs["NCBITAXON"]
     expected = models.OntologyRef(
-        'ROLEO', 'http://data.bioontology.org/ontologies/ROLEO', '1',
-        'Role Ontology', ())
-    assert expected == investigation.ontology_source_refs['ROLEO']
+        "ROLEO", "http://data.bioontology.org/ontologies/ROLEO", "1", "Role Ontology", ()
+    )
+    assert expected == investigation.ontology_source_refs["ROLEO"]
 
     # Basic info
     assert "Small Investigation" == investigation.info.title
@@ -97,18 +108,26 @@ def test_parse_full_investigation(full_investigation_file):
     # Ontology sources
     assert 9 == len(investigation.ontology_source_refs)
     expected = models.OntologyRef(
-        'OBI', 'http://data.bioontology.org/ontologies/OBI',
-        '21', 'Ontology for Biomedical Investigations', ())
-    assert expected == investigation.ontology_source_refs['OBI']
+        "OBI",
+        "http://data.bioontology.org/ontologies/OBI",
+        "21",
+        "Ontology for Biomedical Investigations",
+        (),
+    )
+    assert expected == investigation.ontology_source_refs["OBI"]
     expected = models.OntologyRef(
-        'NCBITAXON', 'http://data.bioontology.org/ontologies/NCBITAXON', '2',
-        ('National Center for Biotechnology Information (NCBI) Organismal '
-         'Classification'), ())
-    assert expected == investigation.ontology_source_refs['NCBITAXON']
+        "NCBITAXON",
+        "http://data.bioontology.org/ontologies/NCBITAXON",
+        "2",
+        ("National Center for Biotechnology Information (NCBI) Organismal " "Classification"),
+        (),
+    )
+    assert expected == investigation.ontology_source_refs["NCBITAXON"]
 
     # Basic info
-    assert ("Growth control of the eukaryote cell: a systems biology study "
-            "in yeast") == investigation.info.title
+    assert (
+        "Growth control of the eukaryote cell: a systems biology study " "in yeast"
+    ) == investigation.info.title
     assert "BII-I-1" == investigation.info.identifier
     assert "2007-04-30" == investigation.info.submission_date
     assert "2009-03-10" == investigation.info.public_release_date
@@ -116,55 +135,78 @@ def test_parse_full_investigation(full_investigation_file):
     # Publications
     assert 3 == len(investigation.publications)
     expected = models.PublicationInfo(
-        "17439666", "doi:10.1186/jbiol54",
+        "17439666",
+        "doi:10.1186/jbiol54",
         "Castrillo JI, Zeef LA, Hoyle DC, Zhang N, Hayes A, Gardner DC, "
         "Cornell MJ, Petty J, Hakes L, Wardleworth L, Rash B, Brown M, "
         "Dunn WB, Broadhurst D, O'Donoghue K, Hester SS, Dunkley TP, Hart "
         "SR, Swainston N, Li P, Gaskell SJ, Paton NW, Lilley KS, Kell DB, "
         "Oliver SG.",
-        "Growth control of the eukaryote cell: a systems biology study in "
-        "yeast.", "indexed in Pubmed", ())
+        "Growth control of the eukaryote cell: a systems biology study in " "yeast.",
+        "indexed in Pubmed",
+        (),
+    )
     assert expected == investigation.publications[0]
     expected = models.PublicationInfo(
-        "1231222", "",
+        "1231222",
+        "",
         "Piatnochka IT.",
         "Effect of prednisolone on the cardiovascular system in complex "
         "treatment of newly detected pulmonary tuberculosis",
-        models.OntologyTermRef("published",
-                               "http://www.ebi.ac.uk/efo/EFO_0001796",
-                               "EFO"), ())
+        models.OntologyTermRef("published", "http://www.ebi.ac.uk/efo/EFO_0001796", "EFO"),
+        (),
+    )
     assert expected == investigation.publications[1]
 
     # Contacts
     assert 3 == len(investigation.contacts)
     expected = models.ContactInfo(
-        "Oliver", "Stephen", "G", "stephen.oliver@test.mail", "", "",
+        "Oliver",
+        "Stephen",
+        "G",
+        "stephen.oliver@test.mail",
+        "",
+        "",
         "Oxford Road, Manchester M13 9PT, UK",
-        "Faculty of Life Sciences, Michael Smith Building, "
-        "University of Manchester",
+        "Faculty of Life Sciences, Michael Smith Building, " "University of Manchester",
         "corresponding author",
-        (models.Comment("Investigation Person ORCID", "12345", None),
-         models.Comment("Investigation Person REF", "personA", None)))
+        (
+            models.Comment("Investigation Person ORCID", "12345", None),
+            models.Comment("Investigation Person REF", "personA", None),
+        ),
+    )
     assert expected == investigation.contacts[0]
     expected = models.ContactInfo(
-        "Juan", "Castrillo", "I", "", "123456789", "",
+        "Juan",
+        "Castrillo",
+        "I",
+        "",
+        "123456789",
+        "",
         "Oxford Road, Manchester M13 9PT, UK",
-        "Faculty of Life Sciences, Michael Smith Building, "
-        "University of Manchester",
+        "Faculty of Life Sciences, Michael Smith Building, " "University of Manchester",
         "author",
-        (models.Comment("Investigation Person ORCID", "0987654321", None),
-         models.Comment("Investigation Person REF", "personB", None)))
+        (
+            models.Comment("Investigation Person ORCID", "0987654321", None),
+            models.Comment("Investigation Person REF", "personB", None),
+        ),
+    )
     assert expected == investigation.contacts[1]
     expected = models.ContactInfo(
-        "Leo", "Zeef", "A", "", "", "+49 123456789",
+        "Leo",
+        "Zeef",
+        "A",
+        "",
+        "",
+        "+49 123456789",
         "Oxford Road, Manchester M13 9PT, UK",
-        "Faculty of Life Sciences, Michael Smith Building, "
-        "University of Manchester",
-        models.OntologyTermRef("author",
-                               "http://purl.obolibrary.org/obo/RoleO_0000061",
-                               "ROLEO"),
-        (models.Comment("Investigation Person ORCID", "1357908642", None),
-         models.Comment("Investigation Person REF", "personC", None)))
+        "Faculty of Life Sciences, Michael Smith Building, " "University of Manchester",
+        models.OntologyTermRef("author", "http://purl.obolibrary.org/obo/RoleO_0000061", "ROLEO"),
+        (
+            models.Comment("Investigation Person ORCID", "1357908642", None),
+            models.Comment("Investigation Person REF", "personC", None),
+        ),
+    )
     assert expected == investigation.contacts[2]
 
     # Studies
@@ -173,79 +215,96 @@ def test_parse_full_investigation(full_investigation_file):
     # Study 1
     study = investigation.studies[0]
     assert "BII-S-1" == study.info.identifier
-    assert ("Study of the impact of changes in flux on the transcriptome, "
-            "proteome, endometabolome and exometabolome of the yeast "
-            "Saccharomyces cerevisiae under different nutrient limitations"
-            ) == study.info.title
+    assert (
+        "Study of the impact of changes in flux on the transcriptome, "
+        "proteome, endometabolome and exometabolome of the yeast "
+        "Saccharomyces cerevisiae under different nutrient limitations"
+    ) == study.info.title
     assert Path("s_BII-S-1.txt") == study.info.path
 
     # Study 1 - Design descriptors
     assert 2 == len(study.designs)
-    expected = (models.DesignDescriptorsInfo(
-                models.OntologyTermRef(
-                    "intervention design",
-                    "http://purl.obolibrary.org/obo/OBI_0000115",
-                    "OBI"), ()),
-                models.DesignDescriptorsInfo(
-                    models.OntologyTermRef(
-                        "genotyping design",
-                        "http://purl.obolibrary.org/obo/OBI_0001444",
-                        "OBI"), ()))
+    expected = (
+        models.DesignDescriptorsInfo(
+            models.OntologyTermRef(
+                "intervention design", "http://purl.obolibrary.org/obo/OBI_0000115", "OBI"
+            ),
+            (),
+        ),
+        models.DesignDescriptorsInfo(
+            models.OntologyTermRef(
+                "genotyping design", "http://purl.obolibrary.org/obo/OBI_0001444", "OBI"
+            ),
+            (),
+        ),
+    )
     assert expected == study.designs
 
     # Study 1 - Publications
     assert 1 == len(study.publications)
     expected = models.PublicationInfo(
-        "17439666", "doi:10.1186/jbiol54",
+        "17439666",
+        "doi:10.1186/jbiol54",
         "Castrillo JI, Zeef LA, Hoyle DC, Zhang N, Hayes A, Gardner DC, "
         "Cornell MJ, Petty J, Hakes L, Wardleworth L, Rash B, Brown M, "
         "Dunn WB, Broadhurst D, O'Donoghue K, Hester SS, Dunkley TP, Hart "
         "SR, Swainston N, Li P, Gaskell SJ, Paton NW, Lilley KS, Kell DB, "
         "Oliver SG.",
-        "Growth control of the eukaryote cell: a systems biology study in "
-        "yeast.", "published", ())
+        "Growth control of the eukaryote cell: a systems biology study in " "yeast.",
+        "published",
+        (),
+    )
     assert expected == study.publications[0]
 
     # Study 1 - Factors
     assert 2 == len(study.factors)
     expected = models.FactorInfo(
-        "limiting nutrient", models.OntologyTermRef(
-            "chemical entity",
-            "http://purl.obolibrary.org/obo/CHEBI_24431",
-            "CHEBI"), ())
+        "limiting nutrient",
+        models.OntologyTermRef(
+            "chemical entity", "http://purl.obolibrary.org/obo/CHEBI_24431", "CHEBI"
+        ),
+        (),
+    )
     assert expected == study.factors["limiting nutrient"]
     expected = models.FactorInfo(
-        "rate", models.OntologyTermRef(
-            "rate",
-            "http://purl.obolibrary.org/obo/PATO_0000161",
-            "PATO"), ())
+        "rate",
+        models.OntologyTermRef("rate", "http://purl.obolibrary.org/obo/PATO_0000161", "PATO"),
+        (),
+    )
     assert expected == study.factors["rate"]
 
     # Study 1 - Assays
     assert 3 == len(study.assays)
     expected = models.AssayInfo(
-        models.OntologyTermRef("protein expression profiling",
-                               "http://purl.obolibrary.org/obo/OBI_0000615",
-                               "OBI"),
-        models.OntologyTermRef("mass spectrometry",
-                               "http://purl.obolibrary.org/obo/OBI_0000470",
-                               "OBI"),
-        "iTRAQ", Path("a_proteome.txt"), ())
+        models.OntologyTermRef(
+            "protein expression profiling", "http://purl.obolibrary.org/obo/OBI_0000615", "OBI"
+        ),
+        models.OntologyTermRef(
+            "mass spectrometry", "http://purl.obolibrary.org/obo/OBI_0000470", "OBI"
+        ),
+        "iTRAQ",
+        Path("a_proteome.txt"),
+        (),
+    )
     assert expected == study.assays["a_proteome.txt"]
     expected = models.AssayInfo(
-        models.OntologyTermRef("transcription profiling",
-                               "http://purl.obolibrary.org/obo/OBI_0000424",
-                               "OBI"),
-        models.OntologyTermRef("DNA microarray",
-                               "http://purl.obolibrary.org/obo/OBI_0400148",
-                               "OBI"),
-        "Affymetrix", Path("a_transcriptome.txt"), ())
+        models.OntologyTermRef(
+            "transcription profiling", "http://purl.obolibrary.org/obo/OBI_0000424", "OBI"
+        ),
+        models.OntologyTermRef(
+            "DNA microarray", "http://purl.obolibrary.org/obo/OBI_0400148", "OBI"
+        ),
+        "Affymetrix",
+        Path("a_transcriptome.txt"),
+        (),
+    )
     assert expected == study.assays["a_transcriptome.txt"]
 
     # Study 1 - Protocols
     assert 7 == len(study.protocols)
     expected = models.ProtocolInfo(
-        "growth protocol", "growth",
+        "growth protocol",
+        "growth",
         "1. Biomass samples (45 ml) were taken via the sample port of the "
         "Applikon fermenters. The cells were pelleted by centrifugation for 5 "
         "min at 5000 rpm. The supernatant was removed and the RNA pellet "
@@ -275,60 +334,81 @@ def test_parse_full_investigation(full_investigation_file):
         "6000 Nano Assay, and analysed on an Agilent 2100 Bioanalyser (Agilent"
         " Technologies). RNA was quantified using the Nanodrop ultra low "
         "volume spectrophotometer (Nanodrop Technologies).",
-        "", "",
-        {"rate": models.OntologyTermRef(
-            "rate", "http://purl.obolibrary.org/obo/PATO_0000161", "PATO"), },
-        {}, ())
+        "",
+        "",
+        {
+            "rate": models.OntologyTermRef(
+                "rate", "http://purl.obolibrary.org/obo/PATO_0000161", "PATO"
+            )
+        },
+        {},
+        (),
+    )
     assert expected == study.protocols["growth protocol"]
     expected = models.ProtocolInfo(
         "metabolite extraction",
-        models.OntologyTermRef(
-            "extraction", "http://purl.obolibrary.org/obo/OBI_0302884", "OBI"),
-        "", "", "",
-        {"standard volume": "standard volume",
-         "sample volume": "sample volume"},
-        {"pipette": models.ProtocolComponentInfo(
-            "pipette", models.OntologyTermRef(
-                "instrument",
-                "http://www.ebi.ac.uk/efo/EFO_0000548",
-                "EFO")), }, ())
+        models.OntologyTermRef("extraction", "http://purl.obolibrary.org/obo/OBI_0302884", "OBI"),
+        "",
+        "",
+        "",
+        {"standard volume": "standard volume", "sample volume": "sample volume"},
+        {
+            "pipette": models.ProtocolComponentInfo(
+                "pipette",
+                models.OntologyTermRef("instrument", "http://www.ebi.ac.uk/efo/EFO_0000548", "EFO"),
+            )
+        },
+        (),
+    )
     assert expected == study.protocols["metabolite extraction"]
 
     # Study 1 - Contacts
     assert 3 == len(study.contacts)
     expected = models.ContactInfo(
-        "Oliver", "Stephen", "G", "stephen.oliver@test.mail", "", "",
+        "Oliver",
+        "Stephen",
+        "G",
+        "stephen.oliver@test.mail",
+        "",
+        "",
         "Oxford Road, Manchester M13 9PT, UK",
-        "Faculty of Life Sciences, Michael Smith Building, "
-        "University of Manchester",
+        "Faculty of Life Sciences, Michael Smith Building, " "University of Manchester",
         "corresponding author",
-        (models.Comment("Study Person REF", "", None), ))
+        (models.Comment("Study Person REF", "", None),),
+    )
     assert expected == study.contacts[0]
     expected = models.ContactInfo(
-        "Juan", "Castrillo", "I", "", "123456789", "",
+        "Juan",
+        "Castrillo",
+        "I",
+        "",
+        "123456789",
+        "",
         "Oxford Road, Manchester M13 9PT, UK",
-        "Faculty of Life Sciences, Michael Smith Building, "
-        "University of Manchester",
-        models.OntologyTermRef("author",
-                               "http://purl.obolibrary.org/obo/RoleO_0000061",
-                               "ROLEO"),
-        (models.Comment("Study Person REF", "", None), ))
+        "Faculty of Life Sciences, Michael Smith Building, " "University of Manchester",
+        models.OntologyTermRef("author", "http://purl.obolibrary.org/obo/RoleO_0000061", "ROLEO"),
+        (models.Comment("Study Person REF", "", None),),
+    )
     assert expected == study.contacts[1]
     expected = models.ContactInfo(
-        "Leo", "Zeef", "A", "", "", "+49 123456789",
+        "Leo",
+        "Zeef",
+        "A",
+        "",
+        "",
+        "+49 123456789",
         "Oxford Road, Manchester M13 9PT, UK",
-        "Faculty of Life Sciences, Michael Smith Building, "
-        "University of Manchester",
-        models.OntologyTermRef("author",
-                               "http://purl.obolibrary.org/obo/RoleO_0000061",
-                               "ROLEO"),
-        (models.Comment("Study Person REF", "", None), ))
+        "Faculty of Life Sciences, Michael Smith Building, " "University of Manchester",
+        models.OntologyTermRef("author", "http://purl.obolibrary.org/obo/RoleO_0000061", "ROLEO"),
+        (models.Comment("Study Person REF", "", None),),
+    )
     assert expected == study.contacts[2]
 
     # Study 2
     study = investigation.studies[1]
     expected = models.BasicInfo(
-        Path("s_BII-S-2.txt"), "BII-S-2",
+        Path("s_BII-S-2.txt"),
+        "BII-S-2",
         "A time course analysis of transcription response in yeast treated "
         "with rapamycin, a specific inhibitor of the TORC1 complex: impact "
         "on yeast growth",
@@ -352,39 +432,46 @@ def test_parse_full_investigation(full_investigation_file):
         "to the other, as the control. Samples were taken at 0, 1, 2 and 4 h "
         "after treatment. Gene expression at the mRNA level was investigated "
         "by transcriptome analysis using Affymetrix hybridization arrays.",
-        "2007-04-30", "2009-03-10",
-        (models.Comment("Study Grant Number", "", None),
-         models.Comment("Study Funding Agency", "", None),
-         models.Comment("Manuscript Licence", "CC BY 3.0", None),
-         models.Comment("Experimental Metadata Licence", "CC0", None),
-         models.Comment("Data Repository", "", None),
-         models.Comment("Data Record Accession", "", None),
-         models.Comment("Data Record URI", "", None),
-         models.Comment("Supplementary Information File Name", "", None),
-         models.Comment("Supplementary Information File Type", "", None),
-         models.Comment("Supplementary File URI", "", None),
-         models.Comment("Subject Keywords", "", None)))
+        "2007-04-30",
+        "2009-03-10",
+        (
+            models.Comment("Study Grant Number", "", None),
+            models.Comment("Study Funding Agency", "", None),
+            models.Comment("Manuscript Licence", "CC BY 3.0", None),
+            models.Comment("Experimental Metadata Licence", "CC0", None),
+            models.Comment("Data Repository", "", None),
+            models.Comment("Data Record Accession", "", None),
+            models.Comment("Data Record URI", "", None),
+            models.Comment("Supplementary Information File Name", "", None),
+            models.Comment("Supplementary Information File Type", "", None),
+            models.Comment("Supplementary File URI", "", None),
+            models.Comment("Subject Keywords", "", None),
+        ),
+    )
     assert expected == study.info
 
     # Study 2 - Factors
     assert 3 == len(study.factors)
     expected = models.FactorInfo(
         "exposure time",
-        models.OntologyTermRef(
-            "time", "http://purl.obolibrary.org/obo/PATO_0000165", "OBI_BCGO"
-        ), ())
+        models.OntologyTermRef("time", "http://purl.obolibrary.org/obo/PATO_0000165", "OBI_BCGO"),
+        (),
+    )
     assert expected == study.factors["exposure time"]
 
     # Study 2 - Assays
     assert 1 == len(study.assays)
     expected = models.AssayInfo(
-        models.OntologyTermRef("transcription profiling",
-                               "http://purl.obolibrary.org/obo/OBI_0000424",
-                               "OBI"),
-        models.OntologyTermRef("DNA microarray",
-                               "http://purl.obolibrary.org/obo/OBI_0400148",
-                               "OBI"),
-        "Affymetrix", Path("a_microarray.txt"), ())
+        models.OntologyTermRef(
+            "transcription profiling", "http://purl.obolibrary.org/obo/OBI_0000424", "OBI"
+        ),
+        models.OntologyTermRef(
+            "DNA microarray", "http://purl.obolibrary.org/obo/OBI_0400148", "OBI"
+        ),
+        "Affymetrix",
+        Path("a_microarray.txt"),
+        (),
+    )
     assert expected == study.assays["a_microarray.txt"]
 
     # Study 2 - Protocols
@@ -392,31 +479,37 @@ def test_parse_full_investigation(full_investigation_file):
     expected = models.ProtocolInfo(
         "NMR spectroscopy",
         models.OntologyTermRef(
-            "NMR spectroscopy",
-            "http://purl.obolibrary.org/obo/OBI_0000623",
-            "OBI"),
-        "", "", "",
+            "NMR spectroscopy", "http://purl.obolibrary.org/obo/OBI_0000623", "OBI"
+        ),
+        "",
+        "",
+        "",
         {},
-        {"NMR tubes": models.ProtocolComponentInfo(
-            "NMR tubes", None),
-         "Bruker-Av600": models.ProtocolComponentInfo(
-             "Bruker-Av600", models.OntologyTermRef(
-                 "instrument",
-                 "http://www.ebi.ac.uk/efo/EFO_0000548",
-                 "EFO"))}, ())
+        {
+            "NMR tubes": models.ProtocolComponentInfo("NMR tubes", None),
+            "Bruker-Av600": models.ProtocolComponentInfo(
+                "Bruker-Av600",
+                models.OntologyTermRef("instrument", "http://www.ebi.ac.uk/efo/EFO_0000548", "EFO"),
+            ),
+        },
+        (),
+    )
     assert expected == study.protocols["NMR spectroscopy"]
 
     # Study 2 - Contacts
     assert 3 == len(study.contacts)
     expected = models.ContactInfo(
-        "Juan", "Castrillo", "I", "", "123456789", "",
+        "Juan",
+        "Castrillo",
+        "I",
+        "",
+        "123456789",
+        "",
         "Oxford Road, Manchester M13 9PT, UK",
-        "Faculty of Life Sciences, Michael Smith Building, "
-        "University of Manchester",
-        models.OntologyTermRef("author",
-                               "http://purl.obolibrary.org/obo/RoleO_0000061",
-                               "ROLEO"),
-        (models.Comment("Study Person REF", "personB", None), ))
+        "Faculty of Life Sciences, Michael Smith Building, " "University of Manchester",
+        models.OntologyTermRef("author", "http://purl.obolibrary.org/obo/RoleO_0000061", "ROLEO"),
+        (models.Comment("Study Person REF", "personB", None),),
+    )
     assert expected == study.contacts[1]
 
 
@@ -432,10 +525,13 @@ def test_parse_comment_investigation(comment_investigation_file):
     # Ontology sources
     assert 9 == len(investigation.ontology_source_refs)
     expected = models.OntologyRef(
-        'OBI', 'http://data.bioontology.org/ontologies/OBI',
-        '21', 'Ontology for Biomedical Investigations',
-        (models.Comment("OntologyComment", "TestValue01", None), ))
-    assert expected == investigation.ontology_source_refs['OBI']
+        "OBI",
+        "http://data.bioontology.org/ontologies/OBI",
+        "21",
+        "Ontology for Biomedical Investigations",
+        (models.Comment("OntologyComment", "TestValue01", None),),
+    )
+    assert expected == investigation.ontology_source_refs["OBI"]
 
     # Basic info
     assert "BII-I-1" == investigation.info.identifier
@@ -445,29 +541,36 @@ def test_parse_comment_investigation(comment_investigation_file):
     # Publications
     assert 3 == len(investigation.publications)
     expected = models.PublicationInfo(
-        "17439666", "doi:10.1186/jbiol54",
+        "17439666",
+        "doi:10.1186/jbiol54",
         "Castrillo JI, Zeef LA, Hoyle DC, Zhang N, Hayes A, Gardner DC, "
         "Cornell MJ, Petty J, Hakes L, Wardleworth L, Rash B, Brown M, "
         "Dunn WB, Broadhurst D, O'Donoghue K, Hester SS, Dunkley TP, Hart "
         "SR, Swainston N, Li P, Gaskell SJ, Paton NW, Lilley KS, Kell DB, "
         "Oliver SG.",
-        "Growth control of the eukaryote cell: a systems biology study in "
-        "yeast.", "indexed in Pubmed",
-        (models.Comment("InvestPubsComment", "TestValue01", None), ))
+        "Growth control of the eukaryote cell: a systems biology study in " "yeast.",
+        "indexed in Pubmed",
+        (models.Comment("InvestPubsComment", "TestValue01", None),),
+    )
     assert expected == investigation.publications[0]
 
     # Contacts
     assert 3 == len(investigation.contacts)
     expected = models.ContactInfo(
-        "Leo", "Zeef", "A", "", "", "+49 123456789",
+        "Leo",
+        "Zeef",
+        "A",
+        "",
+        "",
+        "+49 123456789",
         "Oxford Road, Manchester M13 9PT, UK",
-        "Faculty of Life Sciences, Michael Smith Building, "
-        "University of Manchester",
-        models.OntologyTermRef("author",
-                               "http://purl.obolibrary.org/obo/RoleO_0000061",
-                               "ROLEO"),
-        (models.Comment("Investigation Person ORCID", "1357908642", None),
-         models.Comment("Investigation Person REF", "personC", None)))
+        "Faculty of Life Sciences, Michael Smith Building, " "University of Manchester",
+        models.OntologyTermRef("author", "http://purl.obolibrary.org/obo/RoleO_0000061", "ROLEO"),
+        (
+            models.Comment("Investigation Person ORCID", "1357908642", None),
+            models.Comment("Investigation Person REF", "personC", None),
+        ),
+    )
     assert expected == investigation.contacts[2]
 
     # Studies
@@ -483,78 +586,86 @@ def test_parse_comment_investigation(comment_investigation_file):
     # Study 1 - Design descriptors
     assert 2 == len(study.designs)
     expected = models.DesignDescriptorsInfo(
-        models.OntologyTermRef("genotyping design",
-                               "http://purl.obolibrary.org/obo/OBI_0001444",
-                               "OBI"),
-        (models.Comment("DesignDescsComment", "TestValue01", None), ))
+        models.OntologyTermRef(
+            "genotyping design", "http://purl.obolibrary.org/obo/OBI_0001444", "OBI"
+        ),
+        (models.Comment("DesignDescsComment", "TestValue01", None),),
+    )
     assert expected == study.designs[1]
 
     # Study 1 - Publications
     assert 1 == len(study.publications)
     expected = models.PublicationInfo(
-        "17439666", "doi:10.1186/jbiol54",
+        "17439666",
+        "doi:10.1186/jbiol54",
         "Castrillo JI, Zeef LA, Hoyle DC, Zhang N, Hayes A, Gardner DC, "
         "Cornell MJ, Petty J, Hakes L, Wardleworth L, Rash B, Brown M, "
         "Dunn WB, Broadhurst D, O'Donoghue K, Hester SS, Dunkley TP, Hart "
         "SR, Swainston N, Li P, Gaskell SJ, Paton NW, Lilley KS, Kell DB, "
         "Oliver SG.",
-        "Growth control of the eukaryote cell: a systems biology study in "
-        "yeast.", "published",
-        (models.Comment("StudyPubsComment", "TestValue01", None), ))
+        "Growth control of the eukaryote cell: a systems biology study in " "yeast.",
+        "published",
+        (models.Comment("StudyPubsComment", "TestValue01", None),),
+    )
     assert expected == study.publications[0]
 
     # Study 1 - Factors
     assert 2 == len(study.factors)
     expected = models.FactorInfo(
-        "rate", models.OntologyTermRef(
-            "rate",
-            "http://purl.obolibrary.org/obo/PATO_0000161",
-            "PATO"),
-        (models.Comment("FactorsComment", "TestValue01", None), ))
+        "rate",
+        models.OntologyTermRef("rate", "http://purl.obolibrary.org/obo/PATO_0000161", "PATO"),
+        (models.Comment("FactorsComment", "TestValue01", None),),
+    )
     assert expected == study.factors["rate"]
 
     # Study 1 - Assays
     assert 3 == len(study.assays)
     expected = models.AssayInfo(
-        models.OntologyTermRef("transcription profiling",
-                               "http://purl.obolibrary.org/obo/OBI_0000424",
-                               "OBI"),
-        models.OntologyTermRef("DNA microarray",
-                               "http://purl.obolibrary.org/obo/OBI_0400148",
-                               "OBI"),
-        "Affymetrix", Path("a_transcriptome.txt"),
-        (models.Comment("AssaysComment", "A comment within ontology terms?",
-                        None), ))
+        models.OntologyTermRef(
+            "transcription profiling", "http://purl.obolibrary.org/obo/OBI_0000424", "OBI"
+        ),
+        models.OntologyTermRef(
+            "DNA microarray", "http://purl.obolibrary.org/obo/OBI_0400148", "OBI"
+        ),
+        "Affymetrix",
+        Path("a_transcriptome.txt"),
+        (models.Comment("AssaysComment", "A comment within ontology terms?", None),),
+    )
     assert expected == study.assays["a_transcriptome.txt"]
 
     # Study 1 - Protocols
     assert 7 == len(study.protocols)
     expected = models.ProtocolInfo(
         "metabolite extraction",
-        models.OntologyTermRef(
-            "extraction", "http://purl.obolibrary.org/obo/OBI_0302884", "OBI"),
-        "", "", "",
-        {"standard volume": "standard volume",
-         "sample volume": "sample volume"},
-        {"pipette": models.ProtocolComponentInfo(
-            "pipette", models.OntologyTermRef(
-                "instrument",
-                "http://www.ebi.ac.uk/efo/EFO_0000548",
-                "EFO"))},
-        (models.Comment("ProtocolsComment", "TestValue01", None), ))
+        models.OntologyTermRef("extraction", "http://purl.obolibrary.org/obo/OBI_0302884", "OBI"),
+        "",
+        "",
+        "",
+        {"standard volume": "standard volume", "sample volume": "sample volume"},
+        {
+            "pipette": models.ProtocolComponentInfo(
+                "pipette",
+                models.OntologyTermRef("instrument", "http://www.ebi.ac.uk/efo/EFO_0000548", "EFO"),
+            )
+        },
+        (models.Comment("ProtocolsComment", "TestValue01", None),),
+    )
     assert expected == study.protocols["metabolite extraction"]
 
     # Study 1 - Contacts
     assert 3 == len(study.contacts)
     expected = models.ContactInfo(
-        "Juan", "Castrillo", "I", "", "123456789", "",
+        "Juan",
+        "Castrillo",
+        "I",
+        "",
+        "123456789",
+        "",
         "Oxford Road, Manchester M13 9PT, UK",
-        "Faculty of Life Sciences, Michael Smith Building, "
-        "University of Manchester",
-        models.OntologyTermRef("author",
-                               "http://purl.obolibrary.org/obo/RoleO_0000061",
-                               "ROLEO"),
-        (models.Comment("Study Person REF", "", None), ))
+        "Faculty of Life Sciences, Michael Smith Building, " "University of Manchester",
+        models.OntologyTermRef("author", "http://purl.obolibrary.org/obo/RoleO_0000061", "ROLEO"),
+        (models.Comment("Study Person REF", "", None),),
+    )
     assert expected == study.contacts[1]
 
     # Study 2
@@ -569,14 +680,17 @@ def test_parse_comment_investigation(comment_investigation_file):
     # Study 2 - Contacts
     assert 3 == len(study.contacts)
     expected = models.ContactInfo(
-        "Juan", "Castrillo", "I", "", "123456789", "",
+        "Juan",
+        "Castrillo",
+        "I",
+        "",
+        "123456789",
+        "",
         "Oxford Road, Manchester M13 9PT, UK",
-        "Faculty of Life Sciences, Michael Smith Building, "
-        "University of Manchester",
-        models.OntologyTermRef("author",
-                               "http://purl.obolibrary.org/obo/RoleO_0000061",
-                               "ROLEO"),
-        (models.Comment("Study Person REF", "personB", None), ))
+        "Faculty of Life Sciences, Michael Smith Building, " "University of Manchester",
+        models.OntologyTermRef("author", "http://purl.obolibrary.org/obo/RoleO_0000061", "ROLEO"),
+        (models.Comment("Study Person REF", "personB", None),),
+    )
     assert expected == study.contacts[1]
 
 
