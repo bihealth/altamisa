@@ -12,3 +12,5 @@ recursive-include docs *.rst conf.py Makefile make.bat *.jpg *.png *.gif
 
 include versioneer.py
 include vcfpy/_version.py
+
+include requirements.txt requirements/*.txt
