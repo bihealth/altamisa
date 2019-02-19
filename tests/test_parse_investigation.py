@@ -182,10 +182,10 @@ def test_parse_full_investigation(full_investigation_file):
     # Study 1 - Design descriptors
     assert 2 == len(study.designs)
     expected = (models.DesignDescriptorsInfo(
-                    models.OntologyTermRef(
-                        "intervention design",
-                        "http://purl.obolibrary.org/obo/OBI_0000115",
-                        "OBI"), ()),
+                models.OntologyTermRef(
+                    "intervention design",
+                    "http://purl.obolibrary.org/obo/OBI_0000115",
+                    "OBI"), ()),
                 models.DesignDescriptorsInfo(
                     models.OntologyTermRef(
                         "genotyping design",
@@ -210,9 +210,9 @@ def test_parse_full_investigation(full_investigation_file):
     assert 2 == len(study.factors)
     expected = models.FactorInfo(
         "limiting nutrient", models.OntologyTermRef(
-                    "chemical entity",
-                    "http://purl.obolibrary.org/obo/CHEBI_24431",
-                    "CHEBI"), ())
+            "chemical entity",
+            "http://purl.obolibrary.org/obo/CHEBI_24431",
+            "CHEBI"), ())
     assert expected == study.factors["limiting nutrient"]
     expected = models.FactorInfo(
         "rate", models.OntologyTermRef(
@@ -284,7 +284,7 @@ def test_parse_full_investigation(full_investigation_file):
         "metabolite extraction",
         models.OntologyTermRef(
             "extraction", "http://purl.obolibrary.org/obo/OBI_0302884", "OBI"),
-        "",  "", "",
+        "", "", "",
         {"standard volume": "standard volume",
          "sample volume": "sample volume"},
         {"pipette": models.ProtocolComponentInfo(

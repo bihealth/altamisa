@@ -6,7 +6,7 @@
 
 from datetime import date
 
-import pytest
+import pytest  # noqa
 
 from altamisa.isatab import models
 from altamisa.isatab import InvestigationReader, StudyRowReader, StudyReader
@@ -129,7 +129,7 @@ def test_study_row_reader_small_study(
         None, characteristics, (), (), None)
     assert expected == first_row[0]
     expected = models.Process(
-        'sample collection', 'S1-sample collection-9-1',  None,
+        'sample collection', 'S1-sample collection-9-1', None,
         date(2018, 2, 2), 'John Doe',
         (models.ParameterValue('instrument', 'scalpel', None), ),
         (), None, None)
@@ -153,7 +153,7 @@ def test_study_row_reader_small_study(
     assert expected == second_row[1]
     expected = models.Material(
         'Sample Name', 'S1-sample-0815-T1', '0815-T1',
-        None,  (models.Characteristics('status', '2', None), ), (),
+        None, (models.Characteristics('status', '2', None), ), (),
         (models.FactorValue('treatment', None, None), ), None)
     assert expected == second_row[2]
 
@@ -214,7 +214,7 @@ def test_study_reader_small_study(
     assert expected == study.materials['S1-source-0815']
     expected = models.Material(
         'Source Name', 'S1-source-0816', '0816', None,
-        characteristics2, (), (),  None)
+        characteristics2, (), (), None)
     assert expected == study.materials['S1-source-0816']
     expected = models.Material(
         'Source Name', 'S1-source-0817', '0817', None,

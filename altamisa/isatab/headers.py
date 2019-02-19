@@ -3,6 +3,8 @@
 assay files and parsing thereof.
 """
 
+from __future__ import generator_stop
+
 from typing import Iterator
 from ..exceptions import ParseIsatabException
 
@@ -364,7 +366,10 @@ class HeaderParserBase:
 
     def run(self) -> Iterator[ColumnHeader]:
         while True:
-            yield self._parse_next()
+            try:
+                yield self._parse_next()
+            except StopIteration:
+                break
 
     def _parse_next(self):
         # Get next value from header
@@ -405,7 +410,7 @@ class HeaderParserBase:
             next(self.it)
         except StopIteration as e:
             msg = 'Expected two more columns on seeing "Term Source REF"'
-            raise ParseIsatabException(msg)
+            raise ParseIsatabException(msg) from e
         self.col_no += 2
         return TermRefAnnotationHeader(self.col_no - 2)
 
