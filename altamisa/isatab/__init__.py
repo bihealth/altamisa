@@ -3,6 +3,7 @@
 
 # Make all models and the ``*Reader`` classes visible within this module.
 
+from .headers import *  # noqa: F403, F401
 from .models import *  # noqa: F403, F401
 from .parse_investigation import InvestigationReader  # noqa: F401
 from .parse_assay_study import (  # noqa: F401
