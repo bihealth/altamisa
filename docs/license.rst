@@ -1,0 +1,10 @@
+cense:
+
+=======
+License
+=======
+
+You can find the License of AltamISA below.
+
+.. literalinclude:: ../LICENSE
+    :language: text
