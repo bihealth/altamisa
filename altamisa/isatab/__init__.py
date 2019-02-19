@@ -9,5 +9,5 @@ from .parse_assay_study import (  # noqa: F401
     AssayReader,
     AssayRowReader,
     StudyReader,
-    StudyRowReader
+    StudyRowReader,
 )

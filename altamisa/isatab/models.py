@@ -14,7 +14,7 @@ from typing import Dict, Tuple, NamedTuple, Union
 
 from ..exceptions import ParseIsatabException
 
-__author__ = 'Manuel Holtgrewe <manuel.holtgrewe@bihealth.de>'
+__author__ = "Manuel Holtgrewe <manuel.holtgrewe@bihealth.de>"
 
 # Base types, used throughout -------------------------------------------------
 
@@ -48,8 +48,7 @@ class AnnotatedStr(str):
             setattr(self, key, value)
 
 
-class OntologyTermRef(namedtuple("OntologyTermRef",
-                                 "name accession ontology_name")):
+class OntologyTermRef(namedtuple("OntologyTermRef", "name accession ontology_name")):
     """Reference to a term into an ontology
     """
 
@@ -58,19 +57,21 @@ class OntologyTermRef(namedtuple("OntologyTermRef",
         if ontology_name or accession:
             # All three variables must be available
             if not all((name, ontology_name, accession)):
-                tpl = ('Incomplete ontology term reference:\n'
-                       'name: {}\nOntology: {}\nAccession: {}')
-                msg = tpl.format(name if name else '?',
-                                 ontology_name if ontology_name else '?',
-                                 accession if accession else '?')
+                tpl = (
+                    "Incomplete ontology term reference:\n" "name: {}\nOntology: {}\nAccession: {}"
+                )
+                msg = tpl.format(
+                    name if name else "?",
+                    ontology_name if ontology_name else "?",
+                    accession if accession else "?",
+                )
                 raise ParseIsatabException(msg)
             # Ontology_name need to reference an ontology source (if provided)
             if ontology_refs and ontology_name not in ontology_refs:
                 tpl = 'Ontology with name "{}" not defined in investigation!'
                 msg = tpl.format(ontology_name)
                 raise ParseIsatabException(msg)
-            return super(cls, OntologyTermRef).__new__(
-                cls, name, accession, ontology_name)
+            return super(cls, OntologyTermRef).__new__(cls, name, accession, ontology_name)
         # Only the name is available --> FreeText
         elif name:
             return name
@@ -294,39 +295,38 @@ class InvestigationInfo(NamedTuple):
 
 # TODO: these could go away!
 
-MATERIAL = 'material'
+MATERIAL = "material"
 
-EXTRACT = 'extract'
-LABELED_EXTRACT = 'labeled extract'
-SAMPLE = 'sample'
-SOURCE = 'source'
+EXTRACT = "extract"
+LABELED_EXTRACT = "labeled extract"
+SAMPLE = "sample"
+SOURCE = "source"
 
 # Data node types
 
-ARRAY_DATA_FILE = 'array_data_file'
-ARRAY_DATA_MATRIX_FILE = 'array_data_matrix_file'
-DERIVED_ARRAY_DATA_FILE = 'derived_array_data_file'
-DERIVED_ARRAY_MATRIX_DATA_FILE = 'derived_array_matrix_data_file'
-DERIVED_DATA_FILE = 'derived_data_file'
-DERIVED_SPECTRAL_DATA_FILE = 'derived_spectral_data_file'
-METABOLITE_ASSIGNMENT_FILE = 'METABOLITE_ASSIGNMENT_FILE'
-PEPTIDE_ASSIGNMENT_FILE = 'PEPTIDE_ASSIGNMENT_FILE'
-PROTEIN_ASSIGNMENT_FILE = 'PROTEIN_ASSIGNMENT_FILE'
-POST_TRANSLATIONAL_MODIFICATION_ASSIGNMENT_FILE = (
-    'POST_TRANSLATIONAL_MODIFICATION_ASSIGNMENT_FILE')
-RAW_DATA_FILE = 'raw_data_file'
-RAW_SPECTRAL_DATA_FILE = 'raw_spectral_data_file'
+ARRAY_DATA_FILE = "array_data_file"
+ARRAY_DATA_MATRIX_FILE = "array_data_matrix_file"
+DERIVED_ARRAY_DATA_FILE = "derived_array_data_file"
+DERIVED_ARRAY_MATRIX_DATA_FILE = "derived_array_matrix_data_file"
+DERIVED_DATA_FILE = "derived_data_file"
+DERIVED_SPECTRAL_DATA_FILE = "derived_spectral_data_file"
+METABOLITE_ASSIGNMENT_FILE = "METABOLITE_ASSIGNMENT_FILE"
+PEPTIDE_ASSIGNMENT_FILE = "PEPTIDE_ASSIGNMENT_FILE"
+PROTEIN_ASSIGNMENT_FILE = "PROTEIN_ASSIGNMENT_FILE"
+POST_TRANSLATIONAL_MODIFICATION_ASSIGNMENT_FILE = "POST_TRANSLATIONAL_MODIFICATION_ASSIGNMENT_FILE"
+RAW_DATA_FILE = "raw_data_file"
+RAW_SPECTRAL_DATA_FILE = "raw_spectral_data_file"
 
 # Assay types
 
-PROTOCOL_REF = 'protocol_ref'
-ASSAY = 'assay'
-DATA_NORMALIZATION = 'data_normalization'
-DATA_TRANSFORMATION = 'data_transformation'
-GEL_ELECTROPHORESIS_ASSAY = 'gel_electrophoresis'
-HYBRIDIZATION_ASSAY = 'hybridization'
-MS_ASSAY = 'mass_spectometry'
-NORMALIZATION = 'normalization'
+PROTOCOL_REF = "protocol_ref"
+ASSAY = "assay"
+DATA_NORMALIZATION = "data_normalization"
+DATA_TRANSFORMATION = "data_transformation"
+GEL_ELECTROPHORESIS_ASSAY = "gel_electrophoresis"
+HYBRIDIZATION_ASSAY = "hybridization"
+MS_ASSAY = "mass_spectometry"
+NORMALIZATION = "normalization"
 
 
 class Characteristics(NamedTuple):
@@ -364,6 +364,7 @@ class ParameterValue(NamedTuple):
 
 class Material(NamedTuple):
     """Representation of a Material or Data node."""
+
     type: str
     #: The unique name of the material node.
     #:
