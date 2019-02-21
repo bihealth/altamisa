@@ -10,6 +10,7 @@ a list of all materials in a study or all comments for a material).
 from collections import namedtuple
 from datetime import date
 from pathlib import Path
+import re
 from typing import Dict, Tuple, NamedTuple, Union
 
 from ..exceptions import ParseIsatabException
@@ -103,6 +104,50 @@ class Comment(NamedTuple):
     unit: FreeTextOrTermRef
 
 
+# Pattern and functions for validate strings
+# DATE_PATTERN = re.compile("^\\d{4}-(0[1-9]|1[0-2])-(0[1-9]|[12]\\d|3[01])$")
+MAIL_PATTERN = re.compile("^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\\.[a-zA-Z0-9-.]+$")
+PHONE_PATTERN = re.compile("^\\+?[\\d /()-]+$")  # only checks characters!
+DOI_PATTERN = re.compile("^(?:(?:DOI|doi):)?10[.][0-9]{4,}(?:[.][0-9]+)*/\\S+$")
+PMID_PATTERN = re.compile("^\\d+$")
+
+
+def _validate_mail_address(mail_address) -> str:
+    """Helper function to validate mail strings"""
+    if mail_address and not MAIL_PATTERN.match(mail_address):
+        tpl = "Invalid mail address: {}"
+        msg = tpl.format(mail_address)
+        raise ParseIsatabException(msg)
+    return mail_address
+
+
+def _validate_phone_number(phone_number) -> str:
+    """Helper function to validate phone/fax number strings"""
+    if phone_number and not PHONE_PATTERN.match(phone_number):
+        tpl = "Invalid phone/fax number: {}"
+        msg = tpl.format(phone_number)
+        raise ParseIsatabException(msg)
+    return phone_number
+
+
+def _validate_doi(doi) -> str:
+    """Helper function to validate doi strings"""
+    if doi and not DOI_PATTERN.match(doi):
+        tpl = "Invalid doi string: {}"
+        msg = tpl.format(doi)
+        raise ParseIsatabException(msg)
+    return doi
+
+
+def _validate_pubmed_id(pubmed_id) -> str:
+    """Helper function to validate pubmed id strings"""
+    if pubmed_id and not PMID_PATTERN.match(pubmed_id):
+        tpl = "Invalid pubmed_id string: {}"
+        msg = tpl.format(pubmed_id)
+        raise ParseIsatabException(msg)
+    return pubmed_id
+
+
 # Types used in investigation files -------------------------------------------
 
 
@@ -143,10 +188,21 @@ class BasicInfo(NamedTuple):
     comments: Tuple[Comment]
 
 
-class PublicationInfo(NamedTuple):
+class PublicationInfo(namedtuple("PublicationInfo", "pubmed_id doi authors title status comments")):
     """Information regarding an investigation publication
     (``INVESTIGATION PUBLICATIONS``).
     """
+
+    def __new__(cls, pubmed_id, doi, authors, title, status, comments):
+        return super(cls, PublicationInfo).__new__(
+            cls,
+            _validate_pubmed_id(pubmed_id),
+            _validate_doi(doi),
+            authors,
+            title,
+            status,
+            comments,
+        )
 
     #: Publication PubMed ID
     pubmed_id: str
@@ -162,8 +218,40 @@ class PublicationInfo(NamedTuple):
     comments: Tuple[Comment]
 
 
-class ContactInfo(NamedTuple):
+class ContactInfo(
+    namedtuple(
+        "ContactInfo",
+        "last_name first_name mid_initial email phone fax address affiliation role comments",
+    )
+):
     """Investigation contact information"""
+
+    def __new__(
+        cls,
+        last_name,
+        first_name,
+        mid_initial,
+        email,
+        phone,
+        fax,
+        address,
+        affiliation,
+        role,
+        comments,
+    ):
+        return super(cls, ContactInfo).__new__(
+            cls,
+            last_name,
+            first_name,
+            mid_initial,
+            _validate_mail_address(email),
+            _validate_phone_number(phone),
+            _validate_phone_number(fax),
+            address,
+            affiliation,
+            role,
+            comments,
+        )
 
     #: Last name of contact
     last_name: str

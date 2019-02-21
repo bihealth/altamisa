@@ -1,7 +1,9 @@
 # -*- coding: utf-8 -*-
 """Tests for parsing ISA investigation files"""
 
+from datetime import date
 from pathlib import Path
+
 from altamisa.isatab import models
 from altamisa.isatab import InvestigationReader
 
@@ -129,8 +131,8 @@ def test_parse_full_investigation(full_investigation_file):
         "Growth control of the eukaryote cell: a systems biology study " "in yeast"
     ) == investigation.info.title
     assert "BII-I-1" == investigation.info.identifier
-    assert "2007-04-30" == investigation.info.submission_date
-    assert "2009-03-10" == investigation.info.public_release_date
+    assert date(2007, 4, 30) == investigation.info.submission_date
+    assert date(2009, 3, 10) == investigation.info.public_release_date
 
     # Publications
     assert 3 == len(investigation.publications)
@@ -432,8 +434,8 @@ def test_parse_full_investigation(full_investigation_file):
         "to the other, as the control. Samples were taken at 0, 1, 2 and 4 h "
         "after treatment. Gene expression at the mRNA level was investigated "
         "by transcriptome analysis using Affymetrix hybridization arrays.",
-        "2007-04-30",
-        "2009-03-10",
+        date(2007, 4, 30),
+        date(2009, 3, 10),
         (
             models.Comment("Study Grant Number", "", None),
             models.Comment("Study Funding Agency", "", None),
