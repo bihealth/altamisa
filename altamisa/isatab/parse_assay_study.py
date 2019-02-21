@@ -915,7 +915,7 @@ class StudyRowReader:
         try:
             self._line = next(self._reader)
             while self._line is not None and (not self._line or self._line[0].startswith("#")):
-                self._line = self.input_file.next()
+                self._line = next(self._reader)
             # Test and collect row duplicates
             if "\t".join(self._line) in self.unique_rows:
                 self.duplicate_rows.append("\t".join(self._line))
@@ -1043,7 +1043,7 @@ class AssayRowReader:
         try:
             self._line = next(self._reader)
             while self._line is not None and (not self._line or self._line[0].startswith("#")):
-                self._line = self.input_file.next()
+                self._line = next(self._reader)
             # Test and collect row duplicates
             if "\t".join(self._line) in self.unique_rows:
                 self.duplicate_rows.append("\t".join(self._line))

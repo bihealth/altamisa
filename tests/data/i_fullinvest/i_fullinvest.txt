@@ -17,7 +17,9 @@ Comment[Principal Investigator URI]
 Comment[Investigation Keywords]	
 INVESTIGATION PUBLICATIONS
 Investigation PubMed ID	17439666	1231222	1234121
+# Comment for testing. The line after next is empty also for testing.
 Investigation Publication DOI	doi:10.1186/jbiol54		
+
 Investigation Publication Author List	Castrillo JI, Zeef LA, Hoyle DC, Zhang N, Hayes A, Gardner DC, Cornell MJ, Petty J, Hakes L, Wardleworth L, Rash B, Brown M, Dunn WB, Broadhurst D, O'Donoghue K, Hester SS, Dunkley TP, Hart SR, Swainston N, Li P, Gaskell SJ, Paton NW, Lilley KS, Kell DB, Oliver SG.	Piatnochka IT.	Monticelli G, Santori S.
 Investigation Publication Title	Growth control of the eukaryote cell: a systems biology study in yeast.	Effect of prednisolone on the cardiovascular system in complex treatment of newly detected pulmonary tuberculosis	Indications for the use of prostheses in the treatment of pathological fractures due to primary malignant and metastatic tumours of bone.
 Investigation Publication Status	indexed in Pubmed	published	Published
