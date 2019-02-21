@@ -6,6 +6,7 @@ from __future__ import generator_stop
 
 import os
 import csv
+from datetime import datetime
 from pathlib import Path
 from typing import Iterator, TextIO
 import warnings
@@ -330,6 +331,20 @@ def _split_study_protocols_components(
             )
 
 
+# Helper function to validate and convert string dates to date objects
+def _parse_date(date_string) -> datetime.date:
+    if date_string:
+        try:
+            date = datetime.strptime(date_string, "%Y-%m-%d").date()
+        except ValueError as e:
+            tpl = 'Invalid ISO8601 date "{}"'
+            msg = tpl.format(date_string)
+            raise ParseIsatabException(msg) from e
+    else:
+        date = None
+    return date
+
+
 class InvestigationReader:
     """Helper class that reads an investigation file into a
     ``InvestigationInfo`` object.
@@ -493,8 +508,8 @@ class InvestigationReader:
             section[INVESTIGATION_IDENTIFIER],
             section[INVESTIGATION_TITLE],
             section[INVESTIGATION_DESCRIPTION],
-            section[INVESTIGATION_SUBMISSION_DATE],
-            section[INVESTIGATION_PUBLIC_RELEASE_DATE],
+            _parse_date(section[INVESTIGATION_SUBMISSION_DATE]),
+            _parse_date(section[INVESTIGATION_PUBLIC_RELEASE_DATE]),
             comments,
         )
 
@@ -587,8 +602,8 @@ class InvestigationReader:
                 section[STUDY_IDENTIFIER],
                 section[STUDY_TITLE],
                 section[STUDY_DESCRIPTION],
-                section[STUDY_SUBMISSION_DATE],
-                section[STUDY_PUBLIC_RELEASE_DATE],
+                _parse_date(section[STUDY_SUBMISSION_DATE]),
+                _parse_date(section[STUDY_PUBLIC_RELEASE_DATE]),
                 comments,
             )
             # Read the remaining sections for this study
