@@ -204,6 +204,23 @@ class _NodeBuilderBase:
                 # Guard against misuse / errors
                 if not prev:
                     tpl = "No primary annotation to annotate with term in " "col {}"
+                elif prev.column_type not in (
+                    # According to ISA-tab specs, Characteristics, Factor
+                    # Values, Parameter Values and Units may be annotated with
+                    # ontologies. However, official examples and configurations
+                    # also feature Label and Material Type with ontologies.
+                    "Characteristics",
+                    # "Comment", this one is unclear
+                    "Factor Value",
+                    "Material Type",
+                    "Label",
+                    "Parameter Value",
+                    "Unit",
+                ):
+                    tpl = (
+                        "Ontologies not supported for primary annotation "
+                        "'{}' (in col {}).".format(prev.column_type, "{}")
+                    )
                 elif prev.term_source_ref_header:
                     tpl = 'Seen "Term Source REF" header for same entity ' "in col {}"
                 else:
@@ -303,7 +320,7 @@ class _MaterialBuilder(_NodeBuilderBase):
             unique_name = models.AnnotatedStr(name_val, was_empty=True)
         extract_label = None
         if self.extract_label_header:
-            extract_label = line[self.extract_label_header.col_no]
+            extract_label = self._build_freetext_or_term_ref(self.extract_label_header, line)
         characteristics = tuple(
             self._build_complex(hdr, line, models.Characteristics)
             for hdr in self.characteristic_headers

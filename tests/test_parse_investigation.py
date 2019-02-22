@@ -145,7 +145,7 @@ def test_parse_full_investigation(full_investigation_file):
         "SR, Swainston N, Li P, Gaskell SJ, Paton NW, Lilley KS, Kell DB, "
         "Oliver SG.",
         "Growth control of the eukaryote cell: a systems biology study in " "yeast.",
-        "indexed in Pubmed",
+        models.OntologyTermRef("indexed in Pubmed", "", ""),
         (),
     )
     assert expected == investigation.publications[0]
@@ -171,7 +171,7 @@ def test_parse_full_investigation(full_investigation_file):
         "",
         "Oxford Road, Manchester M13 9PT, UK",
         "Faculty of Life Sciences, Michael Smith Building, " "University of Manchester",
-        "corresponding author",
+        models.OntologyTermRef("corresponding author", "", ""),
         (
             models.Comment("Investigation Person ORCID", "12345", None),
             models.Comment("Investigation Person REF", "personA", None),
@@ -187,7 +187,7 @@ def test_parse_full_investigation(full_investigation_file):
         "",
         "Oxford Road, Manchester M13 9PT, UK",
         "Faculty of Life Sciences, Michael Smith Building, " "University of Manchester",
-        "author",
+        models.OntologyTermRef("author", "", ""),
         (
             models.Comment("Investigation Person ORCID", "0987654321", None),
             models.Comment("Investigation Person REF", "personB", None),
@@ -253,7 +253,7 @@ def test_parse_full_investigation(full_investigation_file):
         "SR, Swainston N, Li P, Gaskell SJ, Paton NW, Lilley KS, Kell DB, "
         "Oliver SG.",
         "Growth control of the eukaryote cell: a systems biology study in " "yeast.",
-        "published",
+        models.OntologyTermRef("published", "", ""),
         (),
     )
     assert expected == study.publications[0]
@@ -306,7 +306,7 @@ def test_parse_full_investigation(full_investigation_file):
     assert 7 == len(study.protocols)
     expected = models.ProtocolInfo(
         "growth protocol",
-        "growth",
+        models.OntologyTermRef("growth", "", ""),
         "1. Biomass samples (45 ml) were taken via the sample port of the "
         "Applikon fermenters. The cells were pelleted by centrifugation for 5 "
         "min at 5000 rpm. The supernatant was removed and the RNA pellet "
@@ -353,7 +353,10 @@ def test_parse_full_investigation(full_investigation_file):
         "",
         "",
         "",
-        {"standard volume": "standard volume", "sample volume": "sample volume"},
+        {
+            "standard volume": models.OntologyTermRef("standard volume", "", ""),
+            "sample volume": models.OntologyTermRef("sample volume", "", ""),
+        },
         {
             "pipette": models.ProtocolComponentInfo(
                 "pipette",
@@ -375,7 +378,7 @@ def test_parse_full_investigation(full_investigation_file):
         "",
         "Oxford Road, Manchester M13 9PT, UK",
         "Faculty of Life Sciences, Michael Smith Building, " "University of Manchester",
-        "corresponding author",
+        models.OntologyTermRef("corresponding author", "", ""),
         (models.Comment("Study Person REF", "", None),),
     )
     assert expected == study.contacts[0]
@@ -488,7 +491,9 @@ def test_parse_full_investigation(full_investigation_file):
         "",
         {},
         {
-            "NMR tubes": models.ProtocolComponentInfo("NMR tubes", None),
+            "NMR tubes": models.ProtocolComponentInfo(
+                "NMR tubes", models.OntologyTermRef(None, None, None)
+            ),
             "Bruker-Av600": models.ProtocolComponentInfo(
                 "Bruker-Av600",
                 models.OntologyTermRef("instrument", "http://www.ebi.ac.uk/efo/EFO_0000548", "EFO"),
@@ -551,7 +556,7 @@ def test_parse_comment_investigation(comment_investigation_file):
         "SR, Swainston N, Li P, Gaskell SJ, Paton NW, Lilley KS, Kell DB, "
         "Oliver SG.",
         "Growth control of the eukaryote cell: a systems biology study in " "yeast.",
-        "indexed in Pubmed",
+        models.OntologyTermRef("indexed in Pubmed", "", ""),
         (models.Comment("InvestPubsComment", "TestValue01", None),),
     )
     assert expected == investigation.publications[0]
@@ -606,7 +611,7 @@ def test_parse_comment_investigation(comment_investigation_file):
         "SR, Swainston N, Li P, Gaskell SJ, Paton NW, Lilley KS, Kell DB, "
         "Oliver SG.",
         "Growth control of the eukaryote cell: a systems biology study in " "yeast.",
-        "published",
+        models.OntologyTermRef("published", "", ""),
         (models.Comment("StudyPubsComment", "TestValue01", None),),
     )
     assert expected == study.publications[0]
@@ -643,7 +648,10 @@ def test_parse_comment_investigation(comment_investigation_file):
         "",
         "",
         "",
-        {"standard volume": "standard volume", "sample volume": "sample volume"},
+        {
+            "standard volume": models.OntologyTermRef("standard volume", "", ""),
+            "sample volume": models.OntologyTermRef("sample volume", "", ""),
+        },
         {
             "pipette": models.ProtocolComponentInfo(
                 "pipette",
