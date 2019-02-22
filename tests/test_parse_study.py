@@ -225,11 +225,15 @@ def test_study_reader_small_study(small_investigation_file, small_study_file):
         models.Characteristics(name="age", value="90", unit=unit),
     )
     characteristics2 = (
-        models.Characteristics(name="organism", value="Mus musculus", unit=None),
+        models.Characteristics(
+            name="organism", value=models.OntologyTermRef("Mus musculus", "", ""), unit=None
+        ),
         models.Characteristics(name="age", value=None, unit=unit),
     )
     characteristics3 = (
-        models.Characteristics(name="organism", value=None, unit=None),
+        models.Characteristics(
+            name="organism", value=models.OntologyTermRef(None, None, None), unit=None
+        ),
         models.Characteristics(name="age", value="150", unit=unit),
     )
 

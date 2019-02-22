@@ -370,7 +370,7 @@ class HeaderParserBase:
         # Get next value from header
         val = next(self.it)  # StopIteration is OK here
         # Process either by exact match to "Term Source REF", or other exact
-        # mathes, or any of the prefix matches (e.g., "Comment[Label])"
+        # matches, or any of the prefix matches (e.g., "Comment[Label])"
         if val == "Term Source REF":
             if val not in self.allowed_headers:
                 tpl = 'Header "{}" not allowed in {}.'

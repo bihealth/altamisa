@@ -73,12 +73,12 @@ class OntologyTermRef(namedtuple("OntologyTermRef", "name accession ontology_nam
                 msg = tpl.format(ontology_name)
                 raise ParseIsatabException(msg)
             return super(cls, OntologyTermRef).__new__(cls, name, accession, ontology_name)
-        # Only the name is available --> FreeText
+        # Only the name is available --> Text only OntologyTermRef
         elif name:
-            return name
-        # Nothing available
+            return super(cls, OntologyTermRef).__new__(cls, name, None, None)
+        # Nothing available --> Empty OntologyTermRef
         else:
-            return None
+            return super(cls, OntologyTermRef).__new__(cls, None, None, None)
 
     #: Human-readable name of the term
     name: str
@@ -464,7 +464,7 @@ class Material(NamedTuple):
     # Original name of a material or data file
     name: str
     # The label of a Labeled Extract
-    extract_label: str
+    extract_label: FreeTextOrTermRef
     #: Material characteristics
     characteristics: Tuple[Characteristics]
     #: Material comments
