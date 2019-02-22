@@ -57,13 +57,13 @@ Study Factor Type Term Accession Number
 Study Factor Type Term Source REF
 STUDY ASSAYS
 Study Assay File Name	a_small2.txt
-Study Assay Measurement Type	exome sequencing assay
-Study Assay Measurement Type Term Accession Number	http://purl.obolibrary.org/obo/OBI_0002118
+Study Assay Measurement Type	protein expression profiling
+Study Assay Measurement Type Term Accession Number	http://purl.obolibrary.org/obo/OBI_0000615
 Study Assay Measurement Type Term Source REF	OBI
-Study Assay Technology Type	nucleotide sequencing
-Study Assay Technology Type Term Accession Number	http://purl.obolibrary.org/obo/OBI_0000626
+Study Assay Technology Type	mass spectrometry
+Study Assay Technology Type Term Accession Number	http://purl.obolibrary.org/obo/OBI_0000470
 Study Assay Technology Type Term Source REF	OBI
-Study Assay Technology Platform	
+Study Assay Technology Platform	LC-MS/MS
 STUDY PROTOCOLS
 Study Protocol Name	sample collection	extraction	labeling	chromatography	mass spectrometry	data transformation
 Study Protocol Type	sample collection	extraction	labeling	chromatography	mass spectrometry	data transformation

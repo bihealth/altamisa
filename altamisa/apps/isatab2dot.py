@@ -73,7 +73,12 @@ def run(args):
         for a, assayInfo in enumerate(studyInfo.assays.values()):
             with open(os.path.join(path, assayInfo.path), "rt") as inputf:
                 assay = AssayReader.from_stream(
-                    investigation, studyInfo, "S{}".format(s + 1), "A{}".format(a + 1), inputf
+                    investigation,
+                    studyInfo,
+                    assayInfo,
+                    "S{}".format(s + 1),
+                    "A{}".format(a + 1),
+                    inputf,
                 ).read()
             print("  /* assay {} */".format(assayInfo.path), file=args.output_file)
             print("  subgraph clusterAssayS{}A{} {{".format(s, a), file=args.output_file)
