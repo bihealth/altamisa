@@ -452,6 +452,8 @@ class Process(NamedTuple):
     unique_name: str
     # Original name of a process (e.g. from Assay Name etc.)
     name: str
+    # Type of original name (e.g. Assay Name)
+    name_type: str
     #: Process date
     date: date
     #: Performer of process

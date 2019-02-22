@@ -36,7 +36,7 @@ def test_study_row_reader_minimal_study(minimal_investigation_file, minimal_stud
     expected = models.Material("Source Name", "S1-source-0815", "0815", None, (), (), (), None)
     assert expected == first_row[0]
     expected = models.Process(
-        "sample collection", "S1-sample collection-2-1", None, None, None, (), (), None, None
+        "sample collection", "S1-sample collection-2-1", None, None, None, None, (), (), None, None
     )
     assert expected == first_row[1]
     expected = models.Material(
@@ -80,7 +80,7 @@ def test_study_reader_minimal_study(minimal_investigation_file, minimal_study_fi
     assert expected == study.materials["S1-sample-0815-N1"]
 
     expected = models.Process(
-        "sample collection", "S1-sample collection-2-1", None, None, None, (), (), None, None
+        "sample collection", "S1-sample collection-2-1", None, None, None, None, (), (), None, None
     )
     assert expected == study.processes["S1-sample collection-2-1"]
 
@@ -137,6 +137,7 @@ def test_study_row_reader_small_study(small_investigation_file, small_study_file
         "sample collection",
         "S1-sample collection-9-1",
         None,
+        None,
         date(2018, 2, 2),
         "John Doe",
         (models.ParameterValue("instrument", "scalpel", None),),
@@ -165,6 +166,7 @@ def test_study_row_reader_small_study(small_investigation_file, small_study_file
     expected = models.Process(
         "sample collection",
         "S1-sample collection-9-2",
+        None,
         None,
         date(2018, 2, 2),
         "John Doe",
@@ -298,6 +300,7 @@ def test_study_reader_small_study(small_investigation_file, small_study_file):
         "sample collection",
         "S1-sample collection-9-1",
         None,
+        None,
         date(2018, 2, 2),
         "John Doe",
         (models.ParameterValue("instrument", "scalpel", None),),
@@ -310,6 +313,7 @@ def test_study_reader_small_study(small_investigation_file, small_study_file):
         "sample collection",
         "S1-sample collection-9-2",
         None,
+        None,
         date(2018, 2, 2),
         "John Doe",
         (models.ParameterValue("instrument", "scalpel", None),),
@@ -321,6 +325,7 @@ def test_study_reader_small_study(small_investigation_file, small_study_file):
     expected = models.Process(
         "sample collection",
         "S1-sample collection-9-3",
+        None,
         None,
         date(2018, 2, 2),
         "John Doe",

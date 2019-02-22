@@ -39,6 +39,7 @@ def test_assay_row_reader_minimal_assay(minimal_investigation_file, minimal_assa
         "nucleic acid sequencing",
         "S1-A1-0815-N1-DNA1-WES1-3",
         "0815-N1-DNA1-WES1",
+        "Assay Name",
         None,
         None,
         (),
@@ -129,6 +130,7 @@ def test_assay_reader_minimal_assay(minimal_investigation_file, minimal_assay_fi
         "nucleic acid sequencing",
         "S1-A1-0815-N1-DNA1-WES1-3",
         "0815-N1-DNA1-WES1",
+        "Assay Name",
         None,
         None,
         (),
@@ -177,13 +179,23 @@ def test_assay_row_reader_small_assay(small_investigation_file, small_assay_file
     )
     assert expected == first_row[0]
     expected = models.Process(
-        "library preparation", "S1-A1-library preparation-2-1", None, None, None, (), (), None, None
+        "library preparation",
+        "S1-A1-library preparation-2-1",
+        None,
+        None,
+        None,
+        None,
+        (),
+        (),
+        None,
+        None,
     )
     assert expected == first_row[1]
     expected = models.Process(
         "nucleic acid sequencing",
         "S1-A1-0815-N1-DNA1-WES1-4",
         "0815-N1-DNA1-WES1",
+        "Assay Name",
         None,
         None,
         (),
@@ -218,6 +230,7 @@ def test_assay_row_reader_small_assay(small_investigation_file, small_assay_file
         "Unknown",
         "S1-A1-somatic variant calling-1-7",
         "somatic variant calling-1",
+        "Data Transformation Name",
         None,
         None,
         (),
@@ -245,13 +258,23 @@ def test_assay_row_reader_small_assay(small_investigation_file, small_assay_file
     )
     assert expected == second_row[0]
     expected = models.Process(
-        "library preparation", "S1-A1-library preparation-2-2", None, None, None, (), (), None, None
+        "library preparation",
+        "S1-A1-library preparation-2-2",
+        None,
+        None,
+        None,
+        None,
+        (),
+        (),
+        None,
+        None,
     )
     assert expected == second_row[1]
     expected = models.Process(
         "nucleic acid sequencing",
         "S1-A1-0815-T1-DNA1-WES1-4",
         "0815-T1-DNA1-WES1",
+        "Assay Name",
         None,
         None,
         (),
@@ -286,6 +309,7 @@ def test_assay_row_reader_small_assay(small_investigation_file, small_assay_file
         "Unknown",
         "S1-A1-somatic variant calling-1-7",
         "somatic variant calling-1",
+        "Data Transformation Name",
         None,
         None,
         (),
@@ -393,17 +417,36 @@ def test_assay_reader_small_assay(small_investigation_file, small_assay_file):
     assert expected == assay.materials["S1-A1-0815-somatic.vcf.gz-COL8"]
 
     expected = models.Process(
-        "library preparation", "S1-A1-library preparation-2-1", None, None, None, (), (), None, None
+        "library preparation",
+        "S1-A1-library preparation-2-1",
+        None,
+        None,
+        None,
+        None,
+        (),
+        (),
+        None,
+        None,
     )
     assert expected == assay.processes["S1-A1-library preparation-2-1"]
     expected = models.Process(
-        "library preparation", "S1-A1-library preparation-2-2", None, None, None, (), (), None, None
+        "library preparation",
+        "S1-A1-library preparation-2-2",
+        None,
+        None,
+        None,
+        None,
+        (),
+        (),
+        None,
+        None,
     )
     assert expected == assay.processes["S1-A1-library preparation-2-2"]
     expected = models.Process(
         "nucleic acid sequencing",
         "S1-A1-0815-N1-DNA1-WES1-4",
         "0815-N1-DNA1-WES1",
+        "Assay Name",
         None,
         None,
         (),
@@ -416,6 +459,7 @@ def test_assay_reader_small_assay(small_investigation_file, small_assay_file):
         "nucleic acid sequencing",
         "S1-A1-0815-T1-DNA1-WES1-4",
         "0815-T1-DNA1-WES1",
+        "Assay Name",
         None,
         None,
         (),
