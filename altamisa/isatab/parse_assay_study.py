@@ -321,6 +321,7 @@ class _ProcessBuilder(_NodeBuilderBase):
     name_headers = headers.PROCESS_NAME_HEADERS
 
     allowed_column_types = (
+        headers.PROTOCOL_REF,
         # Primary annotations (not parametrized)
         headers.PERFORMER,
         headers.DATE,
@@ -337,7 +338,7 @@ class _ProcessBuilder(_NodeBuilderBase):
     def build(self, line: List[str]) -> models.Process:
         """Build and return ``Process`` from CSV file."""
         # First, build the individual attributes of ``Process``
-        protocol_ref, unique_name, name = self._build_protocol_ref_and_name(line)
+        protocol_ref, unique_name, name, name_type = self._build_protocol_ref_and_name(line)
         # Check if protocol is declared in corresponding study
         if protocol_ref != TOKEN_UNKNOWN and protocol_ref not in self.protocol_refs:
             tpl = 'Protocol "{}" not declared in investigation file'
@@ -382,6 +383,7 @@ class _ProcessBuilder(_NodeBuilderBase):
             protocol_ref,
             unique_name,
             name,
+            name_type,
             date,
             performer,
             parameter_values,
@@ -397,6 +399,7 @@ class _ProcessBuilder(_NodeBuilderBase):
         counter_value = self._next_counter()
         assay_id = "-{}".format(self.assay_id) if self.assay_id else ""
         name = None
+        name_type = None
         if not self.name_header:
             # Name header is not given, will use auto-generated unique name
             # based on protocol ref.
@@ -413,6 +416,7 @@ class _ProcessBuilder(_NodeBuilderBase):
             # Name header is given, but protocol ref header is not
             protocol_ref = TOKEN_UNKNOWN
             name = line[self.name_header.col_no]
+            name_type = self.name_header.column_type
             if name:  # Use name if available
                 unique_name = "{}{}-{}-{}".format(
                     self.study_id, assay_id, name, self.name_header.col_no + 1
@@ -430,6 +434,7 @@ class _ProcessBuilder(_NodeBuilderBase):
         else:  # Both header are given
             protocol_ref = line[self.protocol_ref_header.col_no]
             name = line[self.name_header.col_no]
+            name_type = self.name_header.column_type
             if name:
                 unique_name = "{}{}-{}-{}".format(
                     self.study_id, assay_id, name, self.name_header.col_no + 1
@@ -447,7 +452,7 @@ class _ProcessBuilder(_NodeBuilderBase):
             tpl = "Missing protocol reference in column {}"
             msg = tpl.format(self.protocol_ref_header.col_no + 1)
             raise ParseIsatabException(msg)
-        return protocol_ref, unique_name, name
+        return protocol_ref, unique_name, name, name_type
 
 
 class _RowBuilderBase:
