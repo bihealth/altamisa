@@ -42,6 +42,7 @@ class _NodeBuilderBase:
         column_headers: List[ColumnHeader],
         study_id: str,
         assay_id: str,
+        assay_info: models.AssayInfo = None,
     ):
         #: The definition of the ontology source references
         self.ontology_source_refs = ontology_source_refs
@@ -85,6 +86,8 @@ class _NodeBuilderBase:
         #: Study and assay ids used for unique node naming
         self.study_id = study_id
         self.assay_id = assay_id
+        #: The assay information
+        self.assay_info = assay_info
 
     def _next_counter(self):
         """Increment counter value and return"""
@@ -330,6 +333,7 @@ class _MaterialBuilder(_NodeBuilderBase):
             comments,
             factor_values,
             material_type,
+            self.assay_info,
         )
 
 
@@ -494,12 +498,14 @@ class _RowBuilderBase:
         header: List[ColumnHeader],
         study_id: str,
         assay_id: str = None,
+        assay_info: models.AssayInfo = None,
     ):
         self.ontology_source_refs = ontology_source_refs
         self.protocol_refs = protocol_refs
         self.header = header
         self.study_id = study_id
         self.assay_id = assay_id
+        self.assay_info = assay_info
         self._builders = list(self._make_builders())
 
     def _make_builders(self):
@@ -513,6 +519,7 @@ class _RowBuilderBase:
                 self.header[start:end],
                 self.study_id,
                 self.assay_id,
+                self.assay_info,
             )
 
     def _make_breaks(self):
@@ -842,23 +849,26 @@ class AssayRowReader:
         klass,
         investigation: models.InvestigationInfo,
         study: models.StudyInfo,
+        assay: models.AssayInfo,
         study_id: str,
         assay_id: str,
         input_file: TextIO,
     ):
         """Construct from file-like object"""
-        return AssayRowReader(investigation, study, study_id, assay_id, input_file)
+        return AssayRowReader(investigation, study, assay, study_id, assay_id, input_file)
 
     def __init__(
         self,
         investigation: models.InvestigationInfo,
         study: models.StudyInfo,
+        assay: models.AssayInfo,
         study_id: str,
         assay_id: str,
         input_file: TextIO,
     ):
         self.investigation = investigation
         self.study = study
+        self.assay = assay
         self.study_id = study_id
         self.assay_id = assay_id
         self.input_file = input_file
@@ -901,6 +911,7 @@ class AssayRowReader:
             self.header,
             self.study_id,
             self.assay_id,
+            self.assay,
         )
         while True:
             line = self._read_next_line()
@@ -928,26 +939,26 @@ class AssayReader:
         klass,
         investigation: models.InvestigationInfo,
         study: models.StudyInfo,
+        assay: models.AssayInfo,
         study_id: str,
         assay_id: str,
         input_file: TextIO,
     ):
         """Construct from file-like object"""
-        return AssayReader(investigation, study, study_id, assay_id, input_file)
+        return AssayReader(investigation, study, assay, study_id, assay_id, input_file)
 
     def __init__(
         self,
         investigation: models.InvestigationInfo,
         study: models.StudyInfo,
+        assay: models.AssayInfo,
         study_id: str,
         assay_id: str,
         input_file: TextIO,
     ):
         self.row_reader = AssayRowReader.from_stream(
-            investigation, study, study_id, assay_id, input_file
+            investigation, study, assay, study_id, assay_id, input_file
         )
-        self.investigation = investigation
-        self.study = study
         #: The file used for reading from
         self.input_file = input_file
         #: The header of the ISA assay file

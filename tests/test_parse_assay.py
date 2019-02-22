@@ -18,7 +18,12 @@ def test_assay_row_reader_minimal_assay(minimal_investigation_file, minimal_assa
 
     # Create new row reader and check read headers
     row_reader = AssayRowReader.from_stream(
-        investigation, investigation.studies[0], "S1", "A1", minimal_assay_file
+        investigation,
+        investigation.studies[0],
+        investigation.studies[0].assays["a_minimal.txt"],
+        "S1",
+        "A1",
+        minimal_assay_file,
     )
     assert 5 == len(row_reader.header)
 
@@ -32,7 +37,15 @@ def test_assay_row_reader_minimal_assay(minimal_investigation_file, minimal_assa
     assert 4 == len(first_row)
 
     expected = models.Material(
-        "Sample Name", "S1-sample-0815-N1", "0815-N1", None, (), (), (), None
+        "Sample Name",
+        "S1-sample-0815-N1",
+        "0815-N1",
+        None,
+        (),
+        (),
+        (),
+        None,
+        investigation.studies[0].assays["a_minimal.txt"],
     )
     assert expected == first_row[0]
     expected = models.Process(
@@ -58,6 +71,7 @@ def test_assay_row_reader_minimal_assay(minimal_investigation_file, minimal_assa
         (),
         (),
         None,
+        investigation.studies[0].assays["a_minimal.txt"],
     )
     assert expected == first_row[2]
     expected = models.Material(
@@ -69,6 +83,7 @@ def test_assay_row_reader_minimal_assay(minimal_investigation_file, minimal_assa
         (),
         (),
         None,
+        investigation.studies[0].assays["a_minimal.txt"],
     )
     assert expected == first_row[3]
 
@@ -84,7 +99,12 @@ def test_assay_reader_minimal_assay(minimal_investigation_file, minimal_assay_fi
 
     # Create new row reader and check read headers
     reader = AssayReader.from_stream(
-        investigation, investigation.studies[0], "S1", "A1", minimal_assay_file
+        investigation,
+        investigation.studies[0],
+        investigation.studies[0].assays["a_minimal.txt"],
+        "S1",
+        "A1",
+        minimal_assay_file,
     )
     assert 5 == len(reader.header)
 
@@ -101,7 +121,15 @@ def test_assay_reader_minimal_assay(minimal_investigation_file, minimal_assay_fi
     assert 3 == len(assay.arcs)
 
     expected = models.Material(
-        "Sample Name", "S1-sample-0815-N1", "0815-N1", None, (), (), (), None
+        "Sample Name",
+        "S1-sample-0815-N1",
+        "0815-N1",
+        None,
+        (),
+        (),
+        (),
+        None,
+        investigation.studies[0].assays["a_minimal.txt"],
     )
     assert expected == assay.materials["S1-sample-0815-N1"]
     expected = models.Material(
@@ -113,6 +141,7 @@ def test_assay_reader_minimal_assay(minimal_investigation_file, minimal_assay_fi
         (),
         (),
         None,
+        investigation.studies[0].assays["a_minimal.txt"],
     )
     assert expected == assay.materials["S1-A1-0815-N1-DNA1-WES1_L???_???_R1.fastq.gz-COL4"]
     expected = models.Material(
@@ -124,6 +153,7 @@ def test_assay_reader_minimal_assay(minimal_investigation_file, minimal_assay_fi
         (),
         (),
         None,
+        investigation.studies[0].assays["a_minimal.txt"],
     )
     assert expected == assay.materials["S1-A1-0815-N1-DNA1-WES1_L???_???_R2.fastq.gz-COL5"]
 
@@ -162,7 +192,12 @@ def test_assay_row_reader_small_assay(small_investigation_file, small_assay_file
 
     # Create new row reader and check read headers
     row_reader = AssayRowReader.from_stream(
-        investigation, investigation.studies[0], "S1", "A1", small_assay_file
+        investigation,
+        investigation.studies[0],
+        investigation.studies[0].assays["a_small.txt"],
+        "S1",
+        "A1",
+        small_assay_file,
     )
     assert 8 == len(row_reader.header)
 
@@ -177,7 +212,15 @@ def test_assay_row_reader_small_assay(small_investigation_file, small_assay_file
     assert 7 == len(first_row)
 
     expected = models.Material(
-        "Sample Name", "S1-sample-0815-N1", "0815-N1", None, (), (), (), None
+        "Sample Name",
+        "S1-sample-0815-N1",
+        "0815-N1",
+        None,
+        (),
+        (),
+        (),
+        None,
+        investigation.studies[0].assays["a_small.txt"],
     )
     assert expected == first_row[0]
     expected = models.Process(
@@ -217,6 +260,7 @@ def test_assay_row_reader_small_assay(small_investigation_file, small_assay_file
         (),
         (),
         None,
+        investigation.studies[0].assays["a_small.txt"],
     )
     assert expected == first_row[3]
     expected = models.Material(
@@ -228,6 +272,7 @@ def test_assay_row_reader_small_assay(small_investigation_file, small_assay_file
         (),
         (),
         None,
+        investigation.studies[0].assays["a_small.txt"],
     )
     assert expected == first_row[4]
     expected = models.Process(
@@ -253,13 +298,22 @@ def test_assay_row_reader_small_assay(small_investigation_file, small_assay_file
         (),
         (),
         None,
+        investigation.studies[0].assays["a_small.txt"],
     )
     assert expected == first_row[6]
 
     assert 7 == len(second_row)
 
     expected = models.Material(
-        "Sample Name", "S1-sample-0815-T1", "0815-T1", None, (), (), (), None
+        "Sample Name",
+        "S1-sample-0815-T1",
+        "0815-T1",
+        None,
+        (),
+        (),
+        (),
+        None,
+        investigation.studies[0].assays["a_small.txt"],
     )
     assert expected == second_row[0]
     expected = models.Process(
@@ -299,6 +353,7 @@ def test_assay_row_reader_small_assay(small_investigation_file, small_assay_file
         (),
         (),
         None,
+        investigation.studies[0].assays["a_small.txt"],
     )
     assert expected == second_row[3]
     expected = models.Material(
@@ -310,6 +365,7 @@ def test_assay_row_reader_small_assay(small_investigation_file, small_assay_file
         (),
         (),
         None,
+        investigation.studies[0].assays["a_small.txt"],
     )
     assert expected == second_row[4]
     expected = models.Process(
@@ -335,6 +391,7 @@ def test_assay_row_reader_small_assay(small_investigation_file, small_assay_file
         (),
         (),
         None,
+        investigation.studies[0].assays["a_small.txt"],
     )
     assert expected == second_row[6]
 
@@ -346,7 +403,12 @@ def test_assay_reader_small_assay(small_investigation_file, small_assay_file):
 
     # Create new row reader and check read headers
     reader = AssayReader.from_stream(
-        investigation, investigation.studies[0], "S1", "A1", small_assay_file
+        investigation,
+        investigation.studies[0],
+        investigation.studies[0].assays["a_small.txt"],
+        "S1",
+        "A1",
+        small_assay_file,
     )
     assert 8 == len(reader.header)
 
@@ -361,11 +423,27 @@ def test_assay_reader_small_assay(small_investigation_file, small_assay_file):
     assert 11 == len(assay.arcs)
 
     expected = models.Material(
-        "Sample Name", "S1-sample-0815-N1", "0815-N1", None, (), (), (), None
+        "Sample Name",
+        "S1-sample-0815-N1",
+        "0815-N1",
+        None,
+        (),
+        (),
+        (),
+        None,
+        investigation.studies[0].assays["a_small.txt"],
     )
     assert expected == assay.materials["S1-sample-0815-N1"]
     expected = models.Material(
-        "Sample Name", "S1-sample-0815-T1", "0815-T1", None, (), (), (), None
+        "Sample Name",
+        "S1-sample-0815-T1",
+        "0815-T1",
+        None,
+        (),
+        (),
+        (),
+        None,
+        investigation.studies[0].assays["a_small.txt"],
     )
     assert expected == assay.materials["S1-sample-0815-T1"]
     expected = models.Material(
@@ -377,6 +455,7 @@ def test_assay_reader_small_assay(small_investigation_file, small_assay_file):
         (),
         (),
         None,
+        investigation.studies[0].assays["a_small.txt"],
     )
     assert expected == assay.materials["S1-A1-0815-N1-DNA1-WES1_L???_???_R1.fastq.gz-COL5"]
     expected = models.Material(
@@ -388,6 +467,7 @@ def test_assay_reader_small_assay(small_investigation_file, small_assay_file):
         (),
         (),
         None,
+        investigation.studies[0].assays["a_small.txt"],
     )
     assert expected == assay.materials["S1-A1-0815-N1-DNA1-WES1_L???_???_R2.fastq.gz-COL6"]
     expected = models.Material(
@@ -399,6 +479,7 @@ def test_assay_reader_small_assay(small_investigation_file, small_assay_file):
         (),
         (),
         None,
+        investigation.studies[0].assays["a_small.txt"],
     )
     assert expected == assay.materials["S1-A1-0815-T1-DNA1-WES1_L???_???_R1.fastq.gz-COL5"]
     expected = models.Material(
@@ -410,6 +491,7 @@ def test_assay_reader_small_assay(small_investigation_file, small_assay_file):
         (),
         (),
         None,
+        investigation.studies[0].assays["a_small.txt"],
     )
     assert expected == assay.materials["S1-A1-0815-T1-DNA1-WES1_L???_???_R2.fastq.gz-COL6"]
     expected = models.Material(
@@ -421,6 +503,7 @@ def test_assay_reader_small_assay(small_investigation_file, small_assay_file):
         (),
         (),
         None,
+        investigation.studies[0].assays["a_small.txt"],
     )
     assert expected == assay.materials["S1-A1-0815-somatic.vcf.gz-COL8"]
 
@@ -518,7 +601,12 @@ def test_assay_reader_small2_assay(small2_investigation_file, small2_assay_file)
 
     # Create new row reader and check read headers
     reader = AssayReader.from_stream(
-        investigation, investigation.studies[0], "S1", "A1", small2_assay_file
+        investigation,
+        investigation.studies[0],
+        investigation.studies[0].assays["a_small2.txt"],
+        "S1",
+        "A1",
+        small2_assay_file,
     )
     assert 14 == len(reader.header)
 
@@ -621,7 +709,14 @@ def test_assay_reader_gelelect(gelelect_investigation_file, gelelect_assay_file)
 
     # Create new row reader and check read headers
     reader = AssayReader.from_stream(
-        investigation, investigation.studies[0], "S1", "A1", gelelect_assay_file
+        investigation,
+        investigation.studies[0],
+        investigation.studies[0].assays[
+            "a_study01_protein_expression_profiling_gel_electrophoresis.txt"
+        ],
+        "S1",
+        "A1",
+        gelelect_assay_file,
     )
     assert 22 == len(reader.header)
 
@@ -640,7 +735,17 @@ def test_assay_reader_gelelect(gelelect_investigation_file, gelelect_assay_file)
     assert 18 == len(assay.arcs)
 
     expected = models.Material(
-        "Image File", "S1-A1-Image01.jpeg-COL19", "Image01.jpeg", None, (), (), (), None
+        "Image File",
+        "S1-A1-Image01.jpeg-COL19",
+        "Image01.jpeg",
+        None,
+        (),
+        (),
+        (),
+        None,
+        investigation.studies[0].assays[
+            "a_study01_protein_expression_profiling_gel_electrophoresis.txt"
+        ],
     )
     assert expected == assay.materials["S1-A1-Image01.jpeg-COL19"]
 

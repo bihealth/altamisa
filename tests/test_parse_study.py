@@ -33,7 +33,9 @@ def test_study_row_reader_minimal_study(minimal_investigation_file, minimal_stud
 
     assert 3 == len(first_row)
 
-    expected = models.Material("Source Name", "S1-source-0815", "0815", None, (), (), (), None)
+    expected = models.Material(
+        "Source Name", "S1-source-0815", "0815", None, (), (), (), None, None
+    )
     assert expected == first_row[0]
     expected = models.Process(
         "sample collection",
@@ -50,7 +52,7 @@ def test_study_row_reader_minimal_study(minimal_investigation_file, minimal_stud
     )
     assert expected == first_row[1]
     expected = models.Material(
-        "Sample Name", "S1-sample-0815-N1", "0815-N1", None, (), (), (), None
+        "Sample Name", "S1-sample-0815-N1", "0815-N1", None, (), (), (), None, None
     )
     assert expected == first_row[2]
 
@@ -82,10 +84,12 @@ def test_study_reader_minimal_study(minimal_investigation_file, minimal_study_fi
     assert 1 == len(study.processes)
     assert 2 == len(study.arcs)
 
-    expected = models.Material("Source Name", "S1-source-0815", "0815", None, (), (), (), None)
+    expected = models.Material(
+        "Source Name", "S1-source-0815", "0815", None, (), (), (), None, None
+    )
     assert expected == study.materials["S1-source-0815"]
     expected = models.Material(
-        "Sample Name", "S1-sample-0815-N1", "0815-N1", None, (), (), (), None
+        "Sample Name", "S1-sample-0815-N1", "0815-N1", None, (), (), (), None, None
     )
     assert expected == study.materials["S1-sample-0815-N1"]
 
@@ -150,7 +154,7 @@ def test_study_row_reader_small_study(small_investigation_file, small_study_file
     )
 
     expected = models.Material(
-        "Source Name", "S1-source-0815", "0815", None, characteristics, (), (), None
+        "Source Name", "S1-source-0815", "0815", None, characteristics, (), (), None, None
     )
     assert expected == first_row[0]
     expected = models.Process(
@@ -176,12 +180,13 @@ def test_study_row_reader_small_study(small_investigation_file, small_study_file
         (),
         (models.FactorValue("treatment", "yes", None),),
         None,
+        None,
     )
     assert expected == first_row[2]
 
     assert 3 == len(second_row)
     expected = models.Material(
-        "Source Name", "S1-source-0815", "0815", None, characteristics, (), (), None
+        "Source Name", "S1-source-0815", "0815", None, characteristics, (), (), None, None
     )
     assert expected == second_row[0]
     expected = models.Process(
@@ -206,6 +211,7 @@ def test_study_row_reader_small_study(small_investigation_file, small_study_file
         (models.Characteristics("status", "2", None),),
         (),
         (models.FactorValue("treatment", None, None),),
+        None,
         None,
     )
     assert expected == second_row[2]
@@ -262,15 +268,15 @@ def test_study_reader_small_study(small_investigation_file, small_study_file):
     )
 
     expected = models.Material(
-        "Source Name", "S1-source-0815", "0815", None, characteristics1, (), (), None
+        "Source Name", "S1-source-0815", "0815", None, characteristics1, (), (), None, None
     )
     assert expected == study.materials["S1-source-0815"]
     expected = models.Material(
-        "Source Name", "S1-source-0816", "0816", None, characteristics2, (), (), None
+        "Source Name", "S1-source-0816", "0816", None, characteristics2, (), (), None, None
     )
     assert expected == study.materials["S1-source-0816"]
     expected = models.Material(
-        "Source Name", "S1-source-0817", "0817", None, characteristics3, (), (), None
+        "Source Name", "S1-source-0817", "0817", None, characteristics3, (), (), None, None
     )
     assert expected == study.materials["S1-source-0817"]
     expected = models.Material(
@@ -281,6 +287,7 @@ def test_study_reader_small_study(small_investigation_file, small_study_file):
         (models.Characteristics("status", "0", None),),
         (),
         (models.FactorValue("treatment", "yes", None),),
+        None,
         None,
     )
     assert expected == study.materials["S1-sample-0815-N1"]
@@ -293,6 +300,7 @@ def test_study_reader_small_study(small_investigation_file, small_study_file):
         (),
         (models.FactorValue("treatment", None, None),),
         None,
+        None,
     )
     assert expected == study.materials["S1-sample-0815-T1"]
     expected = models.Material(
@@ -304,6 +312,7 @@ def test_study_reader_small_study(small_investigation_file, small_study_file):
         (),
         (models.FactorValue("treatment", "yes", None),),
         None,
+        None,
     )
     assert expected == study.materials["S1-sample-0816-T1"]
     expected = models.Material(
@@ -314,6 +323,7 @@ def test_study_reader_small_study(small_investigation_file, small_study_file):
         (models.Characteristics("status", None, None),),
         (),
         (models.FactorValue("treatment", None, None),),
+        None,
         None,
     )
     assert expected == study.materials["S1-Empty Sample Name-13-4"]
