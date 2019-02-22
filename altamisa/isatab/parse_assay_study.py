@@ -11,6 +11,7 @@ from datetime import datetime
 from pathlib import Path
 from typing import List, TextIO
 
+from . import headers
 from . import models
 from ..exceptions import ParseIsatabException
 from .headers import ColumnHeader, StudyHeaderParser, AssayHeaderParser
@@ -24,53 +25,6 @@ TOKEN_ANONYMOUS = "Anonymous"
 TOKEN_EMPTY = "Empty"
 #: Used for named Processes without protocol reference
 TOKEN_UNKNOWN = "Unknown"
-
-# We define constants for the headers in the assay and study files as a typo in
-# the code below can then be caught as "unknown identifier" instead of having
-# to chase down string mismatches in if/then/else or table lookups.
-
-PROTOCOL_REF = "protocol_ref"
-ASSAY = "assay"
-DATA_NORMALIZATION = "data_normalization"
-DATA_TRANSFORMATION = "data_transformation"
-GEL_ELECTROPHORESIS_ASSAY = "gel_electrophoresis"
-HYBRIDIZATION_ASSAY = "hybridization"
-MS_ASSAY = "mass_spectometry"
-NORMALIZATION = "normalization"
-
-#: Header values indicating a material name.
-_MATERIAL_NAME_HEADERS = (
-    # Material
-    "Extract Name",
-    "Labeled Extract Name",
-    "Source Name",
-    "Sample Name",
-    # Data
-    "Array Data File",
-    "Array Data Matrix File",
-    "Derived Array Data File",
-    "Derived Array Data Matrix File",
-    "Derived Data File",
-    "Derived Spectral Data File",
-    "Metabolite Assignment File",
-    "Peptide Assignment File",
-    "Post Translational Modification Assignment File",
-    "Protein Assignment File",
-    "Raw Data File",
-    "Raw Spectral Data File",
-)
-
-#: Header values indicating a process name.
-_PROCESS_NAME_HEADERS = (
-    "Assay Name",
-    "Protocol REF",
-    "Normalization Name",
-    "Data Normalization Name",
-    "Data Transformation Name",
-    "Gel Electrophoresis Name",
-    "Hybridization Assay Name",
-    "MS Assay Name",
-)
 
 
 class _NodeBuilderBase:
@@ -151,56 +105,56 @@ class _NodeBuilderBase:
                 raise ParseIsatabException(msg)
             # Most headers are not secondary, so make this the default state.
             is_secondary = False
-            if header.column_type == "Protocol REF":
+            if header.column_type == headers.PROTOCOL_REF:
                 assert not self.protocol_ref_header
                 self.protocol_ref_header = header
             elif header.column_type in self.name_headers:
                 assert not self.name_header
                 self.name_header = header
-            elif header.column_type == "Characteristics":
+            elif header.column_type == headers.CHARACTERISTICS:
                 self.characteristic_headers.append(header)
-            elif header.column_type == "Comment":
+            elif header.column_type == headers.COMMENT:
                 self.comment_headers.append(header)
-            elif header.column_type == "Factor Value":
+            elif header.column_type == headers.FACTOR_VALUE:
                 self.factor_value_headers.append(header)
-            elif header.column_type == "Parameter Value":
+            elif header.column_type == headers.PARAMETER_VALUE:
                 self.parameter_value_headers.append(header)
-            elif header.column_type == "Material Type":
+            elif header.column_type == headers.MATERIAL_TYPE:
                 if self.material_type_header:
                     tpl = 'Seen "Material Type" header for same entity in ' "col {}"
                     msg = tpl.format(header.col_no)
                     raise ParseIsatabException(msg)
                 else:
                     self.material_type_header = header
-            elif header.column_type == "Array Design REF":
+            elif header.column_type == headers.ARRAY_DESIGN_REF:
                 if self.array_design_ref_header:
                     tpl = 'Seen "Array Design REF" header for same entity ' "in col {}"
                     msg = tpl.format(header.col_no)
                     raise ParseIsatabException(msg)
                 else:
                     self.array_design_ref_header = header
-            elif header.column_type == "Label":
+            elif header.column_type == headers.LABEL:
                 if self.extract_label_header:
                     tpl = 'Seen "Label" header for same entity in col {}'
                     msg = tpl.format(header.col_no)
                     raise ParseIsatabException(msg)
                 else:
                     self.extract_label_header = header
-            elif header.column_type == "Date":
+            elif header.column_type == headers.DATE:
                 if self.date_header:
                     tpl = 'Seen "Date" header for same entity in col {}'
                     msg = tpl.format(header.col_no)
                     raise ParseIsatabException(msg)
                 else:
                     self.date_header = header
-            elif header.column_type == "Performer":
+            elif header.column_type == headers.PERFORMER:
                 if self.performer_header:
                     tpl = 'Seen "Performer" header for same entity in col {}'
                     msg = tpl.format(header.col_no)
                     raise ParseIsatabException(msg)
                 else:
                     self.performer_header = header
-            elif header.column_type == "Term Source REF":
+            elif header.column_type == headers.TERM_SOURCE_REF:
                 # Guard against misuse / errors
                 if not prev:
                     tpl = "No primary annotation to annotate with term in " "col {}"
@@ -209,13 +163,13 @@ class _NodeBuilderBase:
                     # Values, Parameter Values and Units may be annotated with
                     # ontologies. However, official examples and configurations
                     # also feature Label and Material Type with ontologies.
-                    "Characteristics",
-                    # "Comment", this one is unclear
-                    "Factor Value",
-                    "Material Type",
-                    "Label",
-                    "Parameter Value",
-                    "Unit",
+                    headers.CHARACTERISTICS,
+                    # COMMENT, this one is unclear
+                    headers.FACTOR_VALUE,
+                    headers.MATERIAL_TYPE,
+                    headers.LABEL,
+                    headers.PARAMETER_VALUE,
+                    headers.UNIT,
                 ):
                     tpl = (
                         "Ontologies not supported for primary annotation "
@@ -233,8 +187,8 @@ class _NodeBuilderBase:
                     # ontology term.
                     prev.term_source_ref_header = header
                     is_secondary = True
-            elif header.column_type == "Unit":
-                if prev.unit_header or prev.column_type == "Unit":
+            elif header.column_type == headers.UNIT:
+                if prev.unit_header or prev.column_type == headers.UNIT:
                     tpl = 'Seen "Unit" header for same entity in col {}'
                     msg = tpl.format(header.col_no)
                     raise ParseIsatabException(msg)
@@ -270,21 +224,21 @@ class _NodeBuilderBase:
 class _MaterialBuilder(_NodeBuilderBase):
     """Helper class to construct a ``Material`` object from a line"""
 
-    type_ = models.MATERIAL
+    type_ = headers.MATERIAL
 
-    name_headers = _MATERIAL_NAME_HEADERS
+    name_headers = headers.MATERIAL_NAME_HEADERS
 
     allowed_column_types = (
         # Primary annotations (not parametrized)
-        "Material Type",
+        headers.MATERIAL_TYPE,
         # Primary annotations (parametrized)
-        "Characteristics",
-        "Comment",
-        "Factor Value",
+        headers.CHARACTERISTICS,
+        headers.COMMENT,
+        headers.FACTOR_VALUE,
         # Secondary annotations
-        "Label",
-        "Term Source REF",
-        "Unit",
+        headers.LABEL,
+        headers.TERM_SOURCE_REF,
+        headers.UNIT,
     )
 
     def build(self, line: List[str]) -> models.Material:
@@ -297,9 +251,9 @@ class _MaterialBuilder(_NodeBuilderBase):
         name = line[self.name_header.col_no]
         if name:
             # make material/data names unique by column
-            if self.name_header.column_type == "Source Name":
+            if self.name_header.column_type == headers.SOURCE_NAME:
                 unique_name = "{}-{}-{}".format(self.study_id, "source", name)
-            elif self.name_header.column_type == "Sample Name":
+            elif self.name_header.column_type == headers.SAMPLE_NAME:
                 # use static column identifier "sample-", since the same
                 # samples occur in different columns in study and assay
                 unique_name = "{}-{}-{}".format(self.study_id, "sample", name)
@@ -361,131 +315,23 @@ class _MaterialBuilder(_NodeBuilderBase):
         )
 
 
-class _SourceBuilder(_MaterialBuilder):
-    """Specialization of ``_MaterialBuilder`` to build source ``Material``
-    objects."""
-
-    type_ = models.SOURCE
-
-
-class _SampleBuilder(_MaterialBuilder):
-    """Specialization of ``_MaterialBuilder`` to build source ``Sample``
-    objects."""
-
-    type_ = models.SAMPLE
-
-
-class _ExtractBuilder(_MaterialBuilder):
-    """Specialization of ``_MaterialBuilder`` to build source ``Extract``
-    objects."""
-
-    type_ = models.EXTRACT
-
-
-class _LabeledExtractBuilder(_MaterialBuilder):
-    """Specialization of ``_MaterialBuilder`` to build source
-    ``Labeled Extract`` objects."""
-
-    type_ = models.LABELED_EXTRACT
-
-
-class _DataBuilder(_MaterialBuilder):
-    """Base class for data builders"""
-
-
-class _ArrayDataBuilder(_DataBuilder):
-    """Specialization of ``_DataBuilder`` to build source ``ArrayData``
-    objects."""
-
-    type_ = models.ARRAY_DATA_FILE
-
-
-class _ArrayDataMatrixBuilder(_DataBuilder):
-    """Specialization of ``_DataBuilder`` to build source ``ArrayDataMatrix``
-    objects."""
-
-    type_ = models.ARRAY_DATA_MATRIX_FILE
-
-
-class _DerivedArrayDataBuilder(_DataBuilder):
-    """Specialization of ``_DataBuilder`` to build source ``DerivedArrayData``
-    objects."""
-
-    type_ = models.DERIVED_ARRAY_DATA_FILE
-
-
-class _DerivedArrayMatrixDataBuilder(_DataBuilder):
-    """Specialization of ``_DataBuilder`` to build source
-    ``DerivedArrayMatrixData`` objects."""
-
-    type_ = models.DERIVED_ARRAY_MATRIX_DATA_FILE
-
-
-class _DerivedDataBuilder(_DataBuilder):
-    """Specialization of ``_DataBuilder`` to build source ``DerivedData``
-    objects."""
-
-    type_ = models.DERIVED_DATA_FILE
-
-
-class _DerivedSpectralDataBuilder(_DataBuilder):
-    """Specialization of ``_DataBuilder`` to build source ``DerivedData``
-    objects."""
-
-    type_ = models.DERIVED_SPECTRAL_DATA_FILE
-
-
-class _MetaboliteAssignmentFileBuilder(_DataBuilder):
-
-    type_ = models.METABOLITE_ASSIGNMENT_FILE
-
-
-class _PeptideAssignmentFileBuilder(_DataBuilder):
-
-    type_ = models.PEPTIDE_ASSIGNMENT_FILE
-
-
-class _ProteinAssignmentFileBuilder(_DataBuilder):
-
-    type_ = models.PROTEIN_ASSIGNMENT_FILE
-
-
-class _PostTranslationalModificationAssignmentFileBuilder(_DataBuilder):
-
-    type_ = models.POST_TRANSLATIONAL_MODIFICATION_ASSIGNMENT_FILE
-
-
-class _RawDataBuilder(_DataBuilder):
-    """Specialization of ``_DataBuilder`` to build source ``DerivedSpectralData``
-    objects."""
-
-    type_ = models.RAW_DATA_FILE
-
-
-class _RawSpectralDataBuilder(_DataBuilder):
-    """Specialization of ``_DataBuilder`` to build source ``DerivedSpectralData``
-    objects."""
-
-    type_ = models.RAW_SPECTRAL_DATA_FILE
-
-
 class _ProcessBuilder(_NodeBuilderBase):
     """Helper class to construct ``Process`` objects."""
 
-    name_headers = _PROCESS_NAME_HEADERS
+    name_headers = headers.PROCESS_NAME_HEADERS
 
     allowed_column_types = (
         # Primary annotations (not parametrized)
-        "Performer",
-        "Date",
-        "Array Design REF",
-        "Scan Name",
+        headers.PERFORMER,
+        headers.DATE,
+        headers.ARRAY_DESIGN_REF,
+        headers.SCAN_NAME,
         # Primary annotations (parametrized)
-        "Parameter Value",
-        "Comment",
+        headers.PARAMETER_VALUE,
+        headers.COMMENT,
         # Secondary annotations
-        "Term Source REF",
-        "Unit",
+        headers.TERM_SOURCE_REF,
+        headers.UNIT,
     )
 
     def build(self, line: List[str]) -> models.Process:
@@ -604,62 +450,6 @@ class _ProcessBuilder(_NodeBuilderBase):
         return protocol_ref, unique_name, name
 
 
-class _ProtocolRefBuilder(_ProcessBuilder):
-    """Specialization of ``_ProcessBuilder`` to build Protocol
-    ``Process`` objects."""
-
-    type_ = models.PROTOCOL_REF
-
-
-class _AssayBuilder(_ProcessBuilder):
-    """Specialization of ``_ProcessBuilder`` to build Assay
-    ``Process`` objects."""
-
-    type_ = models.ASSAY
-
-
-class _DataNormalizationBuilder(_ProcessBuilder):
-    """Specialization of ``_ProcessBuilder`` to build Data Normalization
-    ``Process`` objects."""
-
-    type_ = models.DATA_NORMALIZATION
-
-
-class _DataTransformationBuilder(_ProcessBuilder):
-    """Specialization of ``_ProcessBuilder`` to build Data Transformation
-    ``Process`` objects."""
-
-    type_ = models.DATA_TRANSFORMATION
-
-
-class _GelElectrophoresisAssayBuilder(_ProcessBuilder):
-    """Specialization of ``_ProcessBuilder`` to build Gel Electrophoresis Assay
-    ``Process`` objects."""
-
-    type_ = models.GEL_ELECTROPHORESIS_ASSAY
-
-
-class _HybridizationAssayBuilder(_ProcessBuilder):
-    """Specialization of ``_ProcessBuilder`` to build Hybridization Assay
-    ``Process`` objects."""
-
-    type_ = models.HYBRIDIZATION_ASSAY
-
-
-class _MsAssayBuilder(_ProcessBuilder):
-    """Specialization of ``_ProcessBuilder`` to build MS Assay
-    ``Process`` objects."""
-
-    type_ = models.MS_ASSAY
-
-
-class _NormalizationBuilder(_ProcessBuilder):
-    """Specialization of ``_ProcessBuilder`` to build Normalization
-    ``Process`` objects."""
-
-    type_ = models.NORMALIZATION
-
-
 class _RowBuilderBase:
     """Base class for row builders from study and assay files"""
 
@@ -711,7 +501,7 @@ class _RowBuilderBase:
         # Record whether we have seen a "Protocol REF" but no "Assay Name".
         noname_protocol_ref = False
         for i, col_hdr in enumerate(self.header):
-            if col_hdr.column_type in _MATERIAL_NAME_HEADERS:
+            if col_hdr.column_type in headers.MATERIAL_NAME_HEADERS:
                 noname_protocol_ref = False
                 yield i
             elif col_hdr.column_type in self.node_builders:
@@ -741,10 +531,10 @@ class _StudyRowBuilder(_RowBuilderBase):
 
     node_builders = {
         # Material node builders
-        "Source Name": _SourceBuilder,
-        "Sample Name": _SampleBuilder,
+        headers.SOURCE_NAME: _MaterialBuilder,
+        headers.SAMPLE_NAME: _MaterialBuilder,
         # Process node builders
-        "Protocol REF": _ProcessBuilder,
+        headers.PROTOCOL_REF: _ProcessBuilder,
     }
 
 
@@ -753,31 +543,33 @@ class _AssayRowBuilder(_RowBuilderBase):
 
     node_builders = {
         # Material node builders
-        "Sample Name": _SampleBuilder,
-        "Extract Name": _ExtractBuilder,
-        "Labeled Extract Name": _LabeledExtractBuilder,
+        headers.SAMPLE_NAME: _MaterialBuilder,
+        headers.EXTRACT_NAME: _MaterialBuilder,
+        headers.LABELED_EXTRACT_NAME: _MaterialBuilder,
         # Data node builders
-        "Array Data File": _ArrayDataBuilder,
-        "Array Data Matrix File": _ArrayDataMatrixBuilder,
-        "Derived Array Data File": _DerivedArrayDataBuilder,
-        "Derived Array Data Matrix File": _DerivedArrayMatrixDataBuilder,
-        "Derived Data File": _DerivedDataBuilder,
-        "Derived Spectral Data File": _DerivedSpectralDataBuilder,
-        "Metabolite Assignment File": _MetaboliteAssignmentFileBuilder,
-        "Peptide Assignment File": _PeptideAssignmentFileBuilder,
-        "Post Translational Modification Assignment File": _PostTranslationalModificationAssignmentFileBuilder,
-        "Protein Assignment File": _ProteinAssignmentFileBuilder,
-        "Raw Data File": _RawDataBuilder,
-        "Raw Spectral Data File": _RawSpectralDataBuilder,
+        headers.ARRAY_DATA_FILE: _MaterialBuilder,
+        headers.ARRAY_DATA_MATRIX_FILE: _MaterialBuilder,
+        headers.ARRAY_DESIGN_FILE: _MaterialBuilder,
+        headers.DERIVED_ARRAY_DATA_FILE: _MaterialBuilder,
+        headers.DERIVED_ARRAY_DATA_MATRIX_FILE: _MaterialBuilder,
+        headers.DERIVED_DATA_FILE: _MaterialBuilder,
+        headers.DERIVED_SPECTRAL_DATA_FILE: _MaterialBuilder,
+        headers.METABOLITE_ASSIGNMENT_FILE: _MaterialBuilder,
+        headers.PEPTIDE_ASSIGNMENT_FILE: _MaterialBuilder,
+        headers.POST_TRANSLATIONAL_MODIFICATION_ASSIGNMENT_FILE: _MaterialBuilder,
+        headers.PROTEIN_ASSIGNMENT_FILE: _MaterialBuilder,
+        headers.RAW_DATA_FILE: _MaterialBuilder,
+        headers.RAW_SPECTRAL_DATA_FILE: _MaterialBuilder,
+        headers.SPOT_PICKING_FILE: _MaterialBuilder,
         # Process node builders
-        "Assay Name": _AssayBuilder,
-        "Data Normalization Name": _DataNormalizationBuilder,
-        "Data Transformation Name": _DataTransformationBuilder,
-        "Gel Electrophoresis Assay Name": _GelElectrophoresisAssayBuilder,
-        "Hybridization Assay Name": _HybridizationAssayBuilder,
-        "MS Assay Name": _MsAssayBuilder,
-        "Normalization Name": _NormalizationBuilder,
-        "Protocol REF": _ProtocolRefBuilder,
+        headers.ASSAY_NAME: _ProcessBuilder,
+        headers.DATA_NORMALIZATION_NAME: _ProcessBuilder,
+        headers.DATA_TRANSFORMATION_NAME: _ProcessBuilder,
+        headers.GEL_ELECTROPHORESIS_ASSAY_NAME: _ProcessBuilder,
+        headers.HYBRIDIZATION_ASSAY_NAME: _ProcessBuilder,
+        headers.MS_ASSAY_NAME: _ProcessBuilder,
+        headers.NORMALIZATION_NAME: _ProcessBuilder,
+        headers.PROTOCOL_REF: _ProcessBuilder,
     }
 
 
