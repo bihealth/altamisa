@@ -46,6 +46,7 @@ def test_assay_row_reader_minimal_assay(minimal_investigation_file, minimal_assa
         (),
         None,
         None,
+        None,
     )
     assert expected == first_row[1]
     expected = models.Material(
@@ -137,6 +138,7 @@ def test_assay_reader_minimal_assay(minimal_investigation_file, minimal_assay_fi
         (),
         None,
         None,
+        None,
     )
     assert expected == assay.processes["S1-A1-0815-N1-DNA1-WES1-3"]
 
@@ -189,6 +191,7 @@ def test_assay_row_reader_small_assay(small_investigation_file, small_assay_file
         (),
         None,
         None,
+        None,
     )
     assert expected == first_row[1]
     expected = models.Process(
@@ -200,6 +203,7 @@ def test_assay_row_reader_small_assay(small_investigation_file, small_assay_file
         None,
         (),
         (),
+        None,
         None,
         None,
     )
@@ -237,6 +241,7 @@ def test_assay_row_reader_small_assay(small_investigation_file, small_assay_file
         (),
         None,
         None,
+        None,
     )
     assert expected == first_row[5]
     expected = models.Material(
@@ -268,6 +273,7 @@ def test_assay_row_reader_small_assay(small_investigation_file, small_assay_file
         (),
         None,
         None,
+        None,
     )
     assert expected == second_row[1]
     expected = models.Process(
@@ -279,6 +285,7 @@ def test_assay_row_reader_small_assay(small_investigation_file, small_assay_file
         None,
         (),
         (),
+        None,
         None,
         None,
     )
@@ -314,6 +321,7 @@ def test_assay_row_reader_small_assay(small_investigation_file, small_assay_file
         None,
         (),
         (),
+        None,
         None,
         None,
     )
@@ -427,6 +435,7 @@ def test_assay_reader_small_assay(small_investigation_file, small_assay_file):
         (),
         None,
         None,
+        None,
     )
     assert expected == assay.processes["S1-A1-library preparation-2-1"]
     expected = models.Process(
@@ -438,6 +447,7 @@ def test_assay_reader_small_assay(small_investigation_file, small_assay_file):
         None,
         (),
         (),
+        None,
         None,
         None,
     )
@@ -453,6 +463,7 @@ def test_assay_reader_small_assay(small_investigation_file, small_assay_file):
         (),
         None,
         None,
+        None,
     )
     assert expected == assay.processes["S1-A1-0815-N1-DNA1-WES1-4"]
     expected = models.Process(
@@ -464,6 +475,7 @@ def test_assay_reader_small_assay(small_investigation_file, small_assay_file):
         None,
         (),
         (),
+        None,
         None,
         None,
     )
@@ -600,3 +612,79 @@ def test_assay_reader_small2_assay(small2_investigation_file, small2_assay_file)
         models.Arc("S1-A1-data analysis-13", "S1-A1-results.csv-COL14"),
     )
     assert sorted(expected) == sorted(assay.arcs)
+
+
+def test_assay_reader_gelelect(gelelect_investigation_file, gelelect_assay_file):
+    """Use ``AssayReader`` to read in small assay file."""
+    # Load investigation
+    investigation = InvestigationReader.from_stream(gelelect_investigation_file).read()
+
+    # Create new row reader and check read headers
+    reader = AssayReader.from_stream(
+        investigation, investigation.studies[0], "S1", "A1", gelelect_assay_file
+    )
+    assert 22 == len(reader.header)
+
+    # Read assay
+    assay = reader.read()
+
+    # Check results
+    assert os.path.normpath(str(assay.file)).endswith(
+        os.path.normpath(
+            "data/test_gelelect/a_study01_protein_expression_profiling_gel_electrophoresis.txt"
+        )
+    )
+    assert 22 == len(assay.header)
+    assert 9 == len(assay.materials)
+    assert 10 == len(assay.processes)
+    assert 18 == len(assay.arcs)
+
+    expected = models.Material(
+        "Image File", "S1-A1-Image01.jpeg-COL19", "Image01.jpeg", None, (), (), (), None
+    )
+    assert expected == assay.materials["S1-A1-Image01.jpeg-COL19"]
+
+    expected = models.Process(
+        "data collection",
+        "S1-A1-Scan02-18",
+        "Scan02",
+        "Scan Name",
+        None,
+        None,
+        (),
+        (),
+        None,
+        None,
+        None,
+    )
+    assert expected == assay.processes["S1-A1-Scan02-18"]
+
+    expected = models.Process(
+        "electrophoresis",
+        "S1-A1-Assay01-10",
+        "Assay01",
+        "Gel Electrophoresis Assay Name",
+        None,
+        None,
+        (),
+        (),
+        None,
+        models.OntologyTermRef("", "", ""),
+        models.OntologyTermRef("", "", ""),
+    )
+    assert expected == assay.processes["S1-A1-Assay01-10"]
+
+    expected = models.Process(
+        "electrophoresis",
+        "S1-A1-electrophoresis-9-2",
+        "",
+        "Gel Electrophoresis Assay Name",
+        None,
+        None,
+        (),
+        (),
+        None,
+        models.OntologyTermRef("AssayX", None, None),
+        models.OntologyTermRef("AssayY", None, None),
+    )
+    assert expected == assay.processes["S1-A1-electrophoresis-9-2"]

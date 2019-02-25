@@ -65,6 +65,9 @@ class _NodeBuilderBase:
         self.array_design_ref = None
         #: The header for array design ref
         self.array_design_ref_header = None
+        #: The header for first and second dimension
+        self.first_dimension_header = None
+        self.second_dimension_header = None
         #: The header for extract label type
         self.extract_label_header = None
         #: The header for material type
@@ -75,8 +78,6 @@ class _NodeBuilderBase:
         self.date_header = None
         #: The header for the unit
         self.unit_header = None
-        #: The header for the scan name
-        self.scan_name_header = None
         #: Current counter value
         self.counter_value = 0
         #: Assign column headers to their roles (properties above)
@@ -133,6 +134,20 @@ class _NodeBuilderBase:
                     raise ParseIsatabException(msg)
                 else:
                     self.array_design_ref_header = header
+            elif header.column_type == headers.FIRST_DIMENSION:
+                if self.first_dimension_header:
+                    tpl = 'Seen "First Dimension" header for same entity in col {}'
+                    msg = tpl.format(header.col_no)
+                    raise ParseIsatabException(msg)
+                else:
+                    self.first_dimension_header = header
+            elif header.column_type == headers.SECOND_DIMENSION:
+                if self.second_dimension_header:
+                    tpl = 'Seen "Second Dimension" header for same entity in col {}'
+                    msg = tpl.format(header.col_no)
+                    raise ParseIsatabException(msg)
+                else:
+                    self.second_dimension_header = header
             elif header.column_type == headers.LABEL:
                 if self.extract_label_header:
                     tpl = 'Seen "Label" header for same entity in col {}'
@@ -159,16 +174,19 @@ class _NodeBuilderBase:
                 if not prev:
                     tpl = "No primary annotation to annotate with term in " "col {}"
                 elif prev.column_type not in (
-                    # According to ISA-tab specs, Characteristics, Factor
-                    # Values, Parameter Values and Units may be annotated with
-                    # ontologies. However, official examples and configurations
-                    # also feature Label and Material Type with ontologies.
+                    # According to ISA-tab specs, Characteristics, Factor Values,
+                    # Parameter Values and Units as well as the special cases First
+                    # Dimension and Second Dimension may be annotated with
+                    # ontologies. However, official examples and configurations also
+                    # feature Label and Material Type with ontologies.
                     headers.CHARACTERISTICS,
                     # COMMENT, this one is unclear
                     headers.FACTOR_VALUE,
+                    headers.FIRST_DIMENSION,
                     headers.MATERIAL_TYPE,
                     headers.LABEL,
                     headers.PARAMETER_VALUE,
+                    headers.SECOND_DIMENSION,
                     headers.UNIT,
                 ):
                     tpl = (
@@ -325,8 +343,10 @@ class _ProcessBuilder(_NodeBuilderBase):
         # Primary annotations (not parametrized)
         headers.PERFORMER,
         headers.DATE,
+        # Special annotations (not parametrized)
         headers.ARRAY_DESIGN_REF,
-        headers.SCAN_NAME,
+        headers.FIRST_DIMENSION,
+        headers.SECOND_DIMENSION,
         # Primary annotations (parametrized)
         headers.PARAMETER_VALUE,
         headers.COMMENT,
@@ -370,14 +390,19 @@ class _ProcessBuilder(_NodeBuilderBase):
                 tpl = 'Parameter Value "{}" not declared for Protocol "{}" ' "in investigation file"
                 msg = tpl.format(pv.name, protocol_ref)
                 raise ParseIsatabException(msg)
+        # Check for special case annotations
         if self.array_design_ref_header:
             array_design_ref = line[self.array_design_ref_header.col_no]
         else:
             array_design_ref = None
-        if self.scan_name_header:
-            scan_name = datetime.strptime(line[self.scan_name_header.col_no], "%Y-%m-%d").date()
+        if self.first_dimension_header:
+            first_dimension = self._build_freetext_or_term_ref(self.first_dimension_header, line)
         else:
-            scan_name = None
+            first_dimension = None
+        if self.second_dimension_header:
+            second_dimension = self._build_freetext_or_term_ref(self.second_dimension_header, line)
+        else:
+            second_dimension = None
         # Then, constructing ``Process`` is easy
         return models.Process(
             protocol_ref,
@@ -389,7 +414,8 @@ class _ProcessBuilder(_NodeBuilderBase):
             parameter_values,
             comments,
             array_design_ref,
-            scan_name,
+            first_dimension,
+            second_dimension,
         )
 
     def _build_protocol_ref_and_name(self, line: List[str]):
@@ -559,6 +585,7 @@ class _AssayRowBuilder(_RowBuilderBase):
         headers.DERIVED_ARRAY_DATA_MATRIX_FILE: _MaterialBuilder,
         headers.DERIVED_DATA_FILE: _MaterialBuilder,
         headers.DERIVED_SPECTRAL_DATA_FILE: _MaterialBuilder,
+        headers.IMAGE_FILE: _MaterialBuilder,
         headers.METABOLITE_ASSIGNMENT_FILE: _MaterialBuilder,
         headers.PEPTIDE_ASSIGNMENT_FILE: _MaterialBuilder,
         headers.POST_TRANSLATIONAL_MODIFICATION_ASSIGNMENT_FILE: _MaterialBuilder,
@@ -568,13 +595,13 @@ class _AssayRowBuilder(_RowBuilderBase):
         headers.SPOT_PICKING_FILE: _MaterialBuilder,
         # Process node builders
         headers.ASSAY_NAME: _ProcessBuilder,
-        headers.DATA_NORMALIZATION_NAME: _ProcessBuilder,
         headers.DATA_TRANSFORMATION_NAME: _ProcessBuilder,
         headers.GEL_ELECTROPHORESIS_ASSAY_NAME: _ProcessBuilder,
         headers.HYBRIDIZATION_ASSAY_NAME: _ProcessBuilder,
         headers.MS_ASSAY_NAME: _ProcessBuilder,
         headers.NORMALIZATION_NAME: _ProcessBuilder,
         headers.PROTOCOL_REF: _ProcessBuilder,
+        headers.SCAN_NAME: _ProcessBuilder,
     }
 
 

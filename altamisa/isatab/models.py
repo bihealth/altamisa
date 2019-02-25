@@ -462,10 +462,18 @@ class Process(NamedTuple):
     parameter_values: Tuple[ParameterValue]
     #: Tuple of process comments
     comments: Tuple[Comment]
+
+    #: Special case annotations
+    #: Technology types: "DNA microarray", "protein microarray"
+    #: Protocol types: "nucleic acid hybridization", "hybridization"
     #: Array design reference
     array_design_ref: str
-    #: Scan name of process
-    scan_name: str
+
+    #: Technology types: "gel electrophoresis"
+    #: Protocol types: "electrophoresis"
+    #: First and second dimension (INSTEAD of Gel Electrophoresis Assay Name)
+    first_dimension: FreeTextOrTermRef
+    second_dimension: FreeTextOrTermRef
 
 
 class Arc(NamedTuple):

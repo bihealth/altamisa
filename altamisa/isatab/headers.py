@@ -31,6 +31,7 @@ DERIVED_ARRAY_DATA_FILE = "Derived Array Data File"
 DERIVED_ARRAY_DATA_MATRIX_FILE = "Derived Array Data Matrix File"
 DERIVED_DATA_FILE = "Derived Data File"
 DERIVED_SPECTRAL_DATA_FILE = "Derived Spectral Data File"
+IMAGE_FILE = "Image File"
 METABOLITE_ASSIGNMENT_FILE = "Metabolite Assignment File"
 PEPTIDE_ASSIGNMENT_FILE = "Peptide Assignment File"
 POST_TRANSLATIONAL_MODIFICATION_ASSIGNMENT_FILE = "Post Translational Modification Assignment File"
@@ -41,25 +42,26 @@ SPOT_PICKING_FILE = "Spot Picking File"
 
 # Assay types (nodes)
 ASSAY_NAME = "Assay Name"
-DATA_NORMALIZATION_NAME = "Data Normalization Name"
 DATA_TRANSFORMATION_NAME = "Data Transformation Name"
 GEL_ELECTROPHORESIS_ASSAY_NAME = "Gel Electrophoresis Assay Name"
 HYBRIDIZATION_ASSAY_NAME = "Hybridization Assay Name"
 MS_ASSAY_NAME = "MS Assay Name"
 NORMALIZATION_NAME = "Normalization Name"
 PROTOCOL_REF = "Protocol REF"
+SCAN_NAME = "Scan Name"
 
-# Other simple types (annotations)
-ARRAY_DESIGN_REF = "Array Design REF"
+# Other simple types (standard annotations)
 DATE = "Date"
-FIRST_DIMENSION = "First Dimension"
 LABEL = "Label"
 MATERIAL_TYPE = "Material Type"
 PERFORMER = "Performer"
-SCAN_NAME = "Scan Name"
-SECOND_DIMENSION = "Second Dimension"
 TERM_SOURCE_REF = "Term Source REF"
 UNIT = "Unit"
+
+# Other simple types (special case annotations)
+ARRAY_DESIGN_REF = "Array Design REF"
+FIRST_DIMENSION = "First Dimension"
+SECOND_DIMENSION = "Second Dimension"
 
 # Labeled types (annotations)
 CHARACTERISTICS = "Characteristics"
@@ -77,6 +79,7 @@ DATA_FILE_HEADERS = (
     DERIVED_ARRAY_DATA_MATRIX_FILE,
     DERIVED_DATA_FILE,
     DERIVED_SPECTRAL_DATA_FILE,
+    IMAGE_FILE,
     METABOLITE_ASSIGNMENT_FILE,
     PEPTIDE_ASSIGNMENT_FILE,
     POST_TRANSLATIONAL_MODIFICATION_ASSIGNMENT_FILE,
@@ -100,12 +103,12 @@ MATERIAL_NAME_HEADERS = (
 #: Header values indicating a process name.
 PROCESS_NAME_HEADERS = (
     ASSAY_NAME,
-    DATA_NORMALIZATION_NAME,
     DATA_TRANSFORMATION_NAME,
     GEL_ELECTROPHORESIS_ASSAY_NAME,
     HYBRIDIZATION_ASSAY_NAME,
     MS_ASSAY_NAME,
     NORMALIZATION_NAME,
+    SCAN_NAME,
     # PROTOCOL_REF,  # is not a name header!
 )
 
@@ -147,13 +150,13 @@ class SimpleColumnHeader(ColumnHeader):
 
 
 class ExtractHeader(SimpleColumnHeader):
-    """Extract header in a study or assay"""
+    """Extract header in an assay"""
 
     column_type = EXTRACT_NAME
 
 
 class LabeledExtractHeader(SimpleColumnHeader):
-    """Labeled Extract header in a study or assay"""
+    """Labeled Extract header in an assay"""
 
     column_type = LABELED_EXTRACT_NAME
 
@@ -165,7 +168,7 @@ class SampleHeader(SimpleColumnHeader):
 
 
 class SourceHeader(SimpleColumnHeader):
-    """Source header in a study or assay"""
+    """Source header in a study"""
 
     column_type = SOURCE_NAME
 
@@ -174,85 +177,91 @@ class SourceHeader(SimpleColumnHeader):
 
 
 class ArrayDataFileHeader(SimpleColumnHeader):
-    """ArrayData header in a study or assay"""
+    """ArrayData header in an assay"""
 
     column_type = ARRAY_DATA_FILE
 
 
 class ArrayDataMatrixFileHeader(SimpleColumnHeader):
-    """ArrayData Matrix File header in a study or assay"""
+    """ArrayData Matrix File header in an assay"""
 
     column_type = ARRAY_DATA_MATRIX_FILE
 
 
 class ArrayDesignFileHeader(SimpleColumnHeader):
-    """ArrayDesignFile header in a study or assay"""
+    """ArrayDesignFile header in an assay"""
 
     column_type = ARRAY_DESIGN_FILE
 
 
 class DerivedArrayDataFileHeader(SimpleColumnHeader):
-    """DerivedArrayData header in a study or assay"""
+    """DerivedArrayData header in an assay"""
 
     column_type = DERIVED_ARRAY_DATA_FILE
 
 
 class DerivedArrayDataMatrixFileHeader(SimpleColumnHeader):
-    """DerivedArrayData header in a study or assay"""
+    """DerivedArrayData header in an assay"""
 
     column_type = DERIVED_ARRAY_DATA_MATRIX_FILE
 
 
 class DerivedDataFileHeader(SimpleColumnHeader):
-    """Derived Data File header in a study or assay"""
+    """Derived Data File header in an assay"""
 
     column_type = DERIVED_DATA_FILE
 
 
 class DerivedSpectralDataFileHeader(SimpleColumnHeader):
-    """DerivedSpectralData header in a study or assay"""
+    """DerivedSpectralData header in an assay"""
 
     column_type = DERIVED_SPECTRAL_DATA_FILE
 
 
+class ImageFileHeader(SimpleColumnHeader):
+    """Image File header in an assay"""
+
+    column_type = IMAGE_FILE
+
+
 class MetaboliteAssignmentFileHeader(SimpleColumnHeader):
-    """PeptideAssignment header in a study or assay"""
+    """PeptideAssignment header in an assay"""
 
     column_type = METABOLITE_ASSIGNMENT_FILE
 
 
 class PeptideAssignmentFileHeader(SimpleColumnHeader):
-    """PeptideAssignment header in a study or assay"""
+    """PeptideAssignment header in an assay"""
 
     column_type = PEPTIDE_ASSIGNMENT_FILE
 
 
 class PostTranslationalModificationAssignmentFileHeader(SimpleColumnHeader):
-    """PostTranslationalModificationAssignment header in a study or assay"""
+    """PostTranslationalModificationAssignment header in an assay"""
 
     column_type = POST_TRANSLATIONAL_MODIFICATION_ASSIGNMENT_FILE
 
 
 class ProteinAssignmentFileHeader(SimpleColumnHeader):
-    """ProteinAssignment header in a study or assay"""
+    """ProteinAssignment header in an assay"""
 
     column_type = PROTEIN_ASSIGNMENT_FILE
 
 
 class RawDataFileHeader(SimpleColumnHeader):
-    """Raw Data header in a study or assay"""
+    """Raw Data header in an assay"""
 
     column_type = RAW_DATA_FILE
 
 
 class RawSpectralDataFileHeader(SimpleColumnHeader):
-    """Raw Spectral Data header in a study or assay"""
+    """Raw Spectral Data header in an assay"""
 
     column_type = RAW_SPECTRAL_DATA_FILE
 
 
 class SpotPickingFileHeader(SimpleColumnHeader):
-    """SpotPickingFile header in a study or assay"""
+    """SpotPickingFile header in an assay"""
 
     column_type = SPOT_PICKING_FILE
 
@@ -261,43 +270,37 @@ class SpotPickingFileHeader(SimpleColumnHeader):
 
 
 class AssayNameHeader(SimpleColumnHeader):
-    """Assay Name header in a study or assay"""
+    """Assay Name header in an assay"""
 
     column_type = ASSAY_NAME
 
 
-class DataNormalizationNameHeader(SimpleColumnHeader):
-    """Data Normalization Name header in a study or assay"""
-
-    column_type = DATA_NORMALIZATION_NAME
-
-
 class DataTransformationNameHeader(SimpleColumnHeader):
-    """DataTransformationName header in a study or assay"""
+    """DataTransformationName header in an assay"""
 
     column_type = DATA_TRANSFORMATION_NAME
 
 
 class GelElectrophoresisAssayNameHeader(SimpleColumnHeader):
-    """GelElectrophoresisAssayName header in a study or assay"""
+    """GelElectrophoresisAssayName header in an assay"""
 
     column_type = GEL_ELECTROPHORESIS_ASSAY_NAME
 
 
 class HybridizationAssayNameHeader(SimpleColumnHeader):
-    """HybridizationAssayName header in a study or assay"""
+    """HybridizationAssayName header in an assay"""
 
     column_type = HYBRIDIZATION_ASSAY_NAME
 
 
 class MsAssayNameHeader(SimpleColumnHeader):
-    """MsAssayName header in a study or assay"""
+    """MsAssayName header in an assay"""
 
     column_type = MS_ASSAY_NAME
 
 
 class NormalizationNameHeader(SimpleColumnHeader):
-    """Normalization Name header in a study or assay"""
+    """Normalization Name header in a assay"""
 
     column_type = NORMALIZATION_NAME
 
@@ -308,11 +311,17 @@ class ProtocolRefHeader(SimpleColumnHeader):
     column_type = PROTOCOL_REF
 
 
+class ScanNameHeader(SimpleColumnHeader):
+    """ScanName header in assay"""
+
+    column_type = SCAN_NAME
+
+
 # Other simple header
 
 
 class ArrayDesignRefHeader(SimpleColumnHeader):
-    """ArrayDesignRef header in a study or assay"""
+    """ArrayDesignRef header in an assay"""
 
     column_type = ARRAY_DESIGN_REF
 
@@ -324,37 +333,31 @@ class DateHeader(SimpleColumnHeader):
 
 
 class FirstDimensionHeader(SimpleColumnHeader):
-    """First Dimension header in a study or assay"""
+    """First Dimension header in an assay"""
 
     column_type = FIRST_DIMENSION
 
 
 class LabelHeader(SimpleColumnHeader):
-    """Material Type header in a study or assay"""
+    """Material Type header in an assay"""
 
     column_type = LABEL
 
 
 class MaterialTypeHeader(SimpleColumnHeader):
-    """Material Type header in a study or assay"""
+    """Material Type header in an assay"""
 
     column_type = MATERIAL_TYPE
 
 
 class PerformerHeader(SimpleColumnHeader):
-    """Performer header in a study or assay"""
+    """Performer header in an assay"""
 
     column_type = PERFORMER
 
 
-class ScanNameHeader(SimpleColumnHeader):
-    """ScanName header in a study or assay"""
-
-    column_type = SCAN_NAME
-
-
 class SecondDimensionHeader(SimpleColumnHeader):
-    """SecondDimension header in a study or assay"""
+    """SecondDimension header in an assay"""
 
     column_type = SECOND_DIMENSION
 
@@ -438,6 +441,7 @@ class HeaderParserBase:
         DERIVED_ARRAY_DATA_MATRIX_FILE: DerivedArrayDataMatrixFileHeader,
         DERIVED_DATA_FILE: DerivedDataFileHeader,
         DERIVED_SPECTRAL_DATA_FILE: DerivedSpectralDataFileHeader,
+        IMAGE_FILE: ImageFileHeader,
         METABOLITE_ASSIGNMENT_FILE: MetaboliteAssignmentFileHeader,
         PEPTIDE_ASSIGNMENT_FILE: PeptideAssignmentFileHeader,
         POST_TRANSLATIONAL_MODIFICATION_ASSIGNMENT_FILE: PostTranslationalModificationAssignmentFileHeader,
@@ -445,15 +449,15 @@ class HeaderParserBase:
         RAW_DATA_FILE: RawDataFileHeader,
         RAW_SPECTRAL_DATA_FILE: RawSpectralDataFileHeader,
         SPOT_PICKING_FILE: SpotPickingFileHeader,
-        # Process names
+        # Process names or Ref
         ASSAY_NAME: AssayNameHeader,
-        DATA_NORMALIZATION_NAME: DataNormalizationNameHeader,
         DATA_TRANSFORMATION_NAME: DataTransformationNameHeader,
         GEL_ELECTROPHORESIS_ASSAY_NAME: GelElectrophoresisAssayNameHeader,
         HYBRIDIZATION_ASSAY_NAME: HybridizationAssayNameHeader,
         MS_ASSAY_NAME: MsAssayNameHeader,
         NORMALIZATION_NAME: NormalizationNameHeader,
         PROTOCOL_REF: ProtocolRefHeader,
+        SCAN_NAME: ScanNameHeader,
         # Simple headers
         ARRAY_DESIGN_REF: ArrayDesignRefHeader,
         DATE: DateHeader,
@@ -461,7 +465,6 @@ class HeaderParserBase:
         LABEL: LabelHeader,
         MATERIAL_TYPE: MaterialTypeHeader,
         PERFORMER: PerformerHeader,
-        SCAN_NAME: ScanNameHeader,
         SECOND_DIMENSION: SecondDimensionHeader,
         # Secondary annotations
         UNIT: UnitHeader,
@@ -590,6 +593,7 @@ class AssayHeaderParser(HeaderParserBase):
         DERIVED_ARRAY_DATA_MATRIX_FILE,
         DERIVED_DATA_FILE,
         DERIVED_SPECTRAL_DATA_FILE,
+        IMAGE_FILE,
         METABOLITE_ASSIGNMENT_FILE,
         PEPTIDE_ASSIGNMENT_FILE,
         POST_TRANSLATIONAL_MODIFICATION_ASSIGNMENT_FILE,
@@ -597,15 +601,15 @@ class AssayHeaderParser(HeaderParserBase):
         RAW_DATA_FILE,
         RAW_SPECTRAL_DATA_FILE,
         SPOT_PICKING_FILE,
-        # Process names
+        # Process names or Ref
         ASSAY_NAME,
-        DATA_NORMALIZATION_NAME,
         DATA_TRANSFORMATION_NAME,
         GEL_ELECTROPHORESIS_ASSAY_NAME,
         HYBRIDIZATION_ASSAY_NAME,
         MS_ASSAY_NAME,
         NORMALIZATION_NAME,
         PROTOCOL_REF,
+        SCAN_NAME,
         # Simple headers
         ARRAY_DESIGN_REF,
         DATE,
@@ -613,7 +617,6 @@ class AssayHeaderParser(HeaderParserBase):
         LABEL,
         MATERIAL_TYPE,
         PERFORMER,
-        SCAN_NAME,
         SECOND_DIMENSION,
         # Labeled headers
         CHARACTERISTICS,

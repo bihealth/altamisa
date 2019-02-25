@@ -92,3 +92,20 @@ def small2_assay_file():
     """
     path = os.path.join(os.path.dirname(__file__), "data/i_small2/a_small2.txt")
     return open(path, "rt")
+
+
+@pytest.fixture
+def gelelect_investigation_file():
+    path = os.path.join(os.path.dirname(__file__), "data/test_gelelect/i_Investigation.txt")
+    return open(path, "rt")
+
+
+@pytest.fixture
+def gelelect_assay_file():
+    """This file contains special cases for gel electrophoresis assays.
+    """
+    path = os.path.join(
+        os.path.dirname(__file__),
+        "data/test_gelelect/a_study01_protein_expression_profiling_gel_electrophoresis.txt",
+    )
+    return open(path, "rt")
