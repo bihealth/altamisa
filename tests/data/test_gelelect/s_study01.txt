@@ -1,0 +1,2 @@
+"Source Name"	"Characteristics[organism]"	"Term Source REF"	"Term Accession Number"	"Protocol REF"	"Sample Name"
+"PatientZero"	""	""	""	"sample collection"	"Sample01"
