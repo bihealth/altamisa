@@ -60,19 +60,15 @@ def run(args):
     # Write studies and assays
     for s, study_info in enumerate(investigation.studies):
         if args.output_investigation_file.name == "<stdout>":
-            StudyWriter.from_stream(
-                studies[s], args.output_investigation_file, study_info.factors
-            ).write()
+            StudyWriter.from_stream(studies[s], args.output_investigation_file).write()
             for a, assay_info in enumerate(study_info.assays.values()):
-                AssayWriter.from_stream(
-                    assays[s][a], args.output_investigation_file, study_info.factors
-                ).write()
+                AssayWriter.from_stream(assays[s][a], args.output_investigation_file).write()
         else:
             with open(os.path.join(path_out, study_info.info.path), "wt") as outputf:
-                StudyWriter.from_stream(studies[s], outputf, study_info.factors).write()
+                StudyWriter.from_stream(studies[s], outputf).write()
             for a, assay_info in enumerate(study_info.assays.values()):
                 with open(os.path.join(path_out, assay_info.path), "wt") as outputf:
-                    AssayWriter.from_stream(assays[s][a], outputf, study_info.factors).write()
+                    AssayWriter.from_stream(assays[s][a], outputf).write()
 
 
 def main(argv=None):

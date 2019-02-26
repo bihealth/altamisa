@@ -14,6 +14,7 @@ import warnings
 from ..constants import investigation_headers
 from ..exceptions import ParseIsatabException, ParseIsatabWarning
 from . import models
+from .validate_investigation import InvestigationValidator
 
 
 __author__ = "Manuel Holtgrewe <manuel.holtgrewe@bihealth.de>"
@@ -41,7 +42,7 @@ def _parse_comments(section, comment_keys, i=None):
 
 # Helper function to extract protocol parameters
 def _split_study_protocols_parameters(
-    names, name_term_accs, name_term_srcs, ontology_refs
+    names, name_term_accs, name_term_srcs
 ) -> Iterator[models.FreeTextOrTermRef]:
     names = names.split(";")
     name_term_accs = name_term_accs.split(";")
@@ -56,12 +57,12 @@ def _split_study_protocols_parameters(
         raise ParseIsatabException(msg)
     for (name, acc, src) in zip(names, name_term_accs, name_term_srcs):
         if any((name, acc, src)):  # skips empty parameters
-            yield models.OntologyTermRef(name, acc, src, ontology_refs)
+            yield models.OntologyTermRef(name, acc, src)
 
 
 # Helper function to extract protocol components
 def _split_study_protocols_components(
-    names, types, type_term_accs, type_term_srcs, ontology_refs
+    names, types, type_term_accs, type_term_srcs
 ) -> Iterator[models.ProtocolComponentInfo]:
     names = names.split(";")
     types = types.split(";")
@@ -81,9 +82,7 @@ def _split_study_protocols_components(
             msg = tpl.format(name, ctype, acc, src)
             raise ParseIsatabException(msg)
         if any((name, ctype, acc, src)):  # skips empty components
-            yield models.ProtocolComponentInfo(
-                name, models.OntologyTermRef(ctype, acc, src, ontology_refs)
-            )
+            yield models.ProtocolComponentInfo(name, models.OntologyTermRef(ctype, acc, src))
 
 
 # Helper function to validate and convert string dates to date objects
@@ -115,7 +114,6 @@ class InvestigationReader:
         self._reader = csv.reader(input_file, delimiter="\t", quotechar='"')
         self._line = None
         self._read_next_line()
-        self._ontology_refs = None
 
     def _read_next_line(self):
         """Read next line, skipping comments starting with ``'#'``."""
@@ -141,14 +139,19 @@ class InvestigationReader:
         else:
             return self._line[0].startswith(token)
 
-    def read(self) -> models.InvestigationInfo:
+    def read(self, validate=True) -> models.InvestigationInfo:
         """Read investigation file"""
-        self._ontology_refs = {o.name: o for o in self._read_ontology_source_reference()}
+        ontology_refs = {o.name: o for o in self._read_ontology_source_reference()}
         info = self._read_basic_info()
         publications = list(self._read_publications())
         contacts = list(self._read_contacts())
         studies = list(self._read_studies())
-        return models.InvestigationInfo(self._ontology_refs, info, publications, contacts, studies)
+        investigation = models.InvestigationInfo(
+            ontology_refs, info, publications, contacts, studies
+        )
+        if validate:
+            InvestigationValidator(investigation).validate()
+        return investigation
 
     # reader for content of sections with possibly multiple columns
     # i.e. ONTOLOGY SOURCE REFERENCE, INVESTIGATION PUBLICATIONS,
@@ -173,9 +176,9 @@ class InvestigationReader:
             section[key] = line[1:]
         # Check that all keys are given and all contain the same number of entries
         if len(section) != len(ref_keys) + len(comment_keys):
-            tpl = "Missing entries in section {}; found: {}"
+            tpl = "Missing entries in section {}; only found: {}"
             msg = tpl.format(section_name, list(sorted(section)))
-            raise ParseIsatabException(msg)
+            raise ParseIsatabException(msg)  # TODO: should be warning
         if not len(set([len(v) for v in section.values()])) == 1:
             tpl = "Inconsistent entry lengths in section {}"
             msg = tpl.format(section_name)
@@ -209,9 +212,9 @@ class InvestigationReader:
             section[key] = line[1] if len(line) > 1 else ""
         # Check that all keys are given
         if len(section) != len(ref_keys) + len(comment_keys):
-            tpl = "Missing entries in section {}; found: {}"
+            tpl = "Missing entries in section {}; only found: {}"
             msg = tpl.format(section_name, list(sorted(section)))
-            raise ParseIsatabException(msg)
+            raise ParseIsatabException(msg)  # TODO: should be warning
         return section, comment_keys
 
     def _read_ontology_source_reference(self) -> Iterator[models.OntologyRef]:
@@ -230,19 +233,14 @@ class InvestigationReader:
         # Create resulting objects
         columns = zip(*(section[k] for k in investigation_headers.ONTOLOGY_SOURCE_REF_KEYS))
         for i, (name, file_, version, desc) in enumerate(columns):
+            comments = _parse_comments(section, comment_keys, i)
             # If ontology source is empty, skip it
             # (since ISAcreator always adds a last empty ontology column)
-            if not any((name, file_, version, desc)):
+            if not any((name, file_, version, desc, any(comments))):
                 tpl = "Skipping empty ontology source: {}, {}, {}, {}"
                 msg = tpl.format(name, file_, version, desc)
                 warnings.warn(msg, ParseIsatabWarning)
                 continue
-            # Check if ontology source is complete
-            if not all((name, file_, version, desc)):
-                tpl = "Incomplete ontology source; found: {}, {}, {}, {}"
-                msg = tpl.format(name, file_, version, desc)
-                raise ParseIsatabException(msg)
-            comments = _parse_comments(section, comment_keys, i)
             yield models.OntologyRef(name, file_, version, desc, comments, list(section.keys()))
 
     def _read_basic_info(self) -> models.BasicInfo:
@@ -291,9 +289,7 @@ class InvestigationReader:
             i,
             (pubmed_id, doi, authors, title, status_term, status_term_acc, status_term_src),
         ) in enumerate(columns):
-            status = models.OntologyTermRef(
-                status_term, status_term_acc, status_term_src, self._ontology_refs
-            )
+            status = models.OntologyTermRef(status_term, status_term_acc, status_term_src)
             comments = _parse_comments(section, comment_keys, i)
             yield models.PublicationInfo(
                 pubmed_id, doi, authors, title, status, comments, list(section.keys())
@@ -330,9 +326,7 @@ class InvestigationReader:
                 role_term_src,
             ),
         ) in enumerate(columns):
-            role = models.OntologyTermRef(
-                role_term, role_term_acc, role_term_src, self._ontology_refs
-            )
+            role = models.OntologyTermRef(role_term, role_term_acc, role_term_src)
             comments = _parse_comments(section, comment_keys, i)
             yield models.ContactInfo(
                 last_name,
@@ -402,9 +396,7 @@ class InvestigationReader:
         # Create resulting objects
         columns = zip(*(section[k] for k in investigation_headers.STUDY_DESIGN_DESCR_KEYS))
         for i, (type_term, type_term_acc, type_term_src) in enumerate(columns):
-            otype = models.OntologyTermRef(
-                type_term, type_term_acc, type_term_src, self._ontology_refs
-            )
+            otype = models.OntologyTermRef(type_term, type_term_acc, type_term_src)
             comments = _parse_comments(section, comment_keys, i)
             yield models.DesignDescriptorsInfo(otype, comments, list(section.keys()))
 
@@ -427,9 +419,7 @@ class InvestigationReader:
             i,
             (pubmed_id, doi, authors, title, status_term, status_term_acc, status_term_src),
         ) in enumerate(columns):
-            status = models.OntologyTermRef(
-                status_term, status_term_acc, status_term_src, self._ontology_refs
-            )
+            status = models.OntologyTermRef(status_term, status_term_acc, status_term_src)
             comments = _parse_comments(section, comment_keys, i)
             yield models.PublicationInfo(
                 pubmed_id, doi, authors, title, status, comments, list(section.keys())
@@ -451,9 +441,7 @@ class InvestigationReader:
         # Create resulting objects
         columns = zip(*(section[k] for k in investigation_headers.STUDY_FACTORS_KEYS))
         for i, (name, type_term, type_term_acc, type_term_src) in enumerate(columns):
-            otype = models.OntologyTermRef(
-                type_term, type_term_acc, type_term_src, self._ontology_refs
-            )
+            otype = models.OntologyTermRef(type_term, type_term_acc, type_term_src)
             comments = _parse_comments(section, comment_keys, i)
             yield models.FactorInfo(name, otype, comments, list(section.keys()))
 
@@ -515,12 +503,8 @@ class InvestigationReader:
                 )
                 raise ParseIsatabException(msg)
             elif file_:  # if at least a file exists --> AssayInfo
-                meas = models.OntologyTermRef(
-                    meas_type, meas_type_term_acc, meas_type_term_src, self._ontology_refs
-                )
-                tech = models.OntologyTermRef(
-                    tech_type, tech_type_term_acc, tech_type_term_src, self._ontology_refs
-                )
+                meas = models.OntologyTermRef(meas_type, meas_type_term_acc, meas_type_term_src)
+                tech = models.OntologyTermRef(tech_type, tech_type_term_acc, tech_type_term_src)
                 comments = _parse_comments(section, comment_keys, i)
                 yield models.AssayInfo(
                     meas, tech, tech_plat, Path(file_), comments, list(section.keys())
@@ -561,27 +545,21 @@ class InvestigationReader:
                 comp_type_term_srcs,
             ),
         ) in enumerate(columns):
-            if not name:  # don't allow unnamed assay columns
+            if not name:  # don't allow unnamed protocol columns
                 tpl = 'Expected protocol name in line {}; found: "{}"'
                 msg = tpl.format(investigation_headers.STUDY_PROTOCOL_NAME, name)
                 raise ParseIsatabException(msg)
-            type_ont = models.OntologyTermRef(
-                type_term, type_term_acc, type_term_src, self._ontology_refs
-            )
+            type_ont = models.OntologyTermRef(type_term, type_term_acc, type_term_src)
             paras = {
                 p.name if hasattr(p, "name") else p: p
                 for p in _split_study_protocols_parameters(
-                    para_names, para_name_term_accs, para_name_term_srcs, self._ontology_refs
+                    para_names, para_name_term_accs, para_name_term_srcs
                 )
             }
             comps = {
                 c.name: c
                 for c in _split_study_protocols_components(
-                    comp_names,
-                    comp_types,
-                    comp_type_term_accs,
-                    comp_type_term_srcs,
-                    self._ontology_refs,
+                    comp_names, comp_types, comp_type_term_accs, comp_type_term_srcs
                 )
             }
             comments = _parse_comments(section, comment_keys, i)
@@ -628,9 +606,7 @@ class InvestigationReader:
                 role_term_src,
             ),
         ) in enumerate(columns):
-            role = models.OntologyTermRef(
-                role_term, role_term_acc, role_term_src, self._ontology_refs
-            )
+            role = models.OntologyTermRef(role_term, role_term_acc, role_term_src)
             comments = _parse_comments(section, comment_keys, i)
             yield models.ContactInfo(
                 last_name,

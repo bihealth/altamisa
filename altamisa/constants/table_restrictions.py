@@ -25,19 +25,35 @@ NUCLEOTIDE_SEQUENCING = "nucleotide sequencing"
 MASS_SPECTROMETRY = "mass spectrometry"
 
 
+# Protocol types (only the once needed for special validations)
+PT_DATA_COLLECTION = "data collection"
+PT_DATA_NORMALIZATION = "data normalization"
+PT_DATA_TRANSFORMATION = "data transformation"
+PT_ELECTROPHORESIS = "electrophoresis"
+PT_HYBRIDIZATION = "hybridization"
+PT_MASS_SPECTROMETRY = "mass spectrometry"
+PT_NUCLEIC_ACID_HYBRIDIZATION = "nucleic acid hybridization"
+
+
+# Material restrictions ----------------------------------------------------------------------------
+
+
 # Materials restricted to assay technology
-RESTRICTED_TECH_MATERIALS = {
+RESTRICTED_MATERIALS_ATECH = {
     # nucleotide sequencing
     table_headers.LIBRARY_NAME: {NUCLEOTIDE_SEQUENCING}
 }
 
 
 # Materials restricted to assay measurement
-RESTRICTED_MEAS_MATERIALS = {}
+RESTRICTED_MATERIALS_AMEAS = {}
+
+
+# Data file restrictions ---------------------------------------------------------------------------
 
 
 # Data files restricted to assay technology
-RESTRICTED_TECH_FILES = {
+RESTRICTED_FILES_ATECH = {
     # microarray
     table_headers.ARRAY_DESIGN_FILE: {DNA_MICROARRAY, PROTEIN_MICROARRAY},
     table_headers.ARRAY_DATA_FILE: {DNA_MICROARRAY, PROTEIN_MICROARRAY},
@@ -57,7 +73,7 @@ RESTRICTED_TECH_FILES = {
 
 
 # Data files restricted to assay measurement
-RESTRICTED_MEAS_FILES = {
+RESTRICTED_FILES_AMEAS = {
     # proteomics
     table_headers.PEPTIDE_ASSIGNMENT_FILE: {PROTEIN_EXPRESSION_PROFILING, PROTEIN_IDENTIFICATION},
     table_headers.POST_TRANSLATIONAL_MODIFICATION_ASSIGNMENT_FILE: {
@@ -67,4 +83,45 @@ RESTRICTED_MEAS_FILES = {
     table_headers.PROTEIN_ASSIGNMENT_FILE: {PROTEIN_EXPRESSION_PROFILING, PROTEIN_IDENTIFICATION},
     # metabolomics
     table_headers.METABOLITE_ASSIGNMENT_FILE: {METABOLITE_PROFILING},
+}
+
+
+# Protocol restrictions ----------------------------------------------------------------------------
+
+
+# Protocol names restricted to assay technology
+RESTRICTED_PROTO_NAMES_ATECH = {
+    # microarray
+    table_headers.SCAN_NAME: {DNA_MICROARRAY, GEL_ELECTROPHORESIS, PROTEIN_MICROARRAY},
+    table_headers.HYBRIDIZATION_ASSAY_NAME: {DNA_MICROARRAY, PROTEIN_MICROARRAY},
+    # gel electrophoresis
+    table_headers.GEL_ELECTROPHORESIS_ASSAY_NAME: {GEL_ELECTROPHORESIS},
+    # mass spectrometry
+    table_headers.MS_ASSAY_NAME: {MASS_SPECTROMETRY},
+}
+
+# Protocol names restricted by protocol type (ignore if ref is UNKNOWN)
+RESTRICTED_PROTO_NAMES_PTYPE = {
+    table_headers.DATA_TRANSFORMATION_NAME: {PT_DATA_TRANSFORMATION},
+    table_headers.GEL_ELECTROPHORESIS_ASSAY_NAME: {PT_ELECTROPHORESIS},
+    table_headers.HYBRIDIZATION_ASSAY_NAME: {PT_HYBRIDIZATION, PT_NUCLEIC_ACID_HYBRIDIZATION},
+    table_headers.MS_ASSAY_NAME: {PT_MASS_SPECTROMETRY},
+    table_headers.NORMALIZATION_NAME: {PT_DATA_NORMALIZATION},
+    table_headers.SCAN_NAME: {PT_DATA_COLLECTION},
+}
+
+# Protocol special case annotations restricted to assay technology
+RESTRICTED_PROTO_ANNOS_ATECH = {
+    # microarray
+    table_headers.ARRAY_DESIGN_REF: {DNA_MICROARRAY, PROTEIN_MICROARRAY},
+    # gel electrophoresis
+    table_headers.FIRST_DIMENSION: {GEL_ELECTROPHORESIS},
+    table_headers.SECOND_DIMENSION: {GEL_ELECTROPHORESIS},
+}
+
+# Protocol special case annotations restricted to protocol type
+RESTRICTED_PROTO_ANNOS_PTYPE = {
+    table_headers.ARRAY_DESIGN_REF: {PT_HYBRIDIZATION, PT_NUCLEIC_ACID_HYBRIDIZATION},
+    table_headers.FIRST_DIMENSION: {PT_ELECTROPHORESIS},
+    table_headers.SECOND_DIMENSION: {PT_ELECTROPHORESIS},
 }

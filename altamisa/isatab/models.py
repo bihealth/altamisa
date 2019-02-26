@@ -10,13 +10,7 @@ a list of all materials in a study or all comments for a material).
 from collections import namedtuple
 from datetime import date
 from pathlib import Path
-import re
 from typing import Dict, List, Tuple, NamedTuple, Union
-import warnings
-
-from ..constants import table_headers
-from ..constants import table_restrictions
-from ..exceptions import ParseIsatabException, ParseIsatabWarning
 
 
 __author__ = "Manuel Holtgrewe <manuel.holtgrewe@bihealth.de>"
@@ -61,20 +55,6 @@ class OntologyTermRef(namedtuple("OntologyTermRef", "name accession ontology_nam
     def __new__(cls, name, accession, ontology_name, ontology_refs=None):
         # If accession or ontology_name is available --> OntologyTermRef
         if ontology_name or accession:
-            # All three variables must be available
-            if not all((name, ontology_name, accession)):
-                tpl = "Incomplete ontology term reference:\nName: {}\nOntology: {}\nAccession: {}"
-                msg = tpl.format(
-                    name if name else "?",
-                    ontology_name if ontology_name else "?",
-                    accession if accession else "?",
-                )
-                raise ParseIsatabException(msg)
-            # Ontology_name need to reference an ontology source (if provided)
-            if ontology_refs and ontology_name not in ontology_refs:
-                tpl = 'Ontology with name "{}" not defined in investigation!'
-                msg = tpl.format(ontology_name)
-                raise ParseIsatabException(msg)
             return super(cls, OntologyTermRef).__new__(cls, name, accession, ontology_name)
         # Only the name is available --> Text only OntologyTermRef
         elif name:
@@ -103,105 +83,6 @@ class Comment(NamedTuple):
     name: str
     #: Comment value
     value: str
-
-
-# Pattern and functions for validation
-# DATE_PATTERN = re.compile("^\\d{4}-(0[1-9]|1[0-2])-(0[1-9]|[12]\\d|3[01])$")
-MAIL_PATTERN = re.compile("^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\\.[a-zA-Z0-9-.]+$")
-PHONE_PATTERN = re.compile("^\\+?[\\d /()-]+$")  # only checks characters!
-DOI_PATTERN = re.compile("^(?:(?:DOI|doi):)?10[.][0-9]{4,}(?:[.][0-9]+)*/\\S+$")
-PMID_PATTERN = re.compile("^\\d+$")
-
-
-def _validate_mail_address(mail_address) -> str:
-    """Helper function to validate mail strings"""
-    if mail_address and not MAIL_PATTERN.match(mail_address):
-        tpl = "Invalid mail address: {}"
-        msg = tpl.format(mail_address)
-        raise ParseIsatabException(msg)
-    return mail_address
-
-
-def _validate_phone_number(phone_number) -> str:
-    """Helper function to validate phone/fax number strings"""
-    if phone_number and not PHONE_PATTERN.match(phone_number):
-        tpl = "Invalid phone/fax number: {}"
-        msg = tpl.format(phone_number)
-        raise ParseIsatabException(msg)
-    return phone_number
-
-
-def _validate_doi(doi) -> str:
-    """Helper function to validate doi strings"""
-    if doi and not DOI_PATTERN.match(doi):
-        tpl = "Invalid doi string: {}"
-        msg = tpl.format(doi)
-        raise ParseIsatabException(msg)
-    return doi
-
-
-def _validate_pubmed_id(pubmed_id) -> str:
-    """Helper function to validate pubmed id strings"""
-    if pubmed_id and not PMID_PATTERN.match(pubmed_id):
-        tpl = "Invalid pubmed_id string: {}"
-        msg = tpl.format(pubmed_id)
-        raise ParseIsatabException(msg)
-    return pubmed_id
-
-
-def _validate_assay_material_restrictions(type_, assay_info=None):
-    if type_ in {
-        **table_restrictions.RESTRICTED_MEAS_MATERIALS,
-        **table_restrictions.RESTRICTED_TECH_MATERIALS,
-        **table_restrictions.RESTRICTED_MEAS_FILES,
-        **table_restrictions.RESTRICTED_TECH_FILES,
-    }:
-        if assay_info is None:
-            tpl = "Material/data '{}' not recommended for unspecified assay."
-            msg = tpl.format(type_)
-            warnings.warn(msg, ParseIsatabException)
-        else:
-            _validate_restriction(
-                type_,
-                "Material",
-                "measurement",
-                assay_info.measurement_type,
-                table_restrictions.RESTRICTED_MEAS_MATERIALS,
-            )
-            _validate_restriction(
-                type_,
-                "Material",
-                "technology",
-                assay_info.technology_type,
-                table_restrictions.RESTRICTED_TECH_MATERIALS,
-            )
-            _validate_restriction(
-                type_,
-                "Data",
-                "measurement",
-                assay_info.measurement_type,
-                table_restrictions.RESTRICTED_MEAS_FILES,
-            )
-            _validate_restriction(
-                type_,
-                "Data",
-                "technology",
-                assay_info.technology_type,
-                table_restrictions.RESTRICTED_TECH_FILES,
-            )
-
-
-def _validate_restriction(type_, type_group, assay_info_type, assay_info_value, restrictions):
-    if type_ in restrictions and assay_info_value.name.lower() not in restrictions[type_]:
-        tpl = "{} '{}' not expected for assay {} '{}' (only '{}')"
-        msg = tpl.format(
-            type_group,
-            type_,
-            assay_info_type,
-            assay_info_value.name,
-            "', '".join(restrictions[type_]),
-        )
-        warnings.warn(msg, ParseIsatabWarning)
 
 
 # Types used in investigation files -------------------------------------------
@@ -248,24 +129,10 @@ class BasicInfo(NamedTuple):
     headers: List[str]
 
 
-class PublicationInfo(
-    namedtuple("PublicationInfo", "pubmed_id doi authors title status comments headers")
-):
+class PublicationInfo(NamedTuple):
     """Information regarding an investigation publication
     (``INVESTIGATION PUBLICATIONS``).
     """
-
-    def __new__(cls, pubmed_id, doi, authors, title, status, comments, headers):
-        return super(cls, PublicationInfo).__new__(
-            cls,
-            _validate_pubmed_id(pubmed_id),
-            _validate_doi(doi),
-            authors,
-            title,
-            status,
-            comments,
-            headers,
-        )
 
     #: Publication PubMed ID
     pubmed_id: str
@@ -283,42 +150,8 @@ class PublicationInfo(
     headers: List[str]
 
 
-class ContactInfo(
-    namedtuple(
-        "ContactInfo",
-        "last_name first_name mid_initial email phone fax address affiliation role comments headers",
-    )
-):
+class ContactInfo(NamedTuple):
     """Investigation contact information"""
-
-    def __new__(
-        cls,
-        last_name,
-        first_name,
-        mid_initial,
-        email,
-        phone,
-        fax,
-        address,
-        affiliation,
-        role,
-        comments,
-        headers,
-    ):
-        return super(cls, ContactInfo).__new__(
-            cls,
-            last_name,
-            first_name,
-            mid_initial,
-            _validate_mail_address(email),
-            _validate_phone_number(phone),
-            _validate_phone_number(fax),
-            address,
-            affiliation,
-            role,
-            comments,
-            headers,
-        )
 
     #: Last name of contact
     last_name: str
@@ -487,65 +320,8 @@ class ParameterValue(NamedTuple):
     unit: FreeTextOrTermRef
 
 
-class Material(
-    namedtuple(
-        "Material",
-        "type unique_name name extract_label characteristics comments factor_values material_type headers",
-    )
-):
+class Material(NamedTuple):
     """Representation of a Material or Data node."""
-
-    def __new__(
-        cls,
-        type_,
-        unique_name,
-        name,
-        extract_label,
-        characteristics,
-        comments,
-        factor_values,
-        material_type,
-        assay_info: AssayInfo,
-        headers=None,
-    ):
-        # Restrict certain annotations to corresponding material types
-        if extract_label and type_ != table_headers.LABELED_EXTRACT_NAME:
-            tpl = "Label not applied to Labeled Extract Name: {}."
-            msg = tpl.format(type_)
-            raise ParseIsatabException(msg)
-
-        if characteristics and type_ in table_headers.DATA_FILE_HEADERS:
-            tpl = "Data nodes don't support Characteristics: {}."
-            msg = tpl.format(characteristics)
-            raise ParseIsatabException(msg)
-
-        if material_type and type_ not in (
-            # Only allow for actual materials and not for data files
-            table_headers.EXTRACT_NAME,
-            table_headers.LABELED_EXTRACT_NAME,
-            table_headers.LIBRARY_NAME,
-            table_headers.SAMPLE_NAME,
-            table_headers.SOURCE_NAME,
-        ):
-            tpl = "Material Type not applied to proper Material: {}."
-            msg = tpl.format(type_)
-            raise ParseIsatabException(msg)
-
-        # Restrict certain materials or file types to corresponding assay measurement and technology
-        _validate_assay_material_restrictions(type_, assay_info)
-
-        return super(cls, Material).__new__(
-            cls,
-            type_,
-            unique_name,
-            name,
-            extract_label,
-            characteristics,
-            comments,
-            factor_values,
-            material_type,
-            headers,
-        )
 
     type: str
     #: The unique name of the material node.

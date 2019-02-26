@@ -12,6 +12,7 @@ from typing import List, TextIO
 
 from ..constants import table_tokens
 from ..constants import table_headers
+from . import validate_assay_study
 from ..exceptions import ParseIsatabException
 from .headers import ColumnHeader, StudyHeaderParser, AssayHeaderParser
 from . import models
@@ -28,19 +29,7 @@ class _NodeBuilderBase:
     #: Allowed ``column_type``s.
     allowed_column_types = None
 
-    def __init__(
-        self,
-        ontology_source_refs,
-        protocol_refs,
-        column_headers: List[ColumnHeader],
-        study_id: str,
-        assay_id: str,
-        assay_info: models.AssayInfo = None,
-    ):
-        #: The definition of the ontology source references
-        self.ontology_source_refs = ontology_source_refs
-        #: The definition of the protocol references
-        self.protocol_refs = protocol_refs
+    def __init__(self, column_headers: List[ColumnHeader], study_id: str, assay_id: str):
         #: The column descriptions to build ``Material`` from.
         self.column_headers = column_headers
         #: The "Protocol REF" header, if any
@@ -79,8 +68,6 @@ class _NodeBuilderBase:
         #: Study and assay ids used for unique node naming
         self.study_id = study_id
         self.assay_id = assay_id
-        #: The assay information
-        self.assay_info = assay_info
 
     def _next_counter(self):
         """Increment counter value and return"""
@@ -238,7 +225,7 @@ class _NodeBuilderBase:
                 # There must be one ontology_name and accession per name
                 if len(name) == len(ontology_name) and len(name) == len(accession):
                     term_refs = [
-                        models.OntologyTermRef(n, a, o, self.ontology_source_refs)
+                        models.OntologyTermRef(n, a, o)
                         for n, a, o in zip(name, accession, ontology_name)
                     ]
                     return term_refs
@@ -252,9 +239,7 @@ class _NodeBuilderBase:
 
             # Else, just create single ontology term references
             else:
-                return models.OntologyTermRef(
-                    name, accession, ontology_name, self.ontology_source_refs
-                )
+                return models.OntologyTermRef(name, accession, ontology_name)
         else:
             if allow_list:
                 return self._token_with_escape(line[header.col_no])
@@ -346,23 +331,6 @@ class _MaterialBuilder(_NodeBuilderBase):
             self._build_complex(hdr, line, models.FactorValue) for hdr in self.factor_value_headers
         )
         material_type = self._build_freetext_or_term_ref(self.material_type_header, line)
-        # Don't accept unnamed materials/data files if there are annotations
-        # TODO: accept empty ontology as empty value
-        any_char = any([(any(v for v in char.value) or char.unit) for char in characteristics])
-        any_comm = any([comm.value for comm in comments])
-        any_fact = any([(fact.value or fact.unit) for fact in factor_values])
-        if not name and any((any_char, any_comm, any_fact, extract_label, material_type)):
-            tpl = "Found annotated material/file without name: " "{}, {}, {}, {}, {}, {}, {}"
-            msg = tpl.format(
-                type_,
-                unique_name,
-                extract_label,
-                characteristics,
-                comments,
-                factor_values,
-                material_type,
-            )
-            raise ParseIsatabException(msg)
         # Then, constructing ``Material`` is easy
         return models.Material(
             type_,
@@ -373,7 +341,6 @@ class _MaterialBuilder(_NodeBuilderBase):
             comments,
             factor_values,
             material_type,
-            self.assay_info,
             self._build_simple_headers_list(),
         )
 
@@ -404,11 +371,6 @@ class _ProcessBuilder(_NodeBuilderBase):
         """Build and return ``Process`` from CSV file."""
         # First, build the individual attributes of ``Process``
         protocol_ref, unique_name, name, name_type = self._build_protocol_ref_and_name(line)
-        # Check if protocol is declared in corresponding study
-        if protocol_ref != table_tokens.TOKEN_UNKNOWN and protocol_ref not in self.protocol_refs:
-            tpl = 'Protocol "{}" not declared in investigation file'
-            msg = tpl.format(protocol_ref)
-            raise ParseIsatabException(msg)
         if self.date_header and line[self.date_header.col_no]:
             try:
                 date = datetime.strptime(line[self.date_header.col_no], "%Y-%m-%d").date()
@@ -429,12 +391,6 @@ class _ProcessBuilder(_NodeBuilderBase):
             self._build_complex(hdr, line, models.ParameterValue, allow_list=True)
             for hdr in self.parameter_value_headers
         )
-        # Check if parameter value is declared in corresponding protocol
-        for pv in parameter_values:
-            if pv.name not in self.protocol_refs[protocol_ref].parameters:
-                tpl = 'Parameter Value "{}" not declared for Protocol "{}" ' "in investigation file"
-                msg = tpl.format(pv.name, protocol_ref)
-                raise ParseIsatabException(msg)
         # Check for special case annotations
         array_design_ref = (
             line[self.array_design_ref_header.col_no] if self.array_design_ref_header else None
@@ -526,21 +482,10 @@ class _RowBuilderBase:
     #: Registry of column header to node builder
     node_builders = None
 
-    def __init__(
-        self,
-        ontology_source_refs,
-        protocol_refs,
-        header: List[ColumnHeader],
-        study_id: str,
-        assay_id: str = None,
-        assay_info: models.AssayInfo = None,
-    ):
-        self.ontology_source_refs = ontology_source_refs
-        self.protocol_refs = protocol_refs
+    def __init__(self, header: List[ColumnHeader], study_id: str, assay_id: str = None):
         self.header = header
         self.study_id = study_id
         self.assay_id = assay_id
-        self.assay_info = assay_info
         self._builders = list(self._make_builders())
 
     def _make_builders(self):
@@ -548,14 +493,7 @@ class _RowBuilderBase:
         breaks = list(self._make_breaks())
         for start, end in zip(breaks, breaks[1:]):
             klass = self.node_builders[self.header[start].column_type]
-            yield klass(
-                self.ontology_source_refs,
-                self.protocol_refs,
-                self.header[start:end],
-                self.study_id,
-                self.assay_id,
-                self.assay_info,
-            )
+            yield klass(self.header[start:end], self.study_id, self.assay_id)
 
     def _make_breaks(self):
         """Build indices to break the columns at
@@ -678,12 +616,6 @@ class _AssayAndStudyBuilder:
             for idx, entry in enumerate(row):
                 # Skip first entry
                 if idx == 0:
-                    # But make sure rows start with originally named nodes
-                    # (i.e. a named source in study or a named sample in assay)
-                    if not entry.name:
-                        tpl = "Found start node without original name: {}"
-                        msg = tpl.format(row[idx].unique_name)
-                        raise ParseIsatabException(msg)
                     continue
                 # Process nodes without an original name
                 if not entry.name:
@@ -756,25 +688,11 @@ class StudyRowReader:
     """
 
     @classmethod
-    def from_stream(
-        klass,
-        investigation: models.InvestigationInfo,
-        study: models.StudyInfo,
-        study_id: str,
-        input_file: TextIO,
-    ):
+    def from_stream(klass, study_id: str, input_file: TextIO):
         """Construct from file-like object"""
-        return StudyRowReader(investigation, study, study_id, input_file)
+        return StudyRowReader(study_id, input_file)
 
-    def __init__(
-        self,
-        investigation: models.InvestigationInfo,
-        study: models.StudyInfo,
-        study_id: str,
-        input_file: TextIO,
-    ):
-        self.investigation = investigation
-        self.study = study
+    def __init__(self, study_id: str, input_file: TextIO):
         self.study_id = study_id
         self.input_file = input_file
         self.unique_rows = set()
@@ -791,7 +709,7 @@ class StudyRowReader:
         except StopIteration as e:
             msg = "Study file has no header!"
             raise ParseIsatabException(msg) from e
-        return list(StudyHeaderParser(line, self.study.factors).run())
+        return list(StudyHeaderParser(line).run())
 
     def _read_next_line(self):
         """Read next line, skipping comments starting with ``'#'``."""
@@ -810,12 +728,7 @@ class StudyRowReader:
         return prev_line
 
     def read(self):
-        builder = _StudyRowBuilder(
-            self.investigation.ontology_source_refs,
-            self.study.protocols,
-            self.header,
-            self.study_id,
-        )
+        builder = _StudyRowBuilder(self.header, self.study_id)
         while True:
             line = self._read_next_line()
             if line:
@@ -855,7 +768,7 @@ class StudyReader:
         study_id: str,
         input_file: TextIO,
     ):
-        self.row_reader = StudyRowReader.from_stream(investigation, study, study_id, input_file)
+        self.row_reader = StudyRowReader.from_stream(study_id, input_file)
         self.investigation = investigation
         self.study = study
         #: The file used for reading from
@@ -863,10 +776,15 @@ class StudyReader:
         #: The header of the ISA study file
         self.header = self.row_reader.header
 
-    def read(self):
-        return _AssayAndStudyBuilder(self.input_file.name, self.header, models.Study).build(
+    def read(self, validate=True):
+        study_data = _AssayAndStudyBuilder(self.input_file.name, self.header, models.Study).build(
             list(self.row_reader.read())
         )
+        if validate:
+            validate_assay_study.StudyValidator(
+                self.investigation, self.study, study_data
+            ).validate()
+        return study_data
 
 
 # TODO: extract common parts of {Assay,Study}[Row]Reader into two base classes
@@ -881,30 +799,11 @@ class AssayRowReader:
     """
 
     @classmethod
-    def from_stream(
-        klass,
-        investigation: models.InvestigationInfo,
-        study: models.StudyInfo,
-        assay: models.AssayInfo,
-        study_id: str,
-        assay_id: str,
-        input_file: TextIO,
-    ):
+    def from_stream(klass, study_id: str, assay_id: str, input_file: TextIO):
         """Construct from file-like object"""
-        return AssayRowReader(investigation, study, assay, study_id, assay_id, input_file)
+        return AssayRowReader(study_id, assay_id, input_file)
 
-    def __init__(
-        self,
-        investigation: models.InvestigationInfo,
-        study: models.StudyInfo,
-        assay: models.AssayInfo,
-        study_id: str,
-        assay_id: str,
-        input_file: TextIO,
-    ):
-        self.investigation = investigation
-        self.study = study
-        self.assay = assay
+    def __init__(self, study_id: str, assay_id: str, input_file: TextIO):
         self.study_id = study_id
         self.assay_id = assay_id
         self.input_file = input_file
@@ -922,7 +821,7 @@ class AssayRowReader:
         except StopIteration as e:
             msg = "Assay file has no header!"
             raise ParseIsatabException(msg) from e
-        return list(AssayHeaderParser(line, self.study.factors).run())
+        return list(AssayHeaderParser(line).run())
 
     def _read_next_line(self):
         """Read next line, skipping comments starting with ``'#'``."""
@@ -941,14 +840,7 @@ class AssayRowReader:
         return prev_line
 
     def read(self):
-        builder = _AssayRowBuilder(
-            self.investigation.ontology_source_refs,
-            self.study.protocols,
-            self.header,
-            self.study_id,
-            self.assay_id,
-            self.assay,
-        )
+        builder = _AssayRowBuilder(self.header, self.study_id, self.assay_id)
         while True:
             line = self._read_next_line()
             if line:
@@ -992,15 +884,21 @@ class AssayReader:
         assay_id: str,
         input_file: TextIO,
     ):
-        self.row_reader = AssayRowReader.from_stream(
-            investigation, study, assay, study_id, assay_id, input_file
-        )
+        self.row_reader = AssayRowReader.from_stream(study_id, assay_id, input_file)
+        self.investigation = investigation
+        self.study = study
+        self.assay = assay
         #: The file used for reading from
         self.input_file = input_file
         #: The header of the ISA assay file
         self.header = self.row_reader.header
 
-    def read(self):
-        return _AssayAndStudyBuilder(self.input_file.name, self.header, models.Assay).build(
+    def read(self, validate=True):
+        assay_data = _AssayAndStudyBuilder(self.input_file.name, self.header, models.Assay).build(
             list(self.row_reader.read())
         )
+        if validate:
+            validate_assay_study.AssayValidator(
+                self.investigation, self.study, self.assay, assay_data
+            ).validate()
+        return assay_data

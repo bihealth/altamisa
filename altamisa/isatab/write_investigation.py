@@ -10,6 +10,7 @@ import warnings
 
 from ..exceptions import WriteIsatabException, WriteIsatabWarning
 from ..constants import investigation_headers
+from .helpers import is_ontology_term_ref
 from . import models
 
 
@@ -189,11 +190,7 @@ class InvestigationWriter:
                 publication.authors
             )
             section[investigation_headers.INVESTIGATION_PUBLICATION_TITLE].append(publication.title)
-            if (
-                hasattr(publication.status, "name")
-                and hasattr(publication.status, "accession")
-                and hasattr(publication.status, "ontology_name")
-            ):
+            if is_ontology_term_ref(publication.status):
                 section[investigation_headers.INVESTIGATION_PUBLICATION_STATUS].append(
                     publication.status.name or ""
                 )
@@ -240,11 +237,7 @@ class InvestigationWriter:
             section[investigation_headers.INVESTIGATION_PERSON_AFFILIATION].append(
                 contact.affiliation
             )
-            if (
-                hasattr(contact.role, "name")
-                and hasattr(contact.role, "accession")
-                and hasattr(contact.role, "ontology_name")
-            ):
+            if is_ontology_term_ref(contact.role):
                 section[investigation_headers.INVESTIGATION_PERSON_ROLES].append(
                     contact.role.name or ""
                 )
@@ -299,11 +292,7 @@ class InvestigationWriter:
         # Read STUDY DESIGN DESCRIPTORS section
         section = _init_multi_column_section(investigation_headers.STUDY_DESIGN_DESCR_KEYS)
         for design in study.designs:
-            if (
-                hasattr(design.type, "name")
-                and hasattr(design.type, "accession")
-                and hasattr(design.type, "ontology_name")
-            ):
+            if is_ontology_term_ref(design.type):
                 section[investigation_headers.STUDY_DESIGN_TYPE].append(design.type.name or "")
                 section[investigation_headers.STUDY_DESIGN_TYPE_TERM_ACCESSION_NUMBER].append(
                     design.type.accession or ""
@@ -332,11 +321,7 @@ class InvestigationWriter:
             section[investigation_headers.STUDY_PUBLICATION_DOI].append(publication.doi)
             section[investigation_headers.STUDY_PUBLICATION_AUTHOR_LIST].append(publication.authors)
             section[investigation_headers.STUDY_PUBLICATION_TITLE].append(publication.title)
-            if (
-                hasattr(publication.status, "name")
-                and hasattr(publication.status, "accession")
-                and hasattr(publication.status, "ontology_name")
-            ):
+            if is_ontology_term_ref(publication.status):
                 section[investigation_headers.STUDY_PUBLICATION_STATUS].append(
                     publication.status.name or ""
                 )
@@ -364,11 +349,7 @@ class InvestigationWriter:
         section = _init_multi_column_section(investigation_headers.STUDY_FACTORS_KEYS)
         for factor in study.factors.values():
             section[investigation_headers.STUDY_FACTOR_NAME].append(factor.name)
-            if (
-                hasattr(factor.type, "name")
-                and hasattr(factor.type, "accession")
-                and hasattr(factor.type, "ontology_name")
-            ):
+            if is_ontology_term_ref(factor.type):
                 section[investigation_headers.STUDY_FACTOR_TYPE].append(factor.type.name)
                 section[investigation_headers.STUDY_FACTOR_TYPE_TERM_ACCESSION_NUMBER].append(
                     factor.type.accession
@@ -393,11 +374,7 @@ class InvestigationWriter:
         for assay in study.assays.values():
             section[investigation_headers.STUDY_ASSAY_FILE_NAME].append(assay.path)
 
-            if (
-                hasattr(assay.measurement_type, "name")
-                and hasattr(assay.measurement_type, "accession")
-                and hasattr(assay.measurement_type, "ontology_name")
-            ):
+            if is_ontology_term_ref(assay.measurement_type):
                 section[investigation_headers.STUDY_ASSAY_MEASUREMENT_TYPE].append(
                     assay.measurement_type.name or ""
                 )
@@ -418,11 +395,7 @@ class InvestigationWriter:
                     ""
                 )
 
-            if (
-                hasattr(assay.technology_type, "name")
-                and hasattr(assay.technology_type, "accession")
-                and hasattr(assay.technology_type, "ontology_name")
-            ):
+            if is_ontology_term_ref(assay.technology_type):
                 section[investigation_headers.STUDY_ASSAY_TECHNOLOGY_TYPE].append(
                     assay.technology_type.name or ""
                 )
@@ -458,11 +431,7 @@ class InvestigationWriter:
         for protocol in study.protocols.values():
             section[investigation_headers.STUDY_PROTOCOL_NAME].append(protocol.name)
 
-            if (
-                hasattr(protocol.type, "name")
-                and hasattr(protocol.type, "accession")
-                and hasattr(protocol.type, "ontology_name")
-            ):
+            if is_ontology_term_ref(protocol.type):
                 section[investigation_headers.STUDY_PROTOCOL_TYPE].append(protocol.type.name or "")
                 section[investigation_headers.STUDY_PROTOCOL_TYPE_TERM_ACCESSION_NUMBER].append(
                     protocol.type.accession or ""
@@ -483,11 +452,7 @@ class InvestigationWriter:
             accessions = []
             ontologies = []
             for parameter in protocol.parameters.values():
-                if (
-                    hasattr(parameter, "name")
-                    and hasattr(parameter, "accession")
-                    and hasattr(parameter, "ontology_name")
-                ):
+                if is_ontology_term_ref(parameter):
                     names.append(parameter.name or "")
                     accessions.append(parameter.accession or "")
                     ontologies.append(parameter.ontology_name or "")
@@ -509,11 +474,7 @@ class InvestigationWriter:
             ontologies = []
             for component in protocol.components.values():
                 names.append(component.name)
-                if (
-                    hasattr(component.type, "name")
-                    and hasattr(component.type, "accession")
-                    and hasattr(component.type, "ontology_name")
-                ):
+                if is_ontology_term_ref(component.type):
                     types.append(component.type.name or "")
                     accessions.append(component.type.accession or "")
                     ontologies.append(component.type.ontology_name or "")
@@ -549,11 +510,7 @@ class InvestigationWriter:
             section[investigation_headers.STUDY_PERSON_FAX].append(contact.fax)
             section[investigation_headers.STUDY_PERSON_ADDRESS].append(contact.address)
             section[investigation_headers.STUDY_PERSON_AFFILIATION].append(contact.affiliation)
-            if (
-                hasattr(contact.role, "name")
-                and hasattr(contact.role, "accession")
-                and hasattr(contact.role, "ontology_name")
-            ):
+            if is_ontology_term_ref(contact.role):
                 section[investigation_headers.STUDY_PERSON_ROLES].append(contact.role.name or "")
                 section[investigation_headers.STUDY_PERSON_ROLES_TERM_ACCESSION_NUMBER].append(
                     contact.role.accession or ""

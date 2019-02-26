@@ -27,7 +27,7 @@ def _parse_write_assert(investigation_file, tmp_path, quote=None):
         # Write study to temporary file
         path_out = tmp_path / study_info.info.path
         with open(path_out, "wt") as file:
-            StudyWriter.from_stream(study, file, study_info.factors, quote=quote).write()
+            StudyWriter.from_stream(study, file, quote=quote).write()
         # Sort and compare input and output
         path_in_s = tmp_path / (study_info.info.path.name + ".in.sorted")
         path_out_s = tmp_path / (study_info.info.path.name + ".out.sorted")

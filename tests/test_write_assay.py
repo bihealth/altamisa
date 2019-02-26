@@ -32,7 +32,7 @@ def _parse_write_assert_assay(investigation_file, tmp_path, quote=None, normaliz
             # Write assay to temporary file
             path_out = tmp_path / assay_info.path
             with open(path_out, "wt") as file:
-                AssayWriter.from_stream(assay, file, study_info.factors, quote=quote).write()
+                AssayWriter.from_stream(assay, file, quote=quote).write()
             if normalize:
                 # Read and write assay again
                 path_in = path_out
@@ -47,7 +47,7 @@ def _parse_write_assert_assay(investigation_file, tmp_path, quote=None, normaliz
                     ).read()
                 path_out = tmp_path / (assay_info.path.name + "_b")
                 with open(path_out, "wt") as file:
-                    AssayWriter.from_stream(assay, file, study_info.factors, quote=quote).write()
+                    AssayWriter.from_stream(assay, file, quote=quote).write()
             # Sort and compare input and output
             path_in_s = tmp_path / (assay_info.path.name + ".in.sorted")
             path_out_s = tmp_path / (assay_info.path.name + ".out.sorted")
