@@ -14,13 +14,9 @@ from altamisa.isatab import InvestigationReader, StudyRowReader, StudyReader
 
 def test_study_row_reader_minimal_study(minimal_investigation_file, minimal_study_file):
     """Use ``StudyRowReader`` to read in minimal study file."""
-    # Load investigation (tested elsewhere)
-    investigation = InvestigationReader.from_stream(minimal_investigation_file).read()
 
     # Create new row reader and check read headers
-    row_reader = StudyRowReader.from_stream(
-        investigation, investigation.studies[0], "S1", minimal_study_file
-    )
+    row_reader = StudyRowReader.from_stream("S1", minimal_study_file)
     assert 3 == len(row_reader.header)
 
     # Read all rows in study
@@ -33,16 +29,7 @@ def test_study_row_reader_minimal_study(minimal_investigation_file, minimal_stud
     assert 3 == len(first_row)
 
     expected = models.Material(
-        "Source Name",
-        "S1-source-0815",
-        "0815",
-        None,
-        (),
-        (),
-        (),
-        None,
-        None,
-        [table_headers.SOURCE_NAME],
+        "Source Name", "S1-source-0815", "0815", None, (), (), (), None, [table_headers.SOURCE_NAME]
     )
     assert expected == first_row[0]
     expected = models.Process(
@@ -68,7 +55,6 @@ def test_study_row_reader_minimal_study(minimal_investigation_file, minimal_stud
         (),
         (),
         (),
-        None,
         None,
         [table_headers.SAMPLE_NAME],
     )
@@ -103,16 +89,7 @@ def test_study_reader_minimal_study(minimal_investigation_file, minimal_study_fi
     assert 2 == len(study.arcs)
 
     expected = models.Material(
-        "Source Name",
-        "S1-source-0815",
-        "0815",
-        None,
-        (),
-        (),
-        (),
-        None,
-        None,
-        [table_headers.SOURCE_NAME],
+        "Source Name", "S1-source-0815", "0815", None, (), (), (), None, [table_headers.SOURCE_NAME]
     )
     assert expected == study.materials["S1-source-0815"]
     expected = models.Material(
@@ -123,7 +100,6 @@ def test_study_reader_minimal_study(minimal_investigation_file, minimal_study_fi
         (),
         (),
         (),
-        None,
         None,
         [table_headers.SAMPLE_NAME],
     )
@@ -154,13 +130,9 @@ def test_study_reader_minimal_study(minimal_investigation_file, minimal_study_fi
 
 def test_study_row_reader_small_study(small_investigation_file, small_study_file):
     """Use ``StudyRowReader`` to read in small study file."""
-    # Load investigation (tested elsewhere)
-    investigation = InvestigationReader.from_stream(small_investigation_file).read()
 
     # Create new row reader and check read headers
-    row_reader = StudyRowReader.from_stream(
-        investigation, investigation.studies[0], "S1", small_study_file
-    )
+    row_reader = StudyRowReader.from_stream("S1", small_study_file)
     assert 13 == len(row_reader.header)
 
     # Read all rows in study
@@ -229,7 +201,6 @@ def test_study_row_reader_small_study(small_investigation_file, small_study_file
         (),
         (),
         None,
-        None,
         headers_source,
     )
     assert expected == first_row[0]
@@ -258,7 +229,6 @@ def test_study_row_reader_small_study(small_investigation_file, small_study_file
         (),
         (),
         None,
-        None,
         headers_source,
     )
     assert expected == second_row[0]
@@ -286,7 +256,6 @@ def test_study_row_reader_small_study(small_investigation_file, small_study_file
         (),
         (models.FactorValue("treatment", "yes", None),),
         None,
-        None,
         headers_sample,
     )
     assert expected == second_row[2]
@@ -300,7 +269,6 @@ def test_study_row_reader_small_study(small_investigation_file, small_study_file
         characteristics2,
         (),
         (),
-        None,
         None,
         headers_source,
     )
@@ -328,7 +296,6 @@ def test_study_row_reader_small_study(small_investigation_file, small_study_file
         (models.Characteristics("status", ["2"], None),),
         (),
         (models.FactorValue("treatment", "", None),),
-        None,
         None,
         headers_sample,
     )
@@ -418,7 +385,6 @@ def test_study_reader_small_study(small_investigation_file, small_study_file):
         (),
         (),
         None,
-        None,
         headers_source,
     )
     assert expected == study.materials["S1-source-0815"]
@@ -430,7 +396,6 @@ def test_study_reader_small_study(small_investigation_file, small_study_file):
         characteristics2,
         (),
         (),
-        None,
         None,
         headers_source,
     )
@@ -444,7 +409,6 @@ def test_study_reader_small_study(small_investigation_file, small_study_file):
         (),
         (),
         None,
-        None,
         headers_source,
     )
     assert expected == study.materials["S1-source-0817"]
@@ -456,7 +420,6 @@ def test_study_reader_small_study(small_investigation_file, small_study_file):
         (models.Characteristics("status", ["0"], None),),
         (),
         (models.FactorValue("treatment", "yes", None),),
-        None,
         None,
         headers_sample,
     )
@@ -470,7 +433,6 @@ def test_study_reader_small_study(small_investigation_file, small_study_file):
         (),
         (models.FactorValue("treatment", "", None),),
         None,
-        None,
         headers_sample,
     )
     assert expected == study.materials["S1-sample-0815-T1"]
@@ -483,7 +445,6 @@ def test_study_reader_small_study(small_investigation_file, small_study_file):
         (),
         (models.FactorValue("treatment", "yes", None),),
         None,
-        None,
         headers_sample,
     )
     assert expected == study.materials["S1-sample-0816-T1"]
@@ -495,7 +456,6 @@ def test_study_reader_small_study(small_investigation_file, small_study_file):
         (models.Characteristics("status", [""], None),),
         (),
         (models.FactorValue("treatment", "", None),),
-        None,
         None,
         headers_sample,
     )

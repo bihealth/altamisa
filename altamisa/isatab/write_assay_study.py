@@ -6,13 +6,14 @@
 from __future__ import generator_stop
 import csv
 import os
-from typing import Dict, NamedTuple, TextIO
+from typing import NamedTuple, TextIO
 
 from ..constants import table_headers
 from ..constants.table_tokens import TOKEN_UNKNOWN
 from ..exceptions import WriteIsatabException
 from .headers import AssayHeaderParser, StudyHeaderParser
-from .models import Arc, FactorInfo, Material, OntologyTermRef, Process
+from .helpers import is_ontology_term_ref
+from .models import Arc, Material, OntologyTermRef, Process
 
 
 __author__ = (
@@ -163,23 +164,13 @@ class _WriterBase:
 
     @classmethod
     def from_stream(
-        cls,
-        study_or_assay: NamedTuple,
-        output_file: TextIO,
-        factors: Dict[str, FactorInfo],
-        quote=None,
-        lineterminator=None,
+        cls, study_or_assay: NamedTuple, output_file: TextIO, quote=None, lineterminator=None
     ):
         """"""
-        return cls(study_or_assay, output_file, factors, quote, lineterminator)
+        return cls(study_or_assay, output_file, quote, lineterminator)
 
     def __init__(
-        self,
-        study_or_assay: NamedTuple,
-        output_file: TextIO,
-        factors: Dict[str, FactorInfo],
-        quote=None,
-        lineterminator=None,
+        self, study_or_assay: NamedTuple, output_file: TextIO, quote=None, lineterminator=None
     ):
         #: Study or Assay model
         self._model = study_or_assay
@@ -187,8 +178,6 @@ class _WriterBase:
         self._nodes = {**self._model.materials, **self._model.processes}
         #: Output file
         self.output_file = output_file
-        #: Study factors
-        self.factors = factors
         #: Character for quoting
         self.quote = quote
         #: Csv file writer
@@ -222,7 +211,7 @@ class _WriterBase:
             # and that the headers match the available attributes
             if node.headers:
                 # TODO: check that headers and attributes match
-                self._headers.append(list(self._header_parser(node.headers, self.factors).run()))
+                self._headers.append(list(self._header_parser(node.headers).run()))
                 # self._headers.append(node.headers)
             else:
                 # TODO: create new headers based on attributes
@@ -269,11 +258,7 @@ class _WriterBase:
                 self._append_attribute_with_value(line, attribute, attributes)
             # Append attribute with direct ontology:
             # (extract_label, first_dimension, material_type, second_dimension)
-            elif (
-                hasattr(attribute, "name")
-                and hasattr(attribute, "ontology_name")
-                and hasattr(attribute, "accession")
-            ):
+            elif is_ontology_term_ref(attribute):
                 line.append(attribute.name)
                 attributes[table_headers.TERM_SOURCE_REF] = attribute
             # Append attributes with string only (everything else)
@@ -285,34 +270,28 @@ class _WriterBase:
             msg = tpl.format(header, node.unique_name, self._previous_attribute)
             raise WriteIsatabException(msg)
 
-    def _append_attribute_ontology_reference(self, line, attribute, header, node):
+    @staticmethod
+    def _append_attribute_ontology_reference(line, attribute, header, node):
         # Append expected ontology reference
-        if hasattr(attribute, "ontology_name") and hasattr(attribute, "accession"):
+        if is_ontology_term_ref(attribute):
             line.extend([attribute.ontology_name or "", attribute.accession or ""])
         else:
             tpl = "Expected {} not found in attribute {} of node {}"
             msg = tpl.format(header, attribute, node.unique_name)
             raise WriteIsatabException(msg)
 
-    def _append_attribute_with_value(self, line, attribute, attributes):
+    @staticmethod
+    def _append_attribute_with_value(line, attribute, attributes):
         # Append attribute with a value and potentially a unit
         # (Characteristics, Comment, FactorValue, ParameterValue)
 
         # If available, add Ontology to dict for next header
-        if (
-            hasattr(attribute.value, "name")
-            and hasattr(attribute.value, "ontology_name")
-            and hasattr(attribute.value, "accession")
-        ):
+        if is_ontology_term_ref(attribute.value):
             line.append(attribute.value.name or "")
             attributes[table_headers.TERM_SOURCE_REF] = attribute.value
         # Cases for attributes with lists of values allowed (Characteristics, ParameterValue)
         elif isinstance(attribute.value, list):
-            if (
-                hasattr(attribute.value[0], "name")
-                and hasattr(attribute.value[0], "ontology_name")
-                and hasattr(attribute.value[0], "accession")
-            ):
+            if is_ontology_term_ref(attribute.value[0]):
                 name = ";".join(
                     [v.name.replace(";", "\\;") if v.name else "" for v in attribute.value]
                 )
@@ -338,11 +317,7 @@ class _WriterBase:
         # If available, add Unit to dict for next header
         # (Characteristics, FactorValue, ParameterValue)
         if hasattr(attribute, "unit") and attribute.unit is not None:
-            if (
-                hasattr(attribute.unit, "name")
-                and hasattr(attribute.unit, "ontology_name")
-                and hasattr(attribute.unit, "accession")
-            ):
+            if is_ontology_term_ref(attribute.unit):
                 attributes[table_headers.UNIT] = attribute.unit.name
                 attributes[table_headers.TERM_SOURCE_REF] = attribute.unit
             else:

@@ -12,18 +12,9 @@ from altamisa.isatab import InvestigationReader, AssayRowReader, AssayReader
 
 def test_assay_row_reader_minimal_assay(minimal_investigation_file, minimal_assay_file):
     """Use ``AssayRowReader`` to read in minimal assay file."""
-    # Load investigation (tested elsewhere)
-    investigation = InvestigationReader.from_stream(minimal_investigation_file).read()
 
     # Create new row reader and check read headers
-    row_reader = AssayRowReader.from_stream(
-        investigation,
-        investigation.studies[0],
-        investigation.studies[0].assays["a_minimal.txt"],
-        "S1",
-        "A1",
-        minimal_assay_file,
-    )
+    row_reader = AssayRowReader.from_stream("S1", "A1", minimal_assay_file)
     assert 5 == len(row_reader.header)
 
     # Read all rows in assay
@@ -44,7 +35,6 @@ def test_assay_row_reader_minimal_assay(minimal_investigation_file, minimal_assa
         (),
         (),
         None,
-        investigation.studies[0].assays["a_minimal.txt"],
         [table_headers.SAMPLE_NAME],
     )
     assert expected == first_row[0]
@@ -72,7 +62,6 @@ def test_assay_row_reader_minimal_assay(minimal_investigation_file, minimal_assa
         (),
         (),
         None,
-        investigation.studies[0].assays["a_minimal.txt"],
         [table_headers.RAW_DATA_FILE],
     )
     assert expected == first_row[2]
@@ -85,7 +74,6 @@ def test_assay_row_reader_minimal_assay(minimal_investigation_file, minimal_assa
         (),
         (),
         None,
-        investigation.studies[0].assays["a_minimal.txt"],
         [table_headers.RAW_DATA_FILE],
     )
     assert expected == first_row[3]
@@ -132,7 +120,6 @@ def test_assay_reader_minimal_assay(minimal_investigation_file, minimal_assay_fi
         (),
         (),
         None,
-        investigation.studies[0].assays["a_minimal.txt"],
         [table_headers.SAMPLE_NAME],
     )
     assert expected == assay.materials["S1-sample-0815-N1"]
@@ -145,7 +132,6 @@ def test_assay_reader_minimal_assay(minimal_investigation_file, minimal_assay_fi
         (),
         (),
         None,
-        investigation.studies[0].assays["a_minimal.txt"],
         [table_headers.RAW_DATA_FILE],
     )
     assert expected == assay.materials["S1-A1-0815-N1-DNA1-WES1_L???_???_R1.fastq.gz-COL4"]
@@ -158,7 +144,6 @@ def test_assay_reader_minimal_assay(minimal_investigation_file, minimal_assay_fi
         (),
         (),
         None,
-        investigation.studies[0].assays["a_minimal.txt"],
         [table_headers.RAW_DATA_FILE],
     )
     assert expected == assay.materials["S1-A1-0815-N1-DNA1-WES1_L???_???_R2.fastq.gz-COL5"]
@@ -194,18 +179,9 @@ def test_assay_reader_minimal_assay(minimal_investigation_file, minimal_assay_fi
 
 def test_assay_row_reader_small_assay(small_investigation_file, small_assay_file):
     """Use ``AssayRowReader`` to read in small assay file."""
-    # Load investigation (tested elsewhere)
-    investigation = InvestigationReader.from_stream(small_investigation_file).read()
 
     # Create new row reader and check read headers
-    row_reader = AssayRowReader.from_stream(
-        investigation,
-        investigation.studies[0],
-        investigation.studies[0].assays["a_small.txt"],
-        "S1",
-        "A1",
-        small_assay_file,
-    )
+    row_reader = AssayRowReader.from_stream("S1", "A1", small_assay_file)
     assert 9 == len(row_reader.header)
 
     # Read all rows in assay
@@ -227,7 +203,6 @@ def test_assay_row_reader_small_assay(small_investigation_file, small_assay_file
         (),
         (),
         None,
-        investigation.studies[0].assays["a_small.txt"],
         [table_headers.SAMPLE_NAME],
     )
     assert expected == first_row[0]
@@ -257,7 +232,6 @@ def test_assay_row_reader_small_assay(small_investigation_file, small_assay_file
         (),
         (),
         None,
-        investigation.studies[0].assays["a_small.txt"],
         [table_headers.LIBRARY_NAME],
     )
     assert expected == first_row[2]
@@ -287,7 +261,6 @@ def test_assay_row_reader_small_assay(small_investigation_file, small_assay_file
         (),
         (),
         None,
-        investigation.studies[0].assays["a_small.txt"],
         [table_headers.RAW_DATA_FILE],
     )
     assert expected == first_row[4]
@@ -301,7 +274,6 @@ def test_assay_row_reader_small_assay(small_investigation_file, small_assay_file
         (),
         (),
         None,
-        investigation.studies[0].assays["a_small.txt"],
         [table_headers.RAW_DATA_FILE],
     )
     assert expected == first_row[5]
@@ -331,7 +303,6 @@ def test_assay_row_reader_small_assay(small_investigation_file, small_assay_file
         (),
         (),
         None,
-        investigation.studies[0].assays["a_small.txt"],
         [table_headers.DERIVED_DATA_FILE],
     )
     assert expected == first_row[7]
@@ -347,7 +318,6 @@ def test_assay_row_reader_small_assay(small_investigation_file, small_assay_file
         (),
         (),
         None,
-        investigation.studies[0].assays["a_small.txt"],
         [table_headers.SAMPLE_NAME],
     )
     assert expected == second_row[0]
@@ -377,7 +347,6 @@ def test_assay_row_reader_small_assay(small_investigation_file, small_assay_file
         (),
         (),
         None,
-        investigation.studies[0].assays["a_small.txt"],
         [table_headers.LIBRARY_NAME],
     )
     assert expected == second_row[2]
@@ -407,7 +376,6 @@ def test_assay_row_reader_small_assay(small_investigation_file, small_assay_file
         (),
         (),
         None,
-        investigation.studies[0].assays["a_small.txt"],
         [table_headers.RAW_DATA_FILE],
     )
     assert expected == second_row[4]
@@ -421,7 +389,6 @@ def test_assay_row_reader_small_assay(small_investigation_file, small_assay_file
         (),
         (),
         None,
-        investigation.studies[0].assays["a_small.txt"],
         [table_headers.RAW_DATA_FILE],
     )
     assert expected == second_row[5]
@@ -451,7 +418,6 @@ def test_assay_row_reader_small_assay(small_investigation_file, small_assay_file
         (),
         (),
         None,
-        investigation.studies[0].assays["a_small.txt"],
         [table_headers.DERIVED_DATA_FILE],
     )
     assert expected == second_row[7]
@@ -492,7 +458,6 @@ def test_assay_reader_small_assay(small_investigation_file, small_assay_file):
         (),
         (),
         None,
-        investigation.studies[0].assays["a_small.txt"],
         [table_headers.SAMPLE_NAME],
     )
     assert expected == assay.materials["S1-sample-0815-N1"]
@@ -505,7 +470,6 @@ def test_assay_reader_small_assay(small_investigation_file, small_assay_file):
         (),
         (),
         None,
-        investigation.studies[0].assays["a_small.txt"],
         [table_headers.SAMPLE_NAME],
     )
     assert expected == assay.materials["S1-sample-0815-T1"]
@@ -518,7 +482,6 @@ def test_assay_reader_small_assay(small_investigation_file, small_assay_file):
         (),
         (),
         None,
-        investigation.studies[0].assays["a_small.txt"],
         [table_headers.RAW_DATA_FILE],
     )
     assert expected == assay.materials["S1-A1-0815-N1-DNA1-WES1_L???_???_R1.fastq.gz-COL6"]
@@ -531,7 +494,6 @@ def test_assay_reader_small_assay(small_investigation_file, small_assay_file):
         (),
         (),
         None,
-        investigation.studies[0].assays["a_small.txt"],
         [table_headers.RAW_DATA_FILE],
     )
     assert expected == assay.materials["S1-A1-0815-N1-DNA1-WES1_L???_???_R2.fastq.gz-COL7"]
@@ -544,7 +506,6 @@ def test_assay_reader_small_assay(small_investigation_file, small_assay_file):
         (),
         (),
         None,
-        investigation.studies[0].assays["a_small.txt"],
         [table_headers.RAW_DATA_FILE],
     )
     assert expected == assay.materials["S1-A1-0815-T1-DNA1-WES1_L???_???_R1.fastq.gz-COL6"]
@@ -557,7 +518,6 @@ def test_assay_reader_small_assay(small_investigation_file, small_assay_file):
         (),
         (),
         None,
-        investigation.studies[0].assays["a_small.txt"],
         [table_headers.RAW_DATA_FILE],
     )
     assert expected == assay.materials["S1-A1-0815-T1-DNA1-WES1_L???_???_R2.fastq.gz-COL7"]
@@ -570,7 +530,6 @@ def test_assay_reader_small_assay(small_investigation_file, small_assay_file):
         (),
         (),
         None,
-        investigation.studies[0].assays["a_small.txt"],
         [table_headers.DERIVED_DATA_FILE],
     )
     assert expected == assay.materials["S1-A1-0815-somatic.vcf.gz-COL9"]
@@ -821,9 +780,6 @@ def test_assay_reader_gelelect(gelelect_investigation_file, gelelect_assay_file)
         (),
         (),
         None,
-        investigation.studies[0].assays[
-            "a_study01_protein_expression_profiling_gel_electrophoresis.txt"
-        ],
         [table_headers.IMAGE_FILE],
     )
     assert expected == assay.materials["S1-A1-Image01.jpeg-COL19"]

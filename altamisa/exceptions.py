@@ -27,3 +27,19 @@ class ParseIsatabWarning(IsaWarning):
 
 class WriteIsatabWarning(IsaWarning):
     """Warning raised on problems writing ISA-TAB"""
+
+
+class IsaValidationWarning(IsaWarning):
+    """Warning raised on problems validating ISA models or objects"""
+
+
+class AdvisoryIsaValidationWarning(IsaValidationWarning):
+    """Warning raised on uncritical problems validating ISA models or objects"""
+
+
+class ModerateIsaValidationWarning(IsaValidationWarning):
+    """Warning raised on problems validating ISA models or objects"""
+
+
+class CriticalIsaValidationWarning(IsaValidationWarning):
+    """Warning raised on critical problems validating ISA models or objects"""
