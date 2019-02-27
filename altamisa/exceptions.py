@@ -13,9 +13,17 @@ class ParseIsatabException(IsaException):
     """Exception raised on problems parsing ISA-TAB"""
 
 
+class WriteIsatabException(IsaException):
+    """Exception raised on problems writing ISA-TAB"""
+
+
 class IsaWarning(Warning):
     """Base class for warnings raised by Altamisa"""
 
 
 class ParseIsatabWarning(IsaWarning):
     """Warning raised on problems parsing ISA-TAB"""
+
+
+class WriteIsatabWarning(IsaWarning):
+    """Warning raised on problems writing ISA-TAB"""

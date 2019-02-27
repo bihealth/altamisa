@@ -11,7 +11,7 @@ from collections import namedtuple
 from datetime import date
 from pathlib import Path
 import re
-from typing import Dict, Tuple, NamedTuple, Union
+from typing import Dict, List, Tuple, NamedTuple, Union
 
 from ..constants import table_headers
 from ..constants import table_restrictions
@@ -103,9 +103,7 @@ class Comment(NamedTuple):
     #: Comment name
     name: str
     #: Comment value
-    value: FreeTextOrTermRef
-    #: Comment unit
-    unit: FreeTextOrTermRef
+    value: str
 
 
 # Pattern and functions for validate strings
@@ -169,6 +167,8 @@ class OntologyRef(NamedTuple):
     description: str
     #: Comments
     comments: Tuple[Comment]
+    #: Headers from/for ISA-tab parsing/writing
+    headers: List[str]
 
 
 class BasicInfo(NamedTuple):
@@ -190,14 +190,18 @@ class BasicInfo(NamedTuple):
     public_release_date: date
     #: Comments
     comments: Tuple[Comment]
+    #: Headers from/for ISA-tab parsing/writing
+    headers: List[str]
 
 
-class PublicationInfo(namedtuple("PublicationInfo", "pubmed_id doi authors title status comments")):
+class PublicationInfo(
+    namedtuple("PublicationInfo", "pubmed_id doi authors title status comments headers")
+):
     """Information regarding an investigation publication
     (``INVESTIGATION PUBLICATIONS``).
     """
 
-    def __new__(cls, pubmed_id, doi, authors, title, status, comments):
+    def __new__(cls, pubmed_id, doi, authors, title, status, comments, headers):
         return super(cls, PublicationInfo).__new__(
             cls,
             _validate_pubmed_id(pubmed_id),
@@ -206,6 +210,7 @@ class PublicationInfo(namedtuple("PublicationInfo", "pubmed_id doi authors title
             title,
             status,
             comments,
+            headers,
         )
 
     #: Publication PubMed ID
@@ -220,12 +225,14 @@ class PublicationInfo(namedtuple("PublicationInfo", "pubmed_id doi authors title
     status: FreeTextOrTermRef
     #: Comments
     comments: Tuple[Comment]
+    #: Headers from/for ISA-tab parsing/writing
+    headers: List[str]
 
 
 class ContactInfo(
     namedtuple(
         "ContactInfo",
-        "last_name first_name mid_initial email phone fax address affiliation role comments",
+        "last_name first_name mid_initial email phone fax address affiliation role comments headers",
     )
 ):
     """Investigation contact information"""
@@ -242,6 +249,7 @@ class ContactInfo(
         affiliation,
         role,
         comments,
+        headers,
     ):
         return super(cls, ContactInfo).__new__(
             cls,
@@ -255,6 +263,7 @@ class ContactInfo(
             affiliation,
             role,
             comments,
+            headers,
         )
 
     #: Last name of contact
@@ -277,6 +286,8 @@ class ContactInfo(
     role: FreeTextOrTermRef
     #: Comments
     comments: Tuple[Comment]
+    #: Headers from/for ISA-tab parsing/writing
+    headers: List[str]
 
 
 class DesignDescriptorsInfo(NamedTuple):
@@ -286,6 +297,8 @@ class DesignDescriptorsInfo(NamedTuple):
     type: FreeTextOrTermRef
     #: Comments
     comments: Tuple[Comment]
+    #: Headers from/for ISA-tab parsing/writing
+    headers: List[str]
 
 
 class FactorInfo(NamedTuple):
@@ -297,6 +310,8 @@ class FactorInfo(NamedTuple):
     type: FreeTextOrTermRef
     #: Comments
     comments: Tuple[Comment]
+    #: Headers from/for ISA-tab parsing/writing
+    headers: List[str]
 
 
 class AssayInfo(NamedTuple):
@@ -312,6 +327,8 @@ class AssayInfo(NamedTuple):
     path: Path
     #: Comments
     comments: Tuple[Comment]
+    #: Headers from/for ISA-tab parsing/writing
+    headers: List[str]
 
 
 class ProtocolComponentInfo(NamedTuple):
@@ -342,6 +359,8 @@ class ProtocolInfo(NamedTuple):
     components: Dict[str, ProtocolComponentInfo]
     #: Comments
     comments: Tuple[Comment]
+    #: Headers from/for ISA-tab parsing/writing
+    headers: List[str]
 
 
 class StudyInfo(NamedTuple):
@@ -350,7 +369,7 @@ class StudyInfo(NamedTuple):
     #: Basic study information
     info: BasicInfo
     #: Study designs by name
-    designs: Tuple[FreeTextOrTermRef]
+    designs: Tuple[DesignDescriptorsInfo]
     #: Publication list for study
     publications: Tuple[PublicationInfo]
     #: Study factors by name
@@ -374,7 +393,7 @@ class InvestigationInfo(NamedTuple):
     publications: Tuple[PublicationInfo]
     #: Contact list for investigation
     contacts: Tuple[ContactInfo]
-    #: Contact list for study
+    #: List of studies in this investigation
     studies: Tuple[StudyInfo]
 
 

@@ -4,7 +4,7 @@ Term Source File	http://data.bioontology.org/ontologies/OBI
 Term Source Version	31
 Term Source Description	Ontology for Biomedical Investigations
 INVESTIGATION
-Investigation Identifier	i_minimal
+Investigation Identifier	i_assays
 Investigation Title	Minimal Investigation
 Investigation Description	
 Investigation Submission Date	
@@ -30,14 +30,14 @@ Investigation Person Roles
 Investigation Person Roles Term Accession Number
 Investigation Person Roles Term Source REF
 STUDY
-Study Identifier	s_minimal
+Study Identifier	s_assays_1
 Study Title	Minimal Germline Study
 Study Description	
 Comment[Study Grant Number]	
 Comment[Study Funding Agency]	
 Study Submission Date	
 Study Public Release Date	
-Study File Name	s_minimal.txt
+Study File Name	s_assays.txt
 STUDY DESIGN DESCRIPTORS
 Study Design Type
 Study Design Type Term Accession Number
@@ -56,14 +56,76 @@ Study Factor Type
 Study Factor Type Term Accession Number
 Study Factor Type Term Source REF
 STUDY ASSAYS
-Study Assay File Name	a_minimal.txt
-Study Assay Measurement Type	exome sequencing assay
-Study Assay Measurement Type Term Accession Number	http://purl.obolibrary.org/obo/OBI_0002118
-Study Assay Measurement Type Term Source REF	OBI
-Study Assay Technology Type	nucleotide sequencing
-Study Assay Technology Type Term Accession Number	http://purl.obolibrary.org/obo/OBI_0000626
-Study Assay Technology Type Term Source REF	OBI
-Study Assay Technology Platform	
+Study Assay File Name
+Study Assay Measurement Type
+Study Assay Measurement Type Term Accession Number
+Study Assay Measurement Type Term Source REF
+Study Assay Technology Type
+Study Assay Technology Type Term Accession Number
+Study Assay Technology Type Term Source REF
+Study Assay Technology Platform
+STUDY PROTOCOLS
+Study Protocol Name	sample collection	nucleic acid sequencing
+Study Protocol Type	sample collection	nucleic acid sequencing
+Study Protocol Type Term Accession Number		
+Study Protocol Type Term Source REF		
+Study Protocol Description		
+Study Protocol URI		
+Study Protocol Version		
+Study Protocol Parameters Name		
+Study Protocol Parameters Name Term Accession Number		
+Study Protocol Parameters Name Term Source REF		
+Study Protocol Components Name		
+Study Protocol Components Type		
+Study Protocol Components Type Term Accession Number		
+Study Protocol Components Type Term Source REF		
+STUDY CONTACTS
+Study Person Last Name
+Study Person First Name
+Study Person Mid Initials
+Study Person Email
+Study Person Phone
+Study Person Fax
+Study Person Address
+Study Person Affiliation
+Study Person Roles
+Study Person Roles Term Accession Number
+Study Person Roles Term Source REF
+STUDY
+Study Identifier	s_assays_2
+Study Title	Minimal Germline Study
+Study Description	
+Comment[Study Grant Number]	
+Comment[Study Funding Agency]	
+Study Submission Date	
+Study Public Release Date	
+Study File Name	s_assays.txt
+STUDY DESIGN DESCRIPTORS
+Study Design Type
+Study Design Type Term Accession Number
+Study Design Type Term Source REF
+STUDY PUBLICATIONS
+Study PubMed ID
+Study Publication DOI
+Study Publication Author List
+Study Publication Title
+Study Publication Status
+Study Publication Status Term Accession Number
+Study Publication Status Term Source REF
+STUDY FACTORS
+Study Factor Name
+Study Factor Type
+Study Factor Type Term Accession Number
+Study Factor Type Term Source REF
+STUDY ASSAYS
+Study Assay File Name
+Study Assay Measurement Type
+Study Assay Measurement Type Term Accession Number
+Study Assay Measurement Type Term Source REF
+Study Assay Technology Type
+Study Assay Technology Type Term Accession Number
+Study Assay Technology Type Term Source REF
+Study Assay Technology Platform
 STUDY PROTOCOLS
 Study Protocol Name	sample collection	nucleic acid sequencing
 Study Protocol Type	sample collection	nucleic acid sequencing

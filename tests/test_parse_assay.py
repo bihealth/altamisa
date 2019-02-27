@@ -622,6 +622,10 @@ def test_assay_reader_small2_assay(small2_investigation_file, small2_assay_file)
     assert 41 == len(assay.processes)
     assert 74 == len(assay.arcs)
 
+    # Comments
+    expected = models.Comment(name="Replicate", value="B")
+    assert assay.materials["S1-A1-0815-T1-Pro1-B-115-COL5"].comments[0] == expected
+
     # Expected arcs
     expected = (
         models.Arc("S1-sample-0815-N1", "S1-A1-extraction-2-1"),

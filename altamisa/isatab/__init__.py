@@ -12,3 +12,4 @@ from .parse_assay_study import (  # noqa: F401
     StudyReader,
     StudyRowReader,
 )
+from .write_investigation import InvestigationWriter  # noqa: F401

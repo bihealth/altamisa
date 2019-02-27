@@ -32,12 +32,10 @@ def _parse_comments(section, comment_keys, i=None):
 
     if i is not None:
         comments = tuple(
-            models.Comment(_parse_comment_header(k), section[k][i], None) for k in comment_keys
+            models.Comment(_parse_comment_header(k), section[k][i]) for k in comment_keys
         )
     else:
-        comments = tuple(
-            models.Comment(_parse_comment_header(k), section[k], None) for k in comment_keys
-        )
+        comments = tuple(models.Comment(_parse_comment_header(k), section[k]) for k in comment_keys)
     return comments
 
 
@@ -158,7 +156,7 @@ class InvestigationReader:
     # STUDY FACTORS, STUDY ASSAYS, STUDY PROTOCOLS, STUDY CONTACTS
     def _read_multi_column_section(self, prefix, ref_keys, section_name):
         section = {}
-        comment_keys = list()
+        comment_keys = []
         while self._next_line_startswith(prefix) or self._next_line_startswith_comment():
             line = self._read_next_line()
             key = line[0]
@@ -173,8 +171,7 @@ class InvestigationReader:
                 msg = tpl.format(key, section[key])
                 raise ParseIsatabException(msg)
             section[key] = line[1:]
-        # Check that all keys are given and all contain the same number of
-        # entries
+        # Check that all keys are given and all contain the same number of entries
         if len(section) != len(ref_keys) + len(comment_keys):
             tpl = "Missing entries in section {}; found: {}"
             msg = tpl.format(section_name, list(sorted(section)))
@@ -190,7 +187,7 @@ class InvestigationReader:
     def _read_single_column_section(self, prefix, ref_keys, section_name):
         # Read the lines in this section.
         section = {}
-        comment_keys = list()
+        comment_keys = []
         while self._next_line_startswith(prefix) or self._next_line_startswith_comment():
             line = self._read_next_line()
             if len(line) > 2:
@@ -246,7 +243,7 @@ class InvestigationReader:
                 msg = tpl.format(name, file_, version, desc)
                 raise ParseIsatabException(msg)
             comments = _parse_comments(section, comment_keys, i)
-            yield models.OntologyRef(name, file_, version, desc, comments)
+            yield models.OntologyRef(name, file_, version, desc, comments, list(section.keys()))
 
     def _read_basic_info(self) -> models.BasicInfo:
         # Read INVESTIGATION header
@@ -272,6 +269,7 @@ class InvestigationReader:
             _parse_date(section[investigation_headers.INVESTIGATION_SUBMISSION_DATE]),
             _parse_date(section[investigation_headers.INVESTIGATION_PUBLIC_RELEASE_DATE]),
             comments,
+            list(section.keys()),
         )
 
     def _read_publications(self) -> Iterator[models.PublicationInfo]:
@@ -297,7 +295,9 @@ class InvestigationReader:
                 status_term, status_term_acc, status_term_src, self._ontology_refs
             )
             comments = _parse_comments(section, comment_keys, i)
-            yield models.PublicationInfo(pubmed_id, doi, authors, title, status, comments)
+            yield models.PublicationInfo(
+                pubmed_id, doi, authors, title, status, comments, list(section.keys())
+            )
 
     def _read_contacts(self) -> Iterator[models.ContactInfo]:
         # Read INVESTIGATION CONTACTS header
@@ -345,6 +345,7 @@ class InvestigationReader:
                 affiliation,
                 role,
                 comments,
+                list(section.keys()),
             )
 
     def _read_studies(self) -> Iterator[models.StudyInfo]:
@@ -370,6 +371,7 @@ class InvestigationReader:
                 _parse_date(section[investigation_headers.STUDY_SUBMISSION_DATE]),
                 _parse_date(section[investigation_headers.STUDY_PUBLIC_RELEASE_DATE]),
                 comments,
+                list(section.keys()),
             )
             # Read the remaining sections for this study
             # TODO: specs says "order MAY vary"
@@ -404,7 +406,7 @@ class InvestigationReader:
                 type_term, type_term_acc, type_term_src, self._ontology_refs
             )
             comments = _parse_comments(section, comment_keys, i)
-            yield models.DesignDescriptorsInfo(otype, comments)
+            yield models.DesignDescriptorsInfo(otype, comments, list(section.keys()))
 
     def _read_study_publications(self) -> Iterator[models.PublicationInfo]:
         # Read STUDY PUBLICATIONS header
@@ -429,7 +431,9 @@ class InvestigationReader:
                 status_term, status_term_acc, status_term_src, self._ontology_refs
             )
             comments = _parse_comments(section, comment_keys, i)
-            yield models.PublicationInfo(pubmed_id, doi, authors, title, status, comments)
+            yield models.PublicationInfo(
+                pubmed_id, doi, authors, title, status, comments, list(section.keys())
+            )
 
     def _read_study_factors(self) -> Iterator[models.FactorInfo]:
         # Read STUDY FACTORS header
@@ -451,7 +455,7 @@ class InvestigationReader:
                 type_term, type_term_acc, type_term_src, self._ontology_refs
             )
             comments = _parse_comments(section, comment_keys, i)
-            yield models.FactorInfo(name, otype, comments)
+            yield models.FactorInfo(name, otype, comments, list(section.keys()))
 
     def _read_study_assays(self) -> Iterator[models.AssayInfo]:
         # Read STUDY ASSAYS header
@@ -518,7 +522,9 @@ class InvestigationReader:
                     tech_type, tech_type_term_acc, tech_type_term_src, self._ontology_refs
                 )
                 comments = _parse_comments(section, comment_keys, i)
-                yield models.AssayInfo(meas, tech, tech_plat, Path(file_), comments)
+                yield models.AssayInfo(
+                    meas, tech, tech_plat, Path(file_), comments, list(section.keys())
+                )
             # else, i.e. if all assay fields are empty --> Nothing
 
     def _read_study_protocols(self) -> Iterator[models.ProtocolInfo]:
@@ -580,7 +586,15 @@ class InvestigationReader:
             }
             comments = _parse_comments(section, comment_keys, i)
             yield models.ProtocolInfo(
-                name, type_ont, description, uri, version, paras, comps, comments
+                name,
+                type_ont,
+                description,
+                uri,
+                version,
+                paras,
+                comps,
+                comments,
+                list(section.keys()),
             )
 
     def _read_study_contacts(self) -> Iterator[models.ContactInfo]:
@@ -629,4 +643,5 @@ class InvestigationReader:
                 affiliation,
                 role,
                 comments,
+                list(section.keys()),
             )
