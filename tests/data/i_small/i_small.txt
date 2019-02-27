@@ -6,9 +6,9 @@ Term Source Description	Ontology for Biomedical Investigations	National Center f
 INVESTIGATION
 Investigation Identifier	i_small
 Investigation Title	Small Investigation
-Investigation Description
-Investigation Submission Date
-Investigation Public Release Date
+Investigation Description	
+Investigation Submission Date	
+Investigation Public Release Date	
 INVESTIGATION PUBLICATIONS
 Investigation PubMed ID
 Investigation Publication DOI
@@ -32,11 +32,11 @@ Investigation Person Roles Term Source REF
 STUDY
 Study Identifier	s_small
 Study Title	Small Germline Study
-Study Description
-Comment[Study Grant Number]
-Comment[Study Funding Agency]
-Study Submission Date
-Study Public Release Date
+Study Description	
+Comment[Study Grant Number]	
+Comment[Study Funding Agency]	
+Study Submission Date	
+Study Public Release Date	
 Study File Name	s_small.txt
 STUDY DESIGN DESCRIPTORS
 Study Design Type

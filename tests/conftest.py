@@ -58,6 +58,14 @@ def full_investigation_file():
 
 
 @pytest.fixture
+def full2_investigation_file():
+    """This file contains values for each normal investigation section and key.
+    """
+    path = os.path.join(os.path.dirname(__file__), "data/i_fullinvest2/i_fullinvest2.txt")
+    return open(path, "rt")
+
+
+@pytest.fixture
 def comment_investigation_file():
     """This file contains comments for each investigation section.
     """
@@ -71,6 +79,15 @@ def assays_investigation_file():
     tab-separation (empty column) and once without (no column).
     """
     path = os.path.join(os.path.dirname(__file__), "data/i_assays/i_assays.txt")
+    return open(path, "rt")
+
+
+@pytest.fixture
+def assays2_investigation_file():
+    """This file contains two studies with no assays, once with
+    tab-separation (empty column) and once without (no column).
+    """
+    path = os.path.join(os.path.dirname(__file__), "data/i_assays2/i_assays2.txt")
     return open(path, "rt")
 
 
@@ -108,4 +125,16 @@ def gelelect_assay_file():
         os.path.dirname(__file__),
         "data/test_gelelect/a_study01_protein_expression_profiling_gel_electrophoresis.txt",
     )
+    return open(path, "rt")
+
+
+@pytest.fixture
+def BII_I_1_investigation_file():
+    path = os.path.join(os.path.dirname(__file__), "data/BII-I-1/i_investigation.txt")
+    return open(path, "rt")
+
+
+@pytest.fixture
+def BII_I_2_investigation_file():
+    path = os.path.join(os.path.dirname(__file__), "data/BII-I-2/i_investigation.txt")
     return open(path, "rt")

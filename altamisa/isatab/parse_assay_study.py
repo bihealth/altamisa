@@ -295,7 +295,7 @@ class _MaterialBuilder(_NodeBuilderBase):
             for hdr in self.characteristic_headers
         )
         comments = tuple(
-            self._build_complex(hdr, line, models.Comment) for hdr in self.comment_headers
+            models.Comment(hdr.label, line[hdr.col_no]) for hdr in self.comment_headers
         )
         factor_values = tuple(
             self._build_complex(hdr, line, models.FactorValue) for hdr in self.factor_value_headers
@@ -303,7 +303,7 @@ class _MaterialBuilder(_NodeBuilderBase):
         material_type = self._build_freetext_or_term_ref(self.material_type_header, line)
         # Don't accept unnamed materials/data files if there are annotations
         any_char = any([(char.value or char.unit) for char in characteristics])
-        any_comm = any([(comm.value or comm.unit) for comm in comments])
+        any_comm = any([comm.value for comm in comments])
         any_fact = any([(fact.value or fact.unit) for fact in factor_values])
         if not name and any((any_char, any_comm, any_fact, extract_label, material_type)):
             tpl = "Found annotated material/file without name: " "{}, {}, {}, {}, {}, {}, {}"
@@ -376,7 +376,7 @@ class _ProcessBuilder(_NodeBuilderBase):
         else:
             performer = None
         comments = tuple(
-            self._build_complex(hdr, line, models.Comment) for hdr in self.comment_headers
+            models.Comment(hdr.label, line[hdr.col_no]) for hdr in self.comment_headers
         )
         parameter_values = tuple(
             self._build_complex(hdr, line, models.ParameterValue)

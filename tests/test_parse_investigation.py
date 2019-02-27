@@ -4,6 +4,7 @@
 from datetime import date
 from pathlib import Path
 
+from altamisa.constants import investigation_headers
 from altamisa.isatab import models
 from altamisa.isatab import InvestigationReader
 
@@ -25,6 +26,7 @@ def test_parse_minimal_investigation(minimal_investigation_file):
         "31",
         "Ontology for Biomedical Investigations",
         (),
+        [*investigation_headers.ONTOLOGY_SOURCE_REF_KEYS],
     )
     assert expected == investigation.ontology_source_refs["OBI"]
 
@@ -64,6 +66,7 @@ def test_parse_small_investigation(small_investigation_file):
         "31",
         "Ontology for Biomedical Investigations",
         (),
+        [*investigation_headers.ONTOLOGY_SOURCE_REF_KEYS],
     )
     assert expected == investigation.ontology_source_refs["OBI"]
     expected = models.OntologyRef(
@@ -72,10 +75,16 @@ def test_parse_small_investigation(small_investigation_file):
         "8",
         ("National Center for Biotechnology Information (NCBI) Organismal " "Classification"),
         (),
+        [*investigation_headers.ONTOLOGY_SOURCE_REF_KEYS],
     )
     assert expected == investigation.ontology_source_refs["NCBITAXON"]
     expected = models.OntologyRef(
-        "ROLEO", "http://data.bioontology.org/ontologies/ROLEO", "1", "Role Ontology", ()
+        "ROLEO",
+        "http://data.bioontology.org/ontologies/ROLEO",
+        "1",
+        "Role Ontology",
+        (),
+        [*investigation_headers.ONTOLOGY_SOURCE_REF_KEYS],
     )
     assert expected == investigation.ontology_source_refs["ROLEO"]
 
@@ -109,12 +118,14 @@ def test_parse_full_investigation(full_investigation_file):
 
     # Ontology sources
     assert 9 == len(investigation.ontology_source_refs)
+    expected_headers = [*investigation_headers.ONTOLOGY_SOURCE_REF_KEYS, "Comment[Test]"]
     expected = models.OntologyRef(
         "OBI",
         "http://data.bioontology.org/ontologies/OBI",
         "21",
         "Ontology for Biomedical Investigations",
-        (),
+        (models.Comment("Test", "4"),),
+        expected_headers,
     )
     assert expected == investigation.ontology_source_refs["OBI"]
     expected = models.OntologyRef(
@@ -122,7 +133,8 @@ def test_parse_full_investigation(full_investigation_file):
         "http://data.bioontology.org/ontologies/NCBITAXON",
         "2",
         ("National Center for Biotechnology Information (NCBI) Organismal " "Classification"),
-        (),
+        (models.Comment("Test", "1"),),
+        expected_headers,
     )
     assert expected == investigation.ontology_source_refs["NCBITAXON"]
 
@@ -134,8 +146,24 @@ def test_parse_full_investigation(full_investigation_file):
     assert date(2007, 4, 30) == investigation.info.submission_date
     assert date(2009, 3, 10) == investigation.info.public_release_date
 
+    expected_headers = [
+        *investigation_headers.INVESTIGATION_INFO_KEYS,
+        "Comment[Created With Configuration]",
+        "Comment[Last Opened With Configuration]",
+        "Comment[Owning Organisation URI]",
+        "Comment[Consortium URI]",
+        "Comment[Principal Investigator URI]",
+        "Comment[Investigation Keywords]",
+    ]
+    assert expected_headers == investigation.info.headers
+
     # Publications
     assert 3 == len(investigation.publications)
+    expected_headers = [
+        *investigation_headers.INVESTIGATION_PUBLICATIONS_KEYS[0:4],
+        "Comment[Subtitle]",
+        *investigation_headers.INVESTIGATION_PUBLICATIONS_KEYS[4:],
+    ]
     expected = models.PublicationInfo(
         "17439666",
         "doi:10.1186/jbiol54",
@@ -146,7 +174,8 @@ def test_parse_full_investigation(full_investigation_file):
         "Oliver SG.",
         "Growth control of the eukaryote cell: a systems biology study in " "yeast.",
         models.OntologyTermRef("indexed in Pubmed", "", ""),
-        (),
+        (models.Comment("Subtitle", ""),),
+        expected_headers,
     )
     assert expected == investigation.publications[0]
     expected = models.PublicationInfo(
@@ -156,12 +185,18 @@ def test_parse_full_investigation(full_investigation_file):
         "Effect of prednisolone on the cardiovascular system in complex "
         "treatment of newly detected pulmonary tuberculosis",
         models.OntologyTermRef("published", "http://www.ebi.ac.uk/efo/EFO_0001796", "EFO"),
-        (),
+        (models.Comment("Subtitle", "Something"),),
+        expected_headers,
     )
     assert expected == investigation.publications[1]
 
     # Contacts
     assert 3 == len(investigation.contacts)
+    expected_headers = [
+        *investigation_headers.INVESTIGATION_CONTACTS_KEYS,
+        "Comment[Investigation Person ORCID]",
+        "Comment[Investigation Person REF]",
+    ]
     expected = models.ContactInfo(
         "Oliver",
         "Stephen",
@@ -173,9 +208,10 @@ def test_parse_full_investigation(full_investigation_file):
         "Faculty of Life Sciences, Michael Smith Building, " "University of Manchester",
         models.OntologyTermRef("corresponding author", "", ""),
         (
-            models.Comment("Investigation Person ORCID", "12345", None),
-            models.Comment("Investigation Person REF", "personA", None),
+            models.Comment("Investigation Person ORCID", "12345"),
+            models.Comment("Investigation Person REF", "personA"),
         ),
+        expected_headers,
     )
     assert expected == investigation.contacts[0]
     expected = models.ContactInfo(
@@ -189,9 +225,10 @@ def test_parse_full_investigation(full_investigation_file):
         "Faculty of Life Sciences, Michael Smith Building, " "University of Manchester",
         models.OntologyTermRef("author", "", ""),
         (
-            models.Comment("Investigation Person ORCID", "0987654321", None),
-            models.Comment("Investigation Person REF", "personB", None),
+            models.Comment("Investigation Person ORCID", "0987654321"),
+            models.Comment("Investigation Person REF", "personB"),
         ),
+        expected_headers,
     )
     assert expected == investigation.contacts[1]
     expected = models.ContactInfo(
@@ -205,9 +242,10 @@ def test_parse_full_investigation(full_investigation_file):
         "Faculty of Life Sciences, Michael Smith Building, " "University of Manchester",
         models.OntologyTermRef("author", "http://purl.obolibrary.org/obo/RoleO_0000061", "ROLEO"),
         (
-            models.Comment("Investigation Person ORCID", "1357908642", None),
-            models.Comment("Investigation Person REF", "personC", None),
+            models.Comment("Investigation Person ORCID", "1357908642"),
+            models.Comment("Investigation Person REF", "personC"),
         ),
+        expected_headers,
     )
     assert expected == investigation.contacts[2]
 
@@ -226,18 +264,26 @@ def test_parse_full_investigation(full_investigation_file):
 
     # Study 1 - Design descriptors
     assert 2 == len(study.designs)
+    expected_headers = [
+        *investigation_headers.STUDY_DESIGN_DESCR_KEYS[0:1],
+        "Comment[Test1]",
+        *investigation_headers.STUDY_DESIGN_DESCR_KEYS[1:],
+        "Comment[Test2]",
+    ]
     expected = (
         models.DesignDescriptorsInfo(
             models.OntologyTermRef(
                 "intervention design", "http://purl.obolibrary.org/obo/OBI_0000115", "OBI"
             ),
-            (),
+            (models.Comment("Test1", "1"), models.Comment("Test2", "3")),
+            expected_headers,
         ),
         models.DesignDescriptorsInfo(
             models.OntologyTermRef(
                 "genotyping design", "http://purl.obolibrary.org/obo/OBI_0001444", "OBI"
             ),
-            (),
+            (models.Comment("Test1", "2"), models.Comment("Test2", "4")),
+            expected_headers,
         ),
     )
     assert expected == study.designs
@@ -254,29 +300,38 @@ def test_parse_full_investigation(full_investigation_file):
         "Oliver SG.",
         "Growth control of the eukaryote cell: a systems biology study in " "yeast.",
         models.OntologyTermRef("published", "", ""),
-        (),
+        (models.Comment("Subtitle", "Something"),),
+        [
+            *investigation_headers.STUDY_PUBLICATIONS_KEYS[0:4],
+            "Comment[Subtitle]",
+            *investigation_headers.STUDY_PUBLICATIONS_KEYS[4:],
+        ],
     )
     assert expected == study.publications[0]
 
     # Study 1 - Factors
     assert 2 == len(study.factors)
+    expected_headers = [*investigation_headers.STUDY_FACTORS_KEYS, "Comment[FactorsTest]"]
     expected = models.FactorInfo(
         "limiting nutrient",
         models.OntologyTermRef(
             "chemical entity", "http://purl.obolibrary.org/obo/CHEBI_24431", "CHEBI"
         ),
-        (),
+        (models.Comment("FactorsTest", "1"),),
+        expected_headers,
     )
     assert expected == study.factors["limiting nutrient"]
     expected = models.FactorInfo(
         "rate",
         models.OntologyTermRef("rate", "http://purl.obolibrary.org/obo/PATO_0000161", "PATO"),
-        (),
+        (models.Comment("FactorsTest", "2"),),
+        expected_headers,
     )
     assert expected == study.factors["rate"]
 
     # Study 1 - Assays
     assert 3 == len(study.assays)
+    expected_headers = [*investigation_headers.STUDY_ASSAYS_KEYS, "Comment[Extra Info]"]
     expected = models.AssayInfo(
         models.OntologyTermRef(
             "protein expression profiling", "http://purl.obolibrary.org/obo/OBI_0000615", "OBI"
@@ -286,7 +341,8 @@ def test_parse_full_investigation(full_investigation_file):
         ),
         "iTRAQ",
         Path("a_proteome.txt"),
-        (),
+        (models.Comment("Extra Info", "a"),),
+        expected_headers,
     )
     assert expected == study.assays["a_proteome.txt"]
     expected = models.AssayInfo(
@@ -298,12 +354,18 @@ def test_parse_full_investigation(full_investigation_file):
         ),
         "Affymetrix",
         Path("a_transcriptome.txt"),
-        (),
+        (models.Comment("Extra Info", "c"),),
+        expected_headers,
     )
     assert expected == study.assays["a_transcriptome.txt"]
 
     # Study 1 - Protocols
     assert 7 == len(study.protocols)
+    expected_headers = [
+        *investigation_headers.STUDY_PROTOCOLS_KEYS[0:7],
+        "Comment[Protocol Rating]",
+        *investigation_headers.STUDY_PROTOCOLS_KEYS[7:],
+    ]
     expected = models.ProtocolInfo(
         "growth protocol",
         models.OntologyTermRef("growth", "", ""),
@@ -344,7 +406,8 @@ def test_parse_full_investigation(full_investigation_file):
             )
         },
         {},
-        (),
+        (models.Comment("Protocol Rating", "1"),),
+        expected_headers,
     )
     assert expected == study.protocols["growth protocol"]
     expected = models.ProtocolInfo(
@@ -363,12 +426,14 @@ def test_parse_full_investigation(full_investigation_file):
                 models.OntologyTermRef("instrument", "http://www.ebi.ac.uk/efo/EFO_0000548", "EFO"),
             )
         },
-        (),
+        (models.Comment("Protocol Rating", "7"),),
+        expected_headers,
     )
     assert expected == study.protocols["metabolite extraction"]
 
     # Study 1 - Contacts
     assert 3 == len(study.contacts)
+    expected_headers = [*investigation_headers.STUDY_CONTACTS_KEYS, "Comment[Study Person REF]"]
     expected = models.ContactInfo(
         "Oliver",
         "Stephen",
@@ -379,7 +444,8 @@ def test_parse_full_investigation(full_investigation_file):
         "Oxford Road, Manchester M13 9PT, UK",
         "Faculty of Life Sciences, Michael Smith Building, " "University of Manchester",
         models.OntologyTermRef("corresponding author", "", ""),
-        (models.Comment("Study Person REF", "", None),),
+        (models.Comment("Study Person REF", ""),),
+        expected_headers,
     )
     assert expected == study.contacts[0]
     expected = models.ContactInfo(
@@ -392,7 +458,8 @@ def test_parse_full_investigation(full_investigation_file):
         "Oxford Road, Manchester M13 9PT, UK",
         "Faculty of Life Sciences, Michael Smith Building, " "University of Manchester",
         models.OntologyTermRef("author", "http://purl.obolibrary.org/obo/RoleO_0000061", "ROLEO"),
-        (models.Comment("Study Person REF", "", None),),
+        (models.Comment("Study Person REF", ""),),
+        expected_headers,
     )
     assert expected == study.contacts[1]
     expected = models.ContactInfo(
@@ -405,7 +472,8 @@ def test_parse_full_investigation(full_investigation_file):
         "Oxford Road, Manchester M13 9PT, UK",
         "Faculty of Life Sciences, Michael Smith Building, " "University of Manchester",
         models.OntologyTermRef("author", "http://purl.obolibrary.org/obo/RoleO_0000061", "ROLEO"),
-        (models.Comment("Study Person REF", "", None),),
+        (models.Comment("Study Person REF", ""),),
+        expected_headers,
     )
     assert expected == study.contacts[2]
 
@@ -440,18 +508,33 @@ def test_parse_full_investigation(full_investigation_file):
         date(2007, 4, 30),
         date(2009, 3, 10),
         (
-            models.Comment("Study Grant Number", "", None),
-            models.Comment("Study Funding Agency", "", None),
-            models.Comment("Manuscript Licence", "CC BY 3.0", None),
-            models.Comment("Experimental Metadata Licence", "CC0", None),
-            models.Comment("Data Repository", "", None),
-            models.Comment("Data Record Accession", "", None),
-            models.Comment("Data Record URI", "", None),
-            models.Comment("Supplementary Information File Name", "", None),
-            models.Comment("Supplementary Information File Type", "", None),
-            models.Comment("Supplementary File URI", "", None),
-            models.Comment("Subject Keywords", "", None),
+            models.Comment("Study Grant Number", ""),
+            models.Comment("Study Funding Agency", ""),
+            models.Comment("Manuscript Licence", "CC BY 3.0"),
+            models.Comment("Experimental Metadata Licence", "CC0"),
+            models.Comment("Data Repository", ""),
+            models.Comment("Data Record Accession", ""),
+            models.Comment("Data Record URI", ""),
+            models.Comment("Supplementary Information File Name", ""),
+            models.Comment("Supplementary Information File Type", ""),
+            models.Comment("Supplementary File URI", ""),
+            models.Comment("Subject Keywords", ""),
         ),
+        [
+            *investigation_headers.STUDY_INFO_KEYS[0:3],
+            "Comment[Study Grant Number]",
+            "Comment[Study Funding Agency]",
+            *investigation_headers.STUDY_INFO_KEYS[3:],
+            "Comment[Manuscript Licence]",
+            "Comment[Experimental Metadata Licence]",
+            "Comment[Data Repository]",
+            "Comment[Data Record Accession]",
+            "Comment[Data Record URI]",
+            "Comment[Supplementary Information File Name]",
+            "Comment[Supplementary Information File Type]",
+            "Comment[Supplementary File URI]",
+            "Comment[Subject Keywords]",
+        ],
     )
     assert expected == study.info
 
@@ -461,6 +544,7 @@ def test_parse_full_investigation(full_investigation_file):
         "exposure time",
         models.OntologyTermRef("time", "http://purl.obolibrary.org/obo/PATO_0000165", "OBI_BCGO"),
         (),
+        [*investigation_headers.STUDY_FACTORS_KEYS],
     )
     assert expected == study.factors["exposure time"]
 
@@ -476,6 +560,7 @@ def test_parse_full_investigation(full_investigation_file):
         "Affymetrix",
         Path("a_microarray.txt"),
         (),
+        [*investigation_headers.STUDY_ASSAYS_KEYS],
     )
     assert expected == study.assays["a_microarray.txt"]
 
@@ -500,6 +585,7 @@ def test_parse_full_investigation(full_investigation_file):
             ),
         },
         (),
+        [*investigation_headers.STUDY_PROTOCOLS_KEYS],
     )
     assert expected == study.protocols["NMR spectroscopy"]
 
@@ -515,7 +601,8 @@ def test_parse_full_investigation(full_investigation_file):
         "Oxford Road, Manchester M13 9PT, UK",
         "Faculty of Life Sciences, Michael Smith Building, " "University of Manchester",
         models.OntologyTermRef("author", "http://purl.obolibrary.org/obo/RoleO_0000061", "ROLEO"),
-        (models.Comment("Study Person REF", "personB", None),),
+        (models.Comment("Study Person REF", "personB"),),
+        [*investigation_headers.STUDY_CONTACTS_KEYS, "Comment[Study Person REF]"],
     )
     assert expected == study.contacts[1]
 
@@ -536,7 +623,12 @@ def test_parse_comment_investigation(comment_investigation_file):
         "http://data.bioontology.org/ontologies/OBI",
         "21",
         "Ontology for Biomedical Investigations",
-        (models.Comment("OntologyComment", "TestValue01", None),),
+        (models.Comment("OntologyComment", "TestValue01"),),
+        [
+            *investigation_headers.ONTOLOGY_SOURCE_REF_KEYS[0:2],
+            "Comment[OntologyComment]",
+            *investigation_headers.ONTOLOGY_SOURCE_REF_KEYS[2:],
+        ],
     )
     assert expected == investigation.ontology_source_refs["OBI"]
 
@@ -544,6 +636,16 @@ def test_parse_comment_investigation(comment_investigation_file):
     assert "BII-I-1" == investigation.info.identifier
     assert "Owning Organisation URI" == investigation.info.comments[2].name
     assert "TestValue01" == investigation.info.comments[2].value
+
+    expected_headers = [
+        *investigation_headers.INVESTIGATION_INFO_KEYS,
+        "Comment[Created With Configuration]",
+        "Comment[Last Opened With Configuration]",
+        "Comment[Owning Organisation URI]",
+        "Comment[Consortium URI]",
+        "Comment[Principal Investigator URI]",
+        "Comment[Investigation Keywords]",
+    ]
 
     # Publications
     assert 3 == len(investigation.publications)
@@ -557,7 +659,12 @@ def test_parse_comment_investigation(comment_investigation_file):
         "Oliver SG.",
         "Growth control of the eukaryote cell: a systems biology study in " "yeast.",
         models.OntologyTermRef("indexed in Pubmed", "", ""),
-        (models.Comment("InvestPubsComment", "TestValue01", None),),
+        (models.Comment("InvestPubsComment", "TestValue01"),),
+        [
+            *investigation_headers.INVESTIGATION_PUBLICATIONS_KEYS[0:2],
+            "Comment[InvestPubsComment]",
+            *investigation_headers.INVESTIGATION_PUBLICATIONS_KEYS[2:],
+        ],
     )
     assert expected == investigation.publications[0]
 
@@ -574,9 +681,14 @@ def test_parse_comment_investigation(comment_investigation_file):
         "Faculty of Life Sciences, Michael Smith Building, " "University of Manchester",
         models.OntologyTermRef("author", "http://purl.obolibrary.org/obo/RoleO_0000061", "ROLEO"),
         (
-            models.Comment("Investigation Person ORCID", "1357908642", None),
-            models.Comment("Investigation Person REF", "personC", None),
+            models.Comment("Investigation Person ORCID", "1357908642"),
+            models.Comment("Investigation Person REF", "personC"),
         ),
+        [
+            *investigation_headers.INVESTIGATION_CONTACTS_KEYS,
+            "Comment[Investigation Person ORCID]",
+            "Comment[Investigation Person REF]",
+        ],
     )
     assert expected == investigation.contacts[2]
 
@@ -590,13 +702,31 @@ def test_parse_comment_investigation(comment_investigation_file):
     assert "Manuscript Licence" == study.info.comments[2].name
     assert "CC BY 3.0" == study.info.comments[2].value
 
+    expected_headers = [
+        *investigation_headers.STUDY_INFO_KEYS[0:3],
+        "Comment[Study Grant Number]",
+        "Comment[Study Funding Agency]",
+        *investigation_headers.STUDY_INFO_KEYS[3:],
+        "Comment[Manuscript Licence]",
+        "Comment[Experimental Metadata Licence]",
+        "Comment[Data Repository]",
+        "Comment[Data Record Accession]",
+        "Comment[Data Record URI]",
+        "Comment[Supplementary Information File Name]",
+        "Comment[Supplementary Information File Type]",
+        "Comment[Supplementary File URI]",
+        "Comment[Subject Keywords]",
+    ]
+    assert expected_headers == study.info.headers
+
     # Study 1 - Design descriptors
     assert 2 == len(study.designs)
     expected = models.DesignDescriptorsInfo(
         models.OntologyTermRef(
             "genotyping design", "http://purl.obolibrary.org/obo/OBI_0001444", "OBI"
         ),
-        (models.Comment("DesignDescsComment", "TestValue01", None),),
+        (models.Comment("DesignDescsComment", "TestValue01"),),
+        [*investigation_headers.STUDY_DESIGN_DESCR_KEYS, "Comment[DesignDescsComment]"],
     )
     assert expected == study.designs[1]
 
@@ -612,7 +742,12 @@ def test_parse_comment_investigation(comment_investigation_file):
         "Oliver SG.",
         "Growth control of the eukaryote cell: a systems biology study in " "yeast.",
         models.OntologyTermRef("published", "", ""),
-        (models.Comment("StudyPubsComment", "TestValue01", None),),
+        (models.Comment("StudyPubsComment", "TestValue01"),),
+        [
+            *investigation_headers.STUDY_PUBLICATIONS_KEYS[0:4],
+            "Comment[StudyPubsComment]",
+            *investigation_headers.STUDY_PUBLICATIONS_KEYS[4:],
+        ],
     )
     assert expected == study.publications[0]
 
@@ -621,7 +756,8 @@ def test_parse_comment_investigation(comment_investigation_file):
     expected = models.FactorInfo(
         "rate",
         models.OntologyTermRef("rate", "http://purl.obolibrary.org/obo/PATO_0000161", "PATO"),
-        (models.Comment("FactorsComment", "TestValue01", None),),
+        (models.Comment("FactorsComment", "TestValue01"),),
+        [*investigation_headers.STUDY_FACTORS_KEYS, "Comment[FactorsComment]"],
     )
     assert expected == study.factors["rate"]
 
@@ -636,7 +772,12 @@ def test_parse_comment_investigation(comment_investigation_file):
         ),
         "Affymetrix",
         Path("a_transcriptome.txt"),
-        (models.Comment("AssaysComment", "A comment within ontology terms?", None),),
+        (models.Comment("AssaysComment", "A comment within ontology terms?"),),
+        [
+            *investigation_headers.STUDY_ASSAYS_KEYS[0:5],
+            "Comment[AssaysComment]",
+            *investigation_headers.STUDY_ASSAYS_KEYS[5:],
+        ],
     )
     assert expected == study.assays["a_transcriptome.txt"]
 
@@ -658,7 +799,12 @@ def test_parse_comment_investigation(comment_investigation_file):
                 models.OntologyTermRef("instrument", "http://www.ebi.ac.uk/efo/EFO_0000548", "EFO"),
             )
         },
-        (models.Comment("ProtocolsComment", "TestValue01", None),),
+        (models.Comment("ProtocolsComment", "TestValue01"),),
+        [
+            *investigation_headers.STUDY_PROTOCOLS_KEYS[0:7],
+            "Comment[ProtocolsComment]",
+            *investigation_headers.STUDY_PROTOCOLS_KEYS[7:],
+        ],
     )
     assert expected == study.protocols["metabolite extraction"]
 
@@ -674,7 +820,8 @@ def test_parse_comment_investigation(comment_investigation_file):
         "Oxford Road, Manchester M13 9PT, UK",
         "Faculty of Life Sciences, Michael Smith Building, " "University of Manchester",
         models.OntologyTermRef("author", "http://purl.obolibrary.org/obo/RoleO_0000061", "ROLEO"),
-        (models.Comment("Study Person REF", "", None),),
+        (models.Comment("Study Person REF", ""),),
+        [*investigation_headers.STUDY_CONTACTS_KEYS, "Comment[Study Person REF]"],
     )
     assert expected == study.contacts[1]
 
@@ -686,6 +833,23 @@ def test_parse_comment_investigation(comment_investigation_file):
     assert "" == study.info.comments[0].value
     assert "Manuscript Licence" == study.info.comments[2].name
     assert "CC BY 3.0" == study.info.comments[2].value
+
+    expected_headers = [
+        *investigation_headers.STUDY_INFO_KEYS[0:3],
+        "Comment[Study Grant Number]",
+        "Comment[Study Funding Agency]",
+        *investigation_headers.STUDY_INFO_KEYS[3:],
+        "Comment[Manuscript Licence]",
+        "Comment[Experimental Metadata Licence]",
+        "Comment[Data Repository]",
+        "Comment[Data Record Accession]",
+        "Comment[Data Record URI]",
+        "Comment[Supplementary Information File Name]",
+        "Comment[Supplementary Information File Type]",
+        "Comment[Supplementary File URI]",
+        "Comment[Subject Keywords]",
+    ]
+    assert expected_headers == study.info.headers
 
     # Study 2 - Contacts
     assert 3 == len(study.contacts)
@@ -699,7 +863,8 @@ def test_parse_comment_investigation(comment_investigation_file):
         "Oxford Road, Manchester M13 9PT, UK",
         "Faculty of Life Sciences, Michael Smith Building, " "University of Manchester",
         models.OntologyTermRef("author", "http://purl.obolibrary.org/obo/RoleO_0000061", "ROLEO"),
-        (models.Comment("Study Person REF", "personB", None),),
+        (models.Comment("Study Person REF", "personB"),),
+        [*investigation_headers.STUDY_CONTACTS_KEYS, "Comment[Study Person REF]"],
     )
     assert expected == study.contacts[1]
 
