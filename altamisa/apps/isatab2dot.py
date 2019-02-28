@@ -59,30 +59,30 @@ def run(args):
     print("digraph investigation {", file=args.output_file)
     print('  rankdir = "LR";', file=args.output_file)
 
-    for s, studyInfo in enumerate(investigation.studies):
-        with open(os.path.join(path, studyInfo.info.path), "rt") as inputf:
+    for s, study_info in enumerate(investigation.studies):
+        with open(os.path.join(path, study_info.info.path), "rt") as inputf:
             study = StudyReader.from_stream(
-                investigation, studyInfo, "S{}".format(s + 1), inputf
+                investigation, study_info, "S{}".format(s + 1), inputf
             ).read()
-        print("  /* study {} */".format(studyInfo.info.path), file=args.output_file)
+        print("  /* study {} */".format(study_info.info.path), file=args.output_file)
         print("  subgraph clusterStudy{} {{".format(s), file=args.output_file)
-        print('    label = "Study: {}"'.format(studyInfo.info.path), file=args.output_file)
+        print('    label = "Study: {}"'.format(study_info.info.path), file=args.output_file)
         print_dot(study, args.output_file)
         print("  }", file=args.output_file)
 
-        for a, assayInfo in enumerate(studyInfo.assays.values()):
-            with open(os.path.join(path, assayInfo.path), "rt") as inputf:
+        for a, assay_info in enumerate(study_info.assays.values()):
+            with open(os.path.join(path, assay_info.path), "rt") as inputf:
                 assay = AssayReader.from_stream(
                     investigation,
-                    studyInfo,
-                    assayInfo,
+                    study_info,
+                    assay_info,
                     "S{}".format(s + 1),
                     "A{}".format(a + 1),
                     inputf,
                 ).read()
-            print("  /* assay {} */".format(assayInfo.path), file=args.output_file)
+            print("  /* assay {} */".format(assay_info.path), file=args.output_file)
             print("  subgraph clusterAssayS{}A{} {{".format(s, a), file=args.output_file)
-            print('    label = "Assay: {}"'.format(assayInfo.path), file=args.output_file)
+            print('    label = "Assay: {}"'.format(assay_info.path), file=args.output_file)
             print_dot(assay, args.output_file)
             print("  }", file=args.output_file)
 

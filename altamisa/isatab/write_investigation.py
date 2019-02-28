@@ -47,7 +47,7 @@ def _extract_section_header(first_entry, section_name):
 
 # Helper to create a dict with keys to empty lists
 def _init_multi_column_section(section_keys) -> dict:
-    return {key: list() for key in section_keys}
+    return {key: [] for key in section_keys}
 
 
 class InvestigationWriter:
@@ -479,9 +479,9 @@ class InvestigationWriter:
             section[investigation_headers.STUDY_PROTOCOL_URI].append(protocol.uri)
             section[investigation_headers.STUDY_PROTOCOL_VERSION].append(protocol.version)
 
-            names = list()
-            accessions = list()
-            ontologies = list()
+            names = []
+            accessions = []
+            ontologies = []
             for parameter in protocol.parameters.values():
                 if (
                     hasattr(parameter, "name")
@@ -503,10 +503,10 @@ class InvestigationWriter:
                 ";".join(ontologies)
             )
 
-            names = list()
-            types = list()
-            accessions = list()
-            ontologies = list()
+            names = []
+            types = []
+            accessions = []
+            ontologies = []
             for component in protocol.components.values():
                 names.append(component.name)
                 if (

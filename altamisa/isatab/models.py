@@ -436,7 +436,7 @@ class ParameterValue(NamedTuple):
 class Material(
     namedtuple(
         "Material",
-        "type unique_name name extract_label characteristics comments factor_values material_type",
+        "type unique_name name extract_label characteristics comments factor_values material_type headers",
     )
 ):
     """Representation of a Material or Data node."""
@@ -452,6 +452,7 @@ class Material(
         factor_values,
         material_type,
         assay_info: AssayInfo,
+        headers=None,
     ):
         # Restrict certain annotations to corresponding material types
         if extract_label and type != table_headers.LABELED_EXTRACT_NAME:
@@ -484,7 +485,7 @@ class Material(
                 tpl = "Data {} not supported for unspecified assay."
                 msg = tpl.format(type)
             else:
-                msgs = list()
+                msgs = []
                 if (
                     type in table_restrictions.RESTRICTED_TECH_FILES
                     and assay_info.technology_type.name.lower()
@@ -524,6 +525,7 @@ class Material(
             comments,
             factor_values,
             material_type,
+            headers,
         )
 
     type: str
@@ -546,6 +548,8 @@ class Material(
     factor_values: Tuple[FactorValue]
     #: Material type
     material_type: FreeTextOrTermRef
+    #: Columns headers from/for ISA-tab parsing/writing
+    headers: List[str]
 
 
 class Process(NamedTuple):
@@ -587,6 +591,9 @@ class Process(NamedTuple):
     #: First and second dimension (INSTEAD of Gel Electrophoresis Assay Name)
     first_dimension: FreeTextOrTermRef
     second_dimension: FreeTextOrTermRef
+
+    #: Columns headers from/for ISA-tab parsing/writing
+    headers: List[str]
 
 
 class Arc(NamedTuple):

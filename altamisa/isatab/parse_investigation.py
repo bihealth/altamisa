@@ -26,7 +26,7 @@ def _parse_comments(section, comment_keys, i=None):
         tok = val[len("Comment") :].strip()
         if not tok or tok[0] != "[" or tok[-1] != "]":
             tpl = "Problem parsing comment header {}"
-            msg = tpl.format(tpl.format(val))
+            msg = tpl.format(val)
             raise ParseIsatabException(msg)
         return tok[1:-1]
 

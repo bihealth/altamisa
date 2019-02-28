@@ -1,0 +1,409 @@
+# -*- coding: utf-8 -*-
+"""This module contains code for the parsing of assay and study files.
+"""
+
+
+from __future__ import generator_stop
+import csv
+import os
+from typing import Dict, NamedTuple, TextIO
+
+from ..constants import table_headers
+from ..constants.table_tokens import TOKEN_UNKNOWN
+from ..exceptions import WriteIsatabException
+from .headers import AssayHeaderParser, StudyHeaderParser
+from .models import Arc, FactorInfo, Material, Process
+
+
+__author__ = (
+    "Manuel Holtgrewe <manuel.holtgrewe@bihealth.de>, "
+    "Mathias Kuhring <mathias.kuhring@bihealth.de>"
+)
+
+
+# Graph traversal -------------------------------------------------------
+
+
+class Digraph:
+    """Simple class encapsulating directed graph with vertices and arcs"""
+
+    def __init__(self, vertices, arcs: Arc, starting_type: str):
+        #: Graph vertices/nodes (models.Material and models.Process)
+        self.vertices = vertices
+        #: Graph arcs/edges (models.Arc)
+        self.arcs = arcs
+        #: Name to node mapping
+        self.v_by_name = {v.unique_name: v for v in self.vertices}
+        #: Arcs as tuple of tail and head
+        self.a_by_name = {(a[0], a[1]) for a in self.arcs}
+        #: Names of starting nodes
+        self.source_names = [
+            v.unique_name for v in self.vertices if (hasattr(v, "type") and v.type == starting_type)
+        ]
+        #: Outgoing vertices/nodes
+        self.outgoing = {}
+
+        for s_name, t_name in self.a_by_name:
+            self.outgoing.setdefault(s_name, []).append(t_name)
+
+
+class UnionFind:
+    """Union-Find (disjoint set) data structure allowing to address by vertex
+    name"""
+
+    def __init__(self, vertex_names):
+        #: Node name to id mapping
+        self._name_to_id = {v: i for i, v in enumerate(vertex_names)}
+        #: Pointer to the containing sets
+        self._id = list(range(len(vertex_names)))
+        #: Size of the set (_sz[_id[v]] is the size of the set that contains v)
+        self._sz = [1] * len(vertex_names)
+
+    def find(self, v):
+        assert type(v) is int
+        j = v
+
+        while j != self._id[j]:
+            self._id[j] = self._id[self._id[j]]
+            j = self._id[j]
+
+        return j
+
+    def find_by_name(self, v_name):
+        return self.find(self._name_to_id[v_name])
+
+    def union_by_name(self, v_name, w_name):
+        self.union(self.find_by_name(v_name), self.find_by_name(w_name))
+
+    def union(self, v, w):
+        assert type(v) is int
+        assert type(w) is int
+        i = self.find(v)
+        j = self.find(w)
+
+        if i == j:
+            return
+
+        if self._sz[i] < self._sz[j]:
+            self._id[i] = j
+            self._sz[j] += self._sz[i]
+
+        else:
+            self._id[j] = i
+
+        self._sz[i] += self._sz[j]
+
+
+class RefTableBuilder:
+    """Class for building reference table from a graph"""
+
+    def __init__(self, nodes, arcs, starting_type: str):
+        # Input directed graph
+        self.digraph = Digraph(nodes, arcs, starting_type)
+        #: Output table rows
+        self._rows = []
+
+    def _partition(self):
+        uf = UnionFind(self.digraph.v_by_name.keys())
+
+        for arc in self.digraph.arcs:
+            uf.union_by_name(arc[0], arc[1])
+
+        result = {}
+
+        for v_name in self.digraph.v_by_name.keys():
+            result.setdefault(v_name, []).append(v_name)
+
+        return list(result.values())
+
+    def _dump_row(self, v_names):
+        self._rows.append(list(v_names))
+
+    def _dfs(self, source, path):
+        next_v_names = None
+
+        if source in self.digraph.outgoing:
+            next_v_names = self.digraph.outgoing[source]
+
+        if next_v_names:
+            for target in next_v_names:
+                path.append(target)
+                self._dfs(target, path)
+                path.pop()
+
+        else:
+            self._dump_row(path)
+
+    def _process_component(self, v_names):
+        sources = list(sorted(set(v_names) & set(self.digraph.source_names)))
+
+        for source in sources:
+            self._dfs(source, [source])
+
+    def run(self):
+        components = self._partition()
+
+        for component in components:
+            self._process_component(component)
+
+        return self._rows
+
+
+# Write classes ------------------------------------------------------------------------------------
+
+
+class _WriterBase:
+    """Base class that writes a file from an ``Study`` or ``Assay`` object."""
+
+    #: Note type starting a graph
+    _starting_type = None
+
+    #: Parser for study or assay headers
+    _header_parser = None
+
+    @classmethod
+    def from_stream(
+        cls,
+        study_or_assay: NamedTuple,
+        output_file: TextIO,
+        factors: Dict[str, FactorInfo],
+        quote=None,
+        lineterminator=None,
+    ):
+        """"""
+        return cls(study_or_assay, output_file, factors, quote, lineterminator)
+
+    def __init__(
+        self,
+        study_or_assay: NamedTuple,
+        output_file: TextIO,
+        factors: Dict[str, FactorInfo],
+        quote=None,
+        lineterminator=None,
+    ):
+        #: Study or Assay model
+        self._model = study_or_assay
+        #: Nodes in the model (all materials/data and processes)
+        self._nodes = {**self._model.materials, **self._model.processes}
+        #: Output file
+        self.output_file = output_file
+        #: Study factors
+        self.factors = factors
+        #: Character for quoting
+        self.quote = quote
+        #: Csv file writer
+        self._writer = csv.writer(
+            output_file,
+            delimiter="\t",
+            lineterminator=lineterminator or os.linesep,
+            quoting=csv.QUOTE_ALL if self.quote else csv.QUOTE_NONE,
+            # Can't use no quoting without escaping, so use different dummy quote here
+            escapechar="\\",
+            quotechar=self.quote if self.quote else "|",
+        )
+        #: Reference table for output
+        self._ref_table = None
+        #: Headers for output
+        self._headers = None
+
+    def _write_next_line(self, line: [str]):
+        """Write next line."""
+        self._writer.writerow(line)
+
+    def _extract_headers(self):
+        """
+        Extract reference header from first row, assuming for now all nodes in one column have
+        the same header resp. same attributes (names, characteristics, comments etc.) available.
+        Something the independent validation should check and maybe correct for.
+        """
+        self._headers = []
+        for node in [self._nodes[node] for node in self._ref_table[0]]:
+            # For now, assume that each node brings the list of original headers
+            # and that the headers match the available attributes
+            if node.headers:
+                # TODO: check that headers and attributes match
+                self._headers.append(list(self._header_parser(node.headers, self.factors).run()))
+                # self._headers.append(node.headers)
+            else:
+                # TODO: create new headers based on attributes
+                tpl = "No reference headers available in node {} of first row"
+                msg = tpl.format(node.unique_name)
+                raise WriteIsatabException(msg)
+
+    def _write_headers(self):
+        # Unlist node headers
+        headers = [s for headers in self._headers for h in headers for s in h.get_simple_string()]
+        self._write_next_line(headers)
+
+    def _extract_and_write_nodes(self):
+        # Extract and write all nodes in the order given by the reference table
+        for row in self._ref_table:
+            line = []
+            # Iterate nodes and corresponding headers
+            for node_name, headers in zip(row, self._headers):
+                # Extract node attributes
+                node = self._nodes[node_name]
+                attributes = self._extract_attributes(node)
+                self._previous_attribute = None
+                for header in headers:
+                    header = header.get_simple_string()[0]
+                    # Append next attribute according to header
+                    self._append_attribute(line, attributes, header, node)
+                # Iterating the headers should deplete attributes
+                if len(attributes) > 0:
+                    tpl = "Leftover attributes {} found in node {}"
+                    msg = tpl.format(attributes, node.unique_name)
+                    raise WriteIsatabException(msg)
+            self._write_next_line(line)
+
+    def _append_attribute(self, line, attributes, header, node):
+        # Append the next attribute according to header
+        if header in attributes:
+            attribute = attributes.pop(header)
+            # Append expected ontology reference
+            if header == table_headers.TERM_SOURCE_REF:
+                self._append_attribute_ontology_reference(line, attribute, header, node)
+            # Append attribute with value
+            # (Characteristics, Comment, FactorValue, ParameterValue)
+            elif hasattr(attribute, "value"):
+                self._append_attribute_with_value(line, attribute, attributes)
+            # Append attribute with direct ontology:
+            # (extract_label, first_dimension, material_type, second_dimension)
+            elif (
+                hasattr(attribute, "name")
+                and hasattr(attribute, "ontology_name")
+                and hasattr(attribute, "accession")
+            ):
+                line.append(attribute.name)
+                attributes[table_headers.TERM_SOURCE_REF] = attribute
+            # Append attributes with string only (everything else)
+            else:
+                line.append(attribute)
+            self._previous_attribute = attribute
+        else:
+            tpl = "Expected {} not found in node {} after/for attribute {}"
+            msg = tpl.format(header, node.unique_name, self._previous_attribute)
+            raise WriteIsatabException(msg)
+
+    def _append_attribute_ontology_reference(self, line, attribute, header, node):
+        # Append expected ontology reference
+        if hasattr(attribute, "ontology_name") and hasattr(attribute, "accession"):
+            line.extend([attribute.ontology_name or "", attribute.accession or ""])
+        else:
+            tpl = "Expected {} not found in attribute {} of node {}"
+            msg = tpl.format(header, attribute, node.unique_name)
+            raise WriteIsatabException(msg)
+
+    def _append_attribute_with_value(self, line, attribute, attributes):
+        # Append attribute with a value and potentially a unit
+        # (Characteristics, Comment, FactorValue, ParameterValue)
+
+        # If available, add Ontology to dict for next header
+        if (
+            hasattr(attribute.value, "name")
+            and hasattr(attribute.value, "ontology_name")
+            and hasattr(attribute.value, "accession")
+        ):
+            line.append(attribute.value.name or "")
+            attributes[table_headers.TERM_SOURCE_REF] = attribute.value
+        else:
+            line.append(attribute.value)
+        # If available, add Unit to dict for next header
+        # (Characteristics, FactorValue, ParameterValue)
+        if hasattr(attribute, "unit") and attribute.unit is not None:
+            if (
+                hasattr(attribute.unit, "name")
+                and hasattr(attribute.unit, "ontology_name")
+                and hasattr(attribute.unit, "accession")
+            ):
+                attributes[table_headers.UNIT] = attribute.unit.name
+                attributes[table_headers.TERM_SOURCE_REF] = attribute.unit
+            else:
+                attributes[table_headers.UNIT] = attribute.unit
+
+    def _extract_attributes(self, node) -> dict:
+        # Add all node attributes to a dict with keys corresponding to headers
+        if hasattr(node, "characteristics"):  # is material node
+            attributes = self._extract_material(node)
+        elif hasattr(node, "parameter_values"):  # is process node
+            attributes = self._extract_process(node)
+        else:  # unknown node type
+            tpl = "Node of unexpected type (not material/data nor process): {}"
+            msg = tpl.format(node)
+            raise WriteIsatabException(msg)
+        return attributes
+
+    def _extract_material(self, node: Material) -> dict:
+        # Add all material attributes to a dict with keys corresponding to headers
+        attributes = {}
+        attributes[node.type] = node.name
+        for characteristic in node.characteristics:
+            attributes[
+                self._create_labeled_name(table_headers.CHARACTERISTICS, characteristic.name)
+            ] = characteristic
+        for comment in node.comments:
+            attributes[self._create_labeled_name(table_headers.COMMENT, comment.name)] = comment
+        for factor in node.factor_values:
+            attributes[self._create_labeled_name(table_headers.FACTOR_VALUE, factor.name)] = factor
+        if node.material_type is not None:
+            attributes[table_headers.MATERIAL_TYPE] = node.material_type
+        if node.extract_label is not None:
+            attributes[table_headers.LABEL] = node.extract_label
+        return attributes
+
+    def _extract_process(self, node: Process) -> dict:
+        # Add all process attributes to a dict with keys corresponding to headers
+        attributes = {}
+        if node.protocol_ref != TOKEN_UNKNOWN:
+            attributes[table_headers.PROTOCOL_REF] = node.protocol_ref
+        if node.performer:
+            attributes[table_headers.PERFORMER] = node.performer
+        if node.date:
+            attributes[table_headers.DATE] = node.date
+        for parameter in node.parameter_values:
+            attributes[
+                self._create_labeled_name(table_headers.PARAMETER_VALUE, parameter.name)
+            ] = parameter
+        for comment in node.comments:
+            attributes[self._create_labeled_name(table_headers.COMMENT, comment.name)] = comment
+        if node.name_type:
+            attributes[node.name_type] = node.name
+        if node.array_design_ref is not None:
+            attributes[table_headers.ARRAY_DESIGN_REF] = node.array_design_ref
+        if node.first_dimension is not None:
+            attributes[table_headers.FIRST_DIMENSION] = node.first_dimension
+        if node.second_dimension is not None:
+            attributes[table_headers.SECOND_DIMENSION] = node.second_dimension
+        return attributes
+
+    def _create_labeled_name(self, column_type, label):
+        return "".join((column_type, "[", label, "]"))
+
+    def write(self):
+        """Write study or assay file"""
+        self._ref_table = RefTableBuilder(
+            self._nodes.values(), self._model.arcs, self._starting_type
+        ).run()
+        self._extract_headers()
+        self._write_headers()
+        self._extract_and_write_nodes()
+
+
+class StudyWriter(_WriterBase):
+    """Class that writes a file from an ``Study`` object."""
+
+    #: Node type starting a study graph
+    _starting_type = "Source Name"
+
+    #: Parser for study headers
+    _header_parser = StudyHeaderParser
+
+
+class AssayWriter(_WriterBase):
+    """Class that writes a file from an ``Assay`` object."""
+
+    #: Node type starting an assay graph
+    _starting_type = "Sample Name"
+
+    #: Parser for assay headers
+    _header_parser = AssayHeaderParser
