@@ -4,7 +4,7 @@ assay files and parsing thereof.
 """
 
 from __future__ import generator_stop
-from typing import Iterator
+from typing import Iterator, List
 
 from ..constants import table_headers
 from ..exceptions import ParseIsatabException
@@ -34,6 +34,9 @@ class ColumnHeader:
 
     def __repr__(self):
         return str(self)
+
+    def get_simple_string(self) -> List[str]:
+        return [self.column_type]
 
 
 class SimpleColumnHeader(ColumnHeader):
@@ -268,6 +271,9 @@ class TermRefAnnotationHeader(ColumnHeader):
     def __init__(self, col_no):
         super().__init__(table_headers.TERM_SOURCE_REF, col_no, 2)
 
+    def get_simple_string(self) -> List[str]:
+        return [table_headers.TERM_SOURCE_REF, table_headers.TERM_ACCESSION_NUMBER]
+
 
 class UnitHeader(SimpleColumnHeader):
     """Unit annotation header in a study or assay"""
@@ -289,8 +295,11 @@ class LabeledColumnHeader(ColumnHeader):
         self.label = label
 
     def __str__(self):
-        tpl = "LabeledColumnHeader(" "column_type={}, col_no={}, span={}, label={})"
+        tpl = "LabeledColumnHeader(column_type={}, col_no={}, span={}, label={})"
         return tpl.format(*map(repr, (self.column_type, self.col_no, self.span, self.label)))
+
+    def get_simple_string(self):
+        return ["".join((self.column_type, "[", self.label, "]"))]
 
 
 class CharacteristicsHeader(LabeledColumnHeader):

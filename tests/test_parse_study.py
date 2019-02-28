@@ -1,14 +1,13 @@
 # -*- coding: utf-8 -*-
 """Tests for parsing ISA study files"""
 
-# TODO: test with one annotation for each source, extraction, sample
-# TODO: test with secondary annotation (i.e., further qualify with term) or even tertiary (qualify with unit and qualify unit with term)
 
 from datetime import date
 
 import pytest  # noqa # pylint: disable=unused-import
 import os
 
+from altamisa.constants import table_headers
 from altamisa.isatab import models
 from altamisa.isatab import InvestigationReader, StudyRowReader, StudyReader
 
@@ -34,7 +33,16 @@ def test_study_row_reader_minimal_study(minimal_investigation_file, minimal_stud
     assert 3 == len(first_row)
 
     expected = models.Material(
-        "Source Name", "S1-source-0815", "0815", None, (), (), (), None, None
+        "Source Name",
+        "S1-source-0815",
+        "0815",
+        None,
+        (),
+        (),
+        (),
+        None,
+        None,
+        [table_headers.SOURCE_NAME],
     )
     assert expected == first_row[0]
     expected = models.Process(
@@ -49,10 +57,20 @@ def test_study_row_reader_minimal_study(minimal_investigation_file, minimal_stud
         None,
         None,
         None,
+        [table_headers.PROTOCOL_REF],
     )
     assert expected == first_row[1]
     expected = models.Material(
-        "Sample Name", "S1-sample-0815-N1", "0815-N1", None, (), (), (), None, None
+        "Sample Name",
+        "S1-sample-0815-N1",
+        "0815-N1",
+        None,
+        (),
+        (),
+        (),
+        None,
+        None,
+        [table_headers.SAMPLE_NAME],
     )
     assert expected == first_row[2]
 
@@ -85,11 +103,29 @@ def test_study_reader_minimal_study(minimal_investigation_file, minimal_study_fi
     assert 2 == len(study.arcs)
 
     expected = models.Material(
-        "Source Name", "S1-source-0815", "0815", None, (), (), (), None, None
+        "Source Name",
+        "S1-source-0815",
+        "0815",
+        None,
+        (),
+        (),
+        (),
+        None,
+        None,
+        [table_headers.SOURCE_NAME],
     )
     assert expected == study.materials["S1-source-0815"]
     expected = models.Material(
-        "Sample Name", "S1-sample-0815-N1", "0815-N1", None, (), (), (), None, None
+        "Sample Name",
+        "S1-sample-0815-N1",
+        "0815-N1",
+        None,
+        (),
+        (),
+        (),
+        None,
+        None,
+        [table_headers.SAMPLE_NAME],
     )
     assert expected == study.materials["S1-sample-0815-N1"]
 
@@ -105,6 +141,7 @@ def test_study_reader_minimal_study(minimal_investigation_file, minimal_study_fi
         None,
         None,
         None,
+        [table_headers.PROTOCOL_REF],
     )
     assert expected == study.processes["S1-sample collection-2-1"]
 
@@ -136,6 +173,28 @@ def test_study_row_reader_small_study(small_investigation_file, small_study_file
 
     assert 3 == len(first_row)
 
+    headers_source = [
+        table_headers.SOURCE_NAME,
+        table_headers.CHARACTERISTICS + "[organism]",
+        table_headers.TERM_SOURCE_REF,
+        table_headers.TERM_ACCESSION_NUMBER,
+        table_headers.CHARACTERISTICS + "[age]",
+        table_headers.UNIT,
+        table_headers.TERM_SOURCE_REF,
+        table_headers.TERM_ACCESSION_NUMBER,
+    ]
+    headers_collection = [
+        table_headers.PROTOCOL_REF,
+        table_headers.PARAMETER_VALUE + "[instrument]",
+        table_headers.PERFORMER,
+        table_headers.DATE,
+    ]
+    headers_sample = [
+        table_headers.SAMPLE_NAME,
+        table_headers.CHARACTERISTICS + "[status]",
+        table_headers.FACTOR_VALUE + "[treatment]",
+    ]
+
     unit = models.OntologyTermRef(
         name="day", accession="http://purl.obolibrary.org/obo/UO_0000033", ontology_name="UO"
     )
@@ -154,7 +213,16 @@ def test_study_row_reader_small_study(small_investigation_file, small_study_file
     )
 
     expected = models.Material(
-        "Source Name", "S1-source-0815", "0815", None, characteristics, (), (), None, None
+        "Source Name",
+        "S1-source-0815",
+        "0815",
+        None,
+        characteristics,
+        (),
+        (),
+        None,
+        None,
+        headers_source,
     )
     assert expected == first_row[0]
     expected = models.Process(
@@ -169,6 +237,7 @@ def test_study_row_reader_small_study(small_investigation_file, small_study_file
         None,
         None,
         None,
+        headers_collection,
     )
     assert expected == first_row[1]
     expected = models.Material(
@@ -181,12 +250,22 @@ def test_study_row_reader_small_study(small_investigation_file, small_study_file
         (models.FactorValue("treatment", "yes", None),),
         None,
         None,
+        headers_sample,
     )
     assert expected == first_row[2]
 
     assert 3 == len(second_row)
     expected = models.Material(
-        "Source Name", "S1-source-0815", "0815", None, characteristics, (), (), None, None
+        "Source Name",
+        "S1-source-0815",
+        "0815",
+        None,
+        characteristics,
+        (),
+        (),
+        None,
+        None,
+        headers_source,
     )
     assert expected == second_row[0]
     expected = models.Process(
@@ -201,6 +280,7 @@ def test_study_row_reader_small_study(small_investigation_file, small_study_file
         None,
         None,
         None,
+        headers_collection,
     )
     assert expected == second_row[1]
     expected = models.Material(
@@ -210,9 +290,10 @@ def test_study_row_reader_small_study(small_investigation_file, small_study_file
         None,
         (models.Characteristics("status", "2", None),),
         (),
-        (models.FactorValue("treatment", None, None),),
+        (models.FactorValue("treatment", "", None),),
         None,
         None,
+        headers_sample,
     )
     assert expected == second_row[2]
 
@@ -238,6 +319,28 @@ def test_study_reader_small_study(small_investigation_file, small_study_file):
     assert 4 == len(study.processes)
     assert 8 == len(study.arcs)
 
+    headers_source = [
+        table_headers.SOURCE_NAME,
+        table_headers.CHARACTERISTICS + "[organism]",
+        table_headers.TERM_SOURCE_REF,
+        table_headers.TERM_ACCESSION_NUMBER,
+        table_headers.CHARACTERISTICS + "[age]",
+        table_headers.UNIT,
+        table_headers.TERM_SOURCE_REF,
+        table_headers.TERM_ACCESSION_NUMBER,
+    ]
+    headers_collection = [
+        table_headers.PROTOCOL_REF,
+        table_headers.PARAMETER_VALUE + "[instrument]",
+        table_headers.PERFORMER,
+        table_headers.DATE,
+    ]
+    headers_sample = [
+        table_headers.SAMPLE_NAME,
+        table_headers.CHARACTERISTICS + "[status]",
+        table_headers.FACTOR_VALUE + "[treatment]",
+    ]
+
     unit = models.OntologyTermRef(
         name="day", accession="http://purl.obolibrary.org/obo/UO_0000033", ontology_name="UO"
     )
@@ -258,7 +361,7 @@ def test_study_reader_small_study(small_investigation_file, small_study_file):
         models.Characteristics(
             name="organism", value=models.OntologyTermRef("Mus musculus", "", ""), unit=None
         ),
-        models.Characteristics(name="age", value=None, unit=unit),
+        models.Characteristics(name="age", value="", unit=unit),
     )
     characteristics3 = (
         models.Characteristics(
@@ -268,15 +371,42 @@ def test_study_reader_small_study(small_investigation_file, small_study_file):
     )
 
     expected = models.Material(
-        "Source Name", "S1-source-0815", "0815", None, characteristics1, (), (), None, None
+        "Source Name",
+        "S1-source-0815",
+        "0815",
+        None,
+        characteristics1,
+        (),
+        (),
+        None,
+        None,
+        headers_source,
     )
     assert expected == study.materials["S1-source-0815"]
     expected = models.Material(
-        "Source Name", "S1-source-0816", "0816", None, characteristics2, (), (), None, None
+        "Source Name",
+        "S1-source-0816",
+        "0816",
+        None,
+        characteristics2,
+        (),
+        (),
+        None,
+        None,
+        headers_source,
     )
     assert expected == study.materials["S1-source-0816"]
     expected = models.Material(
-        "Source Name", "S1-source-0817", "0817", None, characteristics3, (), (), None, None
+        "Source Name",
+        "S1-source-0817",
+        "0817",
+        None,
+        characteristics3,
+        (),
+        (),
+        None,
+        None,
+        headers_source,
     )
     assert expected == study.materials["S1-source-0817"]
     expected = models.Material(
@@ -289,6 +419,7 @@ def test_study_reader_small_study(small_investigation_file, small_study_file):
         (models.FactorValue("treatment", "yes", None),),
         None,
         None,
+        headers_sample,
     )
     assert expected == study.materials["S1-sample-0815-N1"]
     expected = models.Material(
@@ -298,9 +429,10 @@ def test_study_reader_small_study(small_investigation_file, small_study_file):
         None,
         (models.Characteristics("status", "2", None),),
         (),
-        (models.FactorValue("treatment", None, None),),
+        (models.FactorValue("treatment", "", None),),
         None,
         None,
+        headers_sample,
     )
     assert expected == study.materials["S1-sample-0815-T1"]
     expected = models.Material(
@@ -313,6 +445,7 @@ def test_study_reader_small_study(small_investigation_file, small_study_file):
         (models.FactorValue("treatment", "yes", None),),
         None,
         None,
+        headers_sample,
     )
     assert expected == study.materials["S1-sample-0816-T1"]
     expected = models.Material(
@@ -320,11 +453,12 @@ def test_study_reader_small_study(small_investigation_file, small_study_file):
         "S1-Empty Sample Name-13-4",
         "",
         None,
-        (models.Characteristics("status", None, None),),
+        (models.Characteristics("status", "", None),),
         (),
-        (models.FactorValue("treatment", None, None),),
+        (models.FactorValue("treatment", "", None),),
         None,
         None,
+        headers_sample,
     )
     assert expected == study.materials["S1-Empty Sample Name-13-4"]
 
@@ -340,6 +474,7 @@ def test_study_reader_small_study(small_investigation_file, small_study_file):
         None,
         None,
         None,
+        headers_collection,
     )
     assert expected == study.processes["S1-sample collection-9-1"]
     expected = models.Process(
@@ -354,6 +489,7 @@ def test_study_reader_small_study(small_investigation_file, small_study_file):
         None,
         None,
         None,
+        headers_collection,
     )
     assert expected == study.processes["S1-sample collection-9-2"]
     expected = models.Process(
@@ -368,6 +504,7 @@ def test_study_reader_small_study(small_investigation_file, small_study_file):
         None,
         None,
         None,
+        headers_collection,
     )
     assert expected == study.processes["S1-sample collection-9-3"]
 

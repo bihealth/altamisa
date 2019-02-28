@@ -56,6 +56,7 @@ LABEL = "Label"
 MATERIAL_TYPE = "Material Type"
 PERFORMER = "Performer"
 TERM_SOURCE_REF = "Term Source REF"
+TERM_ACCESSION_NUMBER = "Term Accession Number"
 UNIT = "Unit"
 
 

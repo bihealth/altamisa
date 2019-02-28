@@ -1,12 +1,11 @@
 # -*- coding: utf-8 -*-
 """Tests for parsing ISA assay files"""
 
-# TODO: test with one annotation for each source, extraction, sample
-# TODO: test with secondary annotation (i.e., further qualify with term) or even tertiary (qualify with unit and qualify unit with term)
 
 import pytest  # noqa # pylint: disable=unused-import
 import os
 
+from altamisa.constants import table_headers
 from altamisa.isatab import models
 from altamisa.isatab import InvestigationReader, AssayRowReader, AssayReader
 
@@ -46,6 +45,7 @@ def test_assay_row_reader_minimal_assay(minimal_investigation_file, minimal_assa
         (),
         None,
         investigation.studies[0].assays["a_minimal.txt"],
+        [table_headers.SAMPLE_NAME],
     )
     assert expected == first_row[0]
     expected = models.Process(
@@ -60,6 +60,7 @@ def test_assay_row_reader_minimal_assay(minimal_investigation_file, minimal_assa
         None,
         None,
         None,
+        [table_headers.PROTOCOL_REF, table_headers.ASSAY_NAME],
     )
     assert expected == first_row[1]
     expected = models.Material(
@@ -72,6 +73,7 @@ def test_assay_row_reader_minimal_assay(minimal_investigation_file, minimal_assa
         (),
         None,
         investigation.studies[0].assays["a_minimal.txt"],
+        [table_headers.RAW_DATA_FILE],
     )
     assert expected == first_row[2]
     expected = models.Material(
@@ -84,6 +86,7 @@ def test_assay_row_reader_minimal_assay(minimal_investigation_file, minimal_assa
         (),
         None,
         investigation.studies[0].assays["a_minimal.txt"],
+        [table_headers.RAW_DATA_FILE],
     )
     assert expected == first_row[3]
 
@@ -130,6 +133,7 @@ def test_assay_reader_minimal_assay(minimal_investigation_file, minimal_assay_fi
         (),
         None,
         investigation.studies[0].assays["a_minimal.txt"],
+        [table_headers.SAMPLE_NAME],
     )
     assert expected == assay.materials["S1-sample-0815-N1"]
     expected = models.Material(
@@ -142,6 +146,7 @@ def test_assay_reader_minimal_assay(minimal_investigation_file, minimal_assay_fi
         (),
         None,
         investigation.studies[0].assays["a_minimal.txt"],
+        [table_headers.RAW_DATA_FILE],
     )
     assert expected == assay.materials["S1-A1-0815-N1-DNA1-WES1_L???_???_R1.fastq.gz-COL4"]
     expected = models.Material(
@@ -154,6 +159,7 @@ def test_assay_reader_minimal_assay(minimal_investigation_file, minimal_assay_fi
         (),
         None,
         investigation.studies[0].assays["a_minimal.txt"],
+        [table_headers.RAW_DATA_FILE],
     )
     assert expected == assay.materials["S1-A1-0815-N1-DNA1-WES1_L???_???_R2.fastq.gz-COL5"]
 
@@ -169,6 +175,7 @@ def test_assay_reader_minimal_assay(minimal_investigation_file, minimal_assay_fi
         None,
         None,
         None,
+        [table_headers.PROTOCOL_REF, table_headers.ASSAY_NAME],
     )
     assert expected == assay.processes["S1-A1-0815-N1-DNA1-WES1-3"]
 
@@ -221,6 +228,7 @@ def test_assay_row_reader_small_assay(small_investigation_file, small_assay_file
         (),
         None,
         investigation.studies[0].assays["a_small.txt"],
+        [table_headers.SAMPLE_NAME],
     )
     assert expected == first_row[0]
     expected = models.Process(
@@ -235,6 +243,7 @@ def test_assay_row_reader_small_assay(small_investigation_file, small_assay_file
         None,
         None,
         None,
+        [table_headers.PROTOCOL_REF],
     )
     assert expected == first_row[1]
     expected = models.Process(
@@ -249,6 +258,7 @@ def test_assay_row_reader_small_assay(small_investigation_file, small_assay_file
         None,
         None,
         None,
+        [table_headers.PROTOCOL_REF, table_headers.ASSAY_NAME],
     )
     assert expected == first_row[2]
     expected = models.Material(
@@ -261,6 +271,7 @@ def test_assay_row_reader_small_assay(small_investigation_file, small_assay_file
         (),
         None,
         investigation.studies[0].assays["a_small.txt"],
+        [table_headers.RAW_DATA_FILE],
     )
     assert expected == first_row[3]
     expected = models.Material(
@@ -273,6 +284,7 @@ def test_assay_row_reader_small_assay(small_investigation_file, small_assay_file
         (),
         None,
         investigation.studies[0].assays["a_small.txt"],
+        [table_headers.RAW_DATA_FILE],
     )
     assert expected == first_row[4]
     expected = models.Process(
@@ -287,6 +299,7 @@ def test_assay_row_reader_small_assay(small_investigation_file, small_assay_file
         None,
         None,
         None,
+        [table_headers.DATA_TRANSFORMATION_NAME],
     )
     assert expected == first_row[5]
     expected = models.Material(
@@ -299,6 +312,7 @@ def test_assay_row_reader_small_assay(small_investigation_file, small_assay_file
         (),
         None,
         investigation.studies[0].assays["a_small.txt"],
+        [table_headers.DERIVED_DATA_FILE],
     )
     assert expected == first_row[6]
 
@@ -314,6 +328,7 @@ def test_assay_row_reader_small_assay(small_investigation_file, small_assay_file
         (),
         None,
         investigation.studies[0].assays["a_small.txt"],
+        [table_headers.SAMPLE_NAME],
     )
     assert expected == second_row[0]
     expected = models.Process(
@@ -328,6 +343,7 @@ def test_assay_row_reader_small_assay(small_investigation_file, small_assay_file
         None,
         None,
         None,
+        [table_headers.PROTOCOL_REF],
     )
     assert expected == second_row[1]
     expected = models.Process(
@@ -342,6 +358,7 @@ def test_assay_row_reader_small_assay(small_investigation_file, small_assay_file
         None,
         None,
         None,
+        [table_headers.PROTOCOL_REF, table_headers.ASSAY_NAME],
     )
     assert expected == second_row[2]
     expected = models.Material(
@@ -354,6 +371,7 @@ def test_assay_row_reader_small_assay(small_investigation_file, small_assay_file
         (),
         None,
         investigation.studies[0].assays["a_small.txt"],
+        [table_headers.RAW_DATA_FILE],
     )
     assert expected == second_row[3]
     expected = models.Material(
@@ -366,6 +384,7 @@ def test_assay_row_reader_small_assay(small_investigation_file, small_assay_file
         (),
         None,
         investigation.studies[0].assays["a_small.txt"],
+        [table_headers.RAW_DATA_FILE],
     )
     assert expected == second_row[4]
     expected = models.Process(
@@ -380,6 +399,7 @@ def test_assay_row_reader_small_assay(small_investigation_file, small_assay_file
         None,
         None,
         None,
+        [table_headers.DATA_TRANSFORMATION_NAME],
     )
     assert expected == second_row[5]
     expected = models.Material(
@@ -392,6 +412,7 @@ def test_assay_row_reader_small_assay(small_investigation_file, small_assay_file
         (),
         None,
         investigation.studies[0].assays["a_small.txt"],
+        [table_headers.DERIVED_DATA_FILE],
     )
     assert expected == second_row[6]
 
@@ -432,6 +453,7 @@ def test_assay_reader_small_assay(small_investigation_file, small_assay_file):
         (),
         None,
         investigation.studies[0].assays["a_small.txt"],
+        [table_headers.SAMPLE_NAME],
     )
     assert expected == assay.materials["S1-sample-0815-N1"]
     expected = models.Material(
@@ -444,6 +466,7 @@ def test_assay_reader_small_assay(small_investigation_file, small_assay_file):
         (),
         None,
         investigation.studies[0].assays["a_small.txt"],
+        [table_headers.SAMPLE_NAME],
     )
     assert expected == assay.materials["S1-sample-0815-T1"]
     expected = models.Material(
@@ -456,6 +479,7 @@ def test_assay_reader_small_assay(small_investigation_file, small_assay_file):
         (),
         None,
         investigation.studies[0].assays["a_small.txt"],
+        [table_headers.RAW_DATA_FILE],
     )
     assert expected == assay.materials["S1-A1-0815-N1-DNA1-WES1_L???_???_R1.fastq.gz-COL5"]
     expected = models.Material(
@@ -468,6 +492,7 @@ def test_assay_reader_small_assay(small_investigation_file, small_assay_file):
         (),
         None,
         investigation.studies[0].assays["a_small.txt"],
+        [table_headers.RAW_DATA_FILE],
     )
     assert expected == assay.materials["S1-A1-0815-N1-DNA1-WES1_L???_???_R2.fastq.gz-COL6"]
     expected = models.Material(
@@ -480,6 +505,7 @@ def test_assay_reader_small_assay(small_investigation_file, small_assay_file):
         (),
         None,
         investigation.studies[0].assays["a_small.txt"],
+        [table_headers.RAW_DATA_FILE],
     )
     assert expected == assay.materials["S1-A1-0815-T1-DNA1-WES1_L???_???_R1.fastq.gz-COL5"]
     expected = models.Material(
@@ -492,6 +518,7 @@ def test_assay_reader_small_assay(small_investigation_file, small_assay_file):
         (),
         None,
         investigation.studies[0].assays["a_small.txt"],
+        [table_headers.RAW_DATA_FILE],
     )
     assert expected == assay.materials["S1-A1-0815-T1-DNA1-WES1_L???_???_R2.fastq.gz-COL6"]
     expected = models.Material(
@@ -504,6 +531,7 @@ def test_assay_reader_small_assay(small_investigation_file, small_assay_file):
         (),
         None,
         investigation.studies[0].assays["a_small.txt"],
+        [table_headers.DERIVED_DATA_FILE],
     )
     assert expected == assay.materials["S1-A1-0815-somatic.vcf.gz-COL8"]
 
@@ -519,6 +547,7 @@ def test_assay_reader_small_assay(small_investigation_file, small_assay_file):
         None,
         None,
         None,
+        [table_headers.PROTOCOL_REF],
     )
     assert expected == assay.processes["S1-A1-library preparation-2-1"]
     expected = models.Process(
@@ -533,6 +562,7 @@ def test_assay_reader_small_assay(small_investigation_file, small_assay_file):
         None,
         None,
         None,
+        [table_headers.PROTOCOL_REF],
     )
     assert expected == assay.processes["S1-A1-library preparation-2-2"]
     expected = models.Process(
@@ -547,6 +577,7 @@ def test_assay_reader_small_assay(small_investigation_file, small_assay_file):
         None,
         None,
         None,
+        [table_headers.PROTOCOL_REF, table_headers.ASSAY_NAME],
     )
     assert expected == assay.processes["S1-A1-0815-N1-DNA1-WES1-4"]
     expected = models.Process(
@@ -561,6 +592,7 @@ def test_assay_reader_small_assay(small_investigation_file, small_assay_file):
         None,
         None,
         None,
+        [table_headers.PROTOCOL_REF, table_headers.ASSAY_NAME],
     )
     assert expected == assay.processes["S1-A1-0815-T1-DNA1-WES1-4"]
 
@@ -750,6 +782,7 @@ def test_assay_reader_gelelect(gelelect_investigation_file, gelelect_assay_file)
         investigation.studies[0].assays[
             "a_study01_protein_expression_profiling_gel_electrophoresis.txt"
         ],
+        [table_headers.IMAGE_FILE],
     )
     assert expected == assay.materials["S1-A1-Image01.jpeg-COL19"]
 
@@ -765,8 +798,20 @@ def test_assay_reader_gelelect(gelelect_investigation_file, gelelect_assay_file)
         None,
         None,
         None,
+        [table_headers.PROTOCOL_REF, table_headers.SCAN_NAME],
     )
     assert expected == assay.processes["S1-A1-Scan02-18"]
+
+    header_electrophoresis = [
+        table_headers.PROTOCOL_REF,
+        table_headers.GEL_ELECTROPHORESIS_ASSAY_NAME,
+        table_headers.FIRST_DIMENSION,
+        table_headers.TERM_SOURCE_REF,
+        table_headers.TERM_ACCESSION_NUMBER,
+        table_headers.SECOND_DIMENSION,
+        table_headers.TERM_SOURCE_REF,
+        table_headers.TERM_ACCESSION_NUMBER,
+    ]
 
     expected = models.Process(
         "electrophoresis",
@@ -780,6 +825,7 @@ def test_assay_reader_gelelect(gelelect_investigation_file, gelelect_assay_file)
         None,
         models.OntologyTermRef("", "", ""),
         models.OntologyTermRef("", "", ""),
+        header_electrophoresis,
     )
     assert expected == assay.processes["S1-A1-Assay01-10"]
 
@@ -795,5 +841,6 @@ def test_assay_reader_gelelect(gelelect_investigation_file, gelelect_assay_file)
         None,
         models.OntologyTermRef("AssayX", None, None),
         models.OntologyTermRef("AssayY", None, None),
+        header_electrophoresis,
     )
     assert expected == assay.processes["S1-A1-electrophoresis-9-2"]

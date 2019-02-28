@@ -2,7 +2,6 @@
 """This module contains code for the parsing of assay and study files.
 """
 
-# TODO: validate whether protocol is known in investigation
 
 from __future__ import generator_stop
 
@@ -198,8 +197,7 @@ class _NodeBuilderBase:
                     msg = tpl.format(header.col_no)
                     raise ParseIsatabException(msg)
                 else:
-                    # The previous non-secondary header is annotated with an
-                    # ontology term.
+                    # The previous non-secondary header is annotated with an ontology term.
                     prev.term_source_ref_header = header
                     is_secondary = True
             elif header.column_type == table_headers.UNIT:
@@ -208,8 +206,7 @@ class _NodeBuilderBase:
                     msg = tpl.format(header.col_no)
                     raise ParseIsatabException(msg)
                 else:
-                    # The previous non-secondary header is annotated with a
-                    # unit.
+                    # The previous non-secondary header is annotated with a unit.
                     prev.unit_header = header
             # Update is secondary flag or not
             if not is_secondary:
@@ -233,7 +230,10 @@ class _NodeBuilderBase:
             accession = line[header2.col_no + 1]
             return models.OntologyTermRef(name, accession, ontology_name, self.ontology_source_refs)
         else:
-            return line[header.col_no] if line[header.col_no] else None
+            return line[header.col_no]
+
+    def _build_simple_headers_list(self) -> List[str]:
+        return [h for headers in self.column_headers for h in headers.get_simple_string()]
 
 
 class _MaterialBuilder(_NodeBuilderBase):
@@ -287,9 +287,7 @@ class _MaterialBuilder(_NodeBuilderBase):
                 counter_value,
             )
             unique_name = models.AnnotatedStr(name_val, was_empty=True)
-        extract_label = None
-        if self.extract_label_header:
-            extract_label = self._build_freetext_or_term_ref(self.extract_label_header, line)
+        extract_label = self._build_freetext_or_term_ref(self.extract_label_header, line)
         characteristics = tuple(
             self._build_complex(hdr, line, models.Characteristics)
             for hdr in self.characteristic_headers
@@ -328,6 +326,7 @@ class _MaterialBuilder(_NodeBuilderBase):
             factor_values,
             material_type,
             self.assay_info,
+            self._build_simple_headers_list(),
         )
 
 
@@ -389,18 +388,11 @@ class _ProcessBuilder(_NodeBuilderBase):
                 msg = tpl.format(pv.name, protocol_ref)
                 raise ParseIsatabException(msg)
         # Check for special case annotations
-        if self.array_design_ref_header:
-            array_design_ref = line[self.array_design_ref_header.col_no]
-        else:
-            array_design_ref = None
-        if self.first_dimension_header:
-            first_dimension = self._build_freetext_or_term_ref(self.first_dimension_header, line)
-        else:
-            first_dimension = None
-        if self.second_dimension_header:
-            second_dimension = self._build_freetext_or_term_ref(self.second_dimension_header, line)
-        else:
-            second_dimension = None
+        array_design_ref = (
+            line[self.array_design_ref_header.col_no] if self.array_design_ref_header else None
+        )
+        first_dimension = self._build_freetext_or_term_ref(self.first_dimension_header, line)
+        second_dimension = self._build_freetext_or_term_ref(self.second_dimension_header, line)
         # Then, constructing ``Process`` is easy
         return models.Process(
             protocol_ref,
@@ -414,6 +406,7 @@ class _ProcessBuilder(_NodeBuilderBase):
             array_design_ref,
             first_dimension,
             second_dimension,
+            self._build_simple_headers_list(),
         )
 
     def _build_protocol_ref_and_name(self, line: List[str]):
@@ -736,7 +729,7 @@ class StudyRowReader:
         self.study_id = study_id
         self.input_file = input_file
         self.unique_rows = set()
-        self.duplicate_rows = list()
+        self.duplicate_rows = []
         self._reader = csv.reader(input_file, delimiter="\t", quotechar='"')
         self._line = None
         self._read_next_line()
@@ -867,7 +860,7 @@ class AssayRowReader:
         self.assay_id = assay_id
         self.input_file = input_file
         self.unique_rows = set()
-        self.duplicate_rows = list()
+        self.duplicate_rows = []
         self._reader = csv.reader(input_file, delimiter="\t", quotechar='"')
         self._line = None
         self._read_next_line()
