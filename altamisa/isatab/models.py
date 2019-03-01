@@ -13,53 +13,12 @@ from pathlib import Path
 import re
 from typing import Dict, Tuple, NamedTuple, Union
 
+from ..constants.table_headers import *  # noqa: F403
+from ..constants.table_restrictions import *  # noqa: F403
 from ..exceptions import ParseIsatabException
-from . import headers
 
 
 __author__ = "Manuel Holtgrewe <manuel.holtgrewe@bihealth.de>"
-
-
-# Assay measurement types (only the once needed for special validations)
-PROTEIN_EXPRESSION_PROFILING = "protein expression profiling"
-PROTEIN_IDENTIFICATION = "protein identification"
-METABOLITE_PROFILING = "metabolite profiling"
-
-# Assay technology types (only the once needed for special validations)
-DNA_MICROARRAY = "dna microarray"
-GEL_ELECTROPHORESIS = "gel electrophoresis"
-PROTEIN_MICROARRAY = "protein microarray"
-MASS_SPECTROMETRY = "mass spectrometry"
-
-# Restriced data files
-RESTRICED_TECH_FILES = {
-    # microarray
-    headers.ARRAY_DESIGN_FILE: {DNA_MICROARRAY, PROTEIN_MICROARRAY},
-    headers.ARRAY_DATA_FILE: {DNA_MICROARRAY, PROTEIN_MICROARRAY},
-    headers.ARRAY_DATA_MATRIX_FILE: {DNA_MICROARRAY, PROTEIN_MICROARRAY},
-    headers.DERIVED_ARRAY_DATA_FILE: {DNA_MICROARRAY, PROTEIN_MICROARRAY},
-    headers.DERIVED_ARRAY_DATA_MATRIX_FILE: {DNA_MICROARRAY, PROTEIN_MICROARRAY},
-    # gel eletrophoresis
-    headers.SPOT_PICKING_FILE: {GEL_ELECTROPHORESIS},
-    # mass spectrometry
-    headers.DERIVED_SPECTRAL_DATA_FILE: {MASS_SPECTROMETRY},
-    headers.RAW_SPECTRAL_DATA_FILE: {MASS_SPECTROMETRY},
-    headers.PEPTIDE_ASSIGNMENT_FILE: {MASS_SPECTROMETRY},
-    headers.POST_TRANSLATIONAL_MODIFICATION_ASSIGNMENT_FILE: {MASS_SPECTROMETRY},
-    headers.PROTEIN_ASSIGNMENT_FILE: {MASS_SPECTROMETRY},
-    headers.METABOLITE_ASSIGNMENT_FILE: {MASS_SPECTROMETRY},
-}
-RESTRICED_MEAS_FILES = {
-    # proteomics
-    headers.PEPTIDE_ASSIGNMENT_FILE: {PROTEIN_EXPRESSION_PROFILING, PROTEIN_IDENTIFICATION},
-    headers.POST_TRANSLATIONAL_MODIFICATION_ASSIGNMENT_FILE: {
-        PROTEIN_EXPRESSION_PROFILING,
-        PROTEIN_IDENTIFICATION,
-    },
-    headers.PROTEIN_ASSIGNMENT_FILE: {PROTEIN_EXPRESSION_PROFILING, PROTEIN_IDENTIFICATION},
-    # metabolomics
-    headers.METABOLITE_ASSIGNMENT_FILE: {METABOLITE_PROFILING},
-}
 
 
 # Base types, used throughout -------------------------------------------------
@@ -476,28 +435,28 @@ class Material(
         assay_info: AssayInfo,
     ):
         # Restrict certain annotations to corresponding material types
-        if extract_label and type != headers.LABELED_EXTRACT_NAME:
+        if extract_label and type != LABELED_EXTRACT_NAME:
             tpl = "Label not applied to Labeled Extract Name: {}."
             msg = tpl.format(type)
             raise ParseIsatabException(msg)
 
-        if characteristics and type in headers.DATA_FILE_HEADERS:
+        if characteristics and type in DATA_FILE_HEADERS:
             tpl = "Data nodes don't support Characteristics: {}."
             msg = tpl.format(characteristics)
             raise ParseIsatabException(msg)
 
         if material_type and type not in (
-            headers.EXTRACT_NAME,
-            headers.LABELED_EXTRACT_NAME,
-            headers.SAMPLE_NAME,
-            headers.SOURCE_NAME,
+            EXTRACT_NAME,
+            LABELED_EXTRACT_NAME,
+            SAMPLE_NAME,
+            SOURCE_NAME,
         ):
             tpl = "Material Type not applied to proper Material: {}."
             msg = tpl.format(type)
             raise ParseIsatabException(msg)
 
         # Restrict certain file types to corresponding assay measurement and technology
-        if type in RESTRICED_TECH_FILES or type in RESTRICED_MEAS_FILES:
+        if type in RESTRICTED_TECH_FILES or type in RESTRICTED_MEAS_FILES:
             msg = ""
             if assay_info is None:
                 tpl = "Data {} not supported for unspecified assay."
@@ -505,23 +464,25 @@ class Material(
             else:
                 msgs = list()
                 if (
-                    type in RESTRICED_TECH_FILES
-                    and assay_info.technology_type.name.lower() not in RESTRICED_TECH_FILES[type]
+                    type in RESTRICTED_TECH_FILES
+                    and assay_info.technology_type.name.lower() not in RESTRICTED_TECH_FILES[type]
                 ):
                     tpl = "Data {} not supported by assay technology {} (only {})"
                     msg = tpl.format(
-                        type, assay_info.technology_type.name, ", ".join(RESTRICED_TECH_FILES[type])
+                        type,
+                        assay_info.technology_type.name,
+                        ", ".join(RESTRICTED_TECH_FILES[type]),
                     )
                     msgs.append(msg)
                 if (
-                    type in RESTRICED_MEAS_FILES
-                    and assay_info.measurement_type.name.lower() not in RESTRICED_MEAS_FILES[type]
+                    type in RESTRICTED_MEAS_FILES
+                    and assay_info.measurement_type.name.lower() not in RESTRICTED_MEAS_FILES[type]
                 ):
                     tpl = "Data {} not supported by assay measurement {} (only {})"
                     msg = tpl.format(
                         type,
                         assay_info.measurement_type.name,
-                        ", ".join(RESTRICED_MEAS_FILES[type]),
+                        ", ".join(RESTRICTED_MEAS_FILES[type]),
                     )
                     msgs.append(msg)
                 if msgs:
