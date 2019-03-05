@@ -11,7 +11,7 @@ from pathlib import Path
 from typing import Iterator, TextIO
 import warnings
 
-from ..constants.investigation_headers import *  # noqa: F403
+from ..constants import investigation_headers
 from ..exceptions import ParseIsatabException, ParseIsatabWarning
 from . import models
 
@@ -220,16 +220,18 @@ class InvestigationReader:
     def _read_ontology_source_reference(self) -> Iterator[models.OntologyRef]:
         # Read ONTOLOGY SOURCE REFERENCE header
         line = self._read_next_line()
-        if not line[0] == ONTOLOGY_SOURCE_REFERENCE:
+        if not line[0] == investigation_headers.ONTOLOGY_SOURCE_REFERENCE:
             tpl = "Expected {} but got {}"
-            msg = tpl.format(ONTOLOGY_SOURCE_REFERENCE, line)
+            msg = tpl.format(investigation_headers.ONTOLOGY_SOURCE_REFERENCE, line)
             raise ParseIsatabException(msg)
         # Read the other four lines in this section.
         section, comment_keys = self._read_multi_column_section(
-            "Term Source", ONTOLOGY_SOURCE_REF_KEYS, ONTOLOGY_SOURCE_REFERENCE
+            "Term Source",
+            investigation_headers.ONTOLOGY_SOURCE_REF_KEYS,
+            investigation_headers.ONTOLOGY_SOURCE_REFERENCE,
         )
         # Create resulting objects
-        columns = zip(*(section[k] for k in ONTOLOGY_SOURCE_REF_KEYS))
+        columns = zip(*(section[k] for k in investigation_headers.ONTOLOGY_SOURCE_REF_KEYS))
         for i, (name, file_, version, desc) in enumerate(columns):
             # If ontology source is empty, skip it
             # (since ISAcreator always adds a last empty ontology column)
@@ -249,40 +251,44 @@ class InvestigationReader:
     def _read_basic_info(self) -> models.BasicInfo:
         # Read INVESTIGATION header
         line = self._read_next_line()
-        if not line[0] == INVESTIGATION:
+        if not line[0] == investigation_headers.INVESTIGATION:
             tpl = "Expected {} but got {}"
-            msg = tpl.format(INVESTIGATION, line)
+            msg = tpl.format(investigation_headers.INVESTIGATION, line)
             raise ParseIsatabException(msg)
         # Read the other lines in this section.
         section, comment_keys = self._read_single_column_section(
-            "Investigation", INVESTIGATION_INFO_KEYS, INVESTIGATION
+            "Investigation",
+            investigation_headers.INVESTIGATION_INFO_KEYS,
+            investigation_headers.INVESTIGATION,
         )
         # Create resulting object
         # TODO: do we really need the name of the investigation file?
         comments = _parse_comments(section, comment_keys)
         return models.BasicInfo(
             Path(os.path.basename(self.input_file.name)),
-            section[INVESTIGATION_IDENTIFIER],
-            section[INVESTIGATION_TITLE],
-            section[INVESTIGATION_DESCRIPTION],
-            _parse_date(section[INVESTIGATION_SUBMISSION_DATE]),
-            _parse_date(section[INVESTIGATION_PUBLIC_RELEASE_DATE]),
+            section[investigation_headers.INVESTIGATION_IDENTIFIER],
+            section[investigation_headers.INVESTIGATION_TITLE],
+            section[investigation_headers.INVESTIGATION_DESCRIPTION],
+            _parse_date(section[investigation_headers.INVESTIGATION_SUBMISSION_DATE]),
+            _parse_date(section[investigation_headers.INVESTIGATION_PUBLIC_RELEASE_DATE]),
             comments,
         )
 
     def _read_publications(self) -> Iterator[models.PublicationInfo]:
         # Read INVESTIGATION PUBLICATIONS header
         line = self._read_next_line()
-        if not line[0] == INVESTIGATION_PUBLICATIONS:
+        if not line[0] == investigation_headers.INVESTIGATION_PUBLICATIONS:
             tpl = "Expected {} but got {}"
-            msg = tpl.format(INVESTIGATION_PUBLICATIONS, line)
+            msg = tpl.format(investigation_headers.INVESTIGATION_PUBLICATIONS, line)
             raise ParseIsatabException(msg)
         # Read the other lines in this section.
         section, comment_keys = self._read_multi_column_section(
-            "Investigation Pub", INVESTIGATION_PUBLICATIONS_KEYS, INVESTIGATION_PUBLICATIONS
+            "Investigation Pub",
+            investigation_headers.INVESTIGATION_PUBLICATIONS_KEYS,
+            investigation_headers.INVESTIGATION_PUBLICATIONS,
         )
         # Create resulting objects
-        columns = zip(*(section[k] for k in INVESTIGATION_PUBLICATIONS_KEYS))
+        columns = zip(*(section[k] for k in investigation_headers.INVESTIGATION_PUBLICATIONS_KEYS))
         for (
             i,
             (pubmed_id, doi, authors, title, status_term, status_term_acc, status_term_src),
@@ -296,16 +302,18 @@ class InvestigationReader:
     def _read_contacts(self) -> Iterator[models.ContactInfo]:
         # Read INVESTIGATION CONTACTS header
         line = self._read_next_line()
-        if not line[0] == INVESTIGATION_CONTACTS:
+        if not line[0] == investigation_headers.INVESTIGATION_CONTACTS:
             tpl = "Expected {} but got {}"
-            msg = tpl.format(INVESTIGATION_CONTACTS, line)
+            msg = tpl.format(investigation_headers.INVESTIGATION_CONTACTS, line)
             raise ParseIsatabException(msg)
         # Read the other lines in this section.
         section, comment_keys = self._read_multi_column_section(
-            "Investigation Person", INVESTIGATION_CONTACTS_KEYS, INVESTIGATION_CONTACTS
+            "Investigation Person",
+            investigation_headers.INVESTIGATION_CONTACTS_KEYS,
+            investigation_headers.INVESTIGATION_CONTACTS,
         )
         # Create resulting objects
-        columns = zip(*(section[k] for k in INVESTIGATION_CONTACTS_KEYS))
+        columns = zip(*(section[k] for k in investigation_headers.INVESTIGATION_CONTACTS_KEYS))
         for (
             i,
             (
@@ -344,23 +352,23 @@ class InvestigationReader:
         while self._line:
             # Read STUDY header
             line = self._read_next_line()
-            if not line[0] == STUDY:
+            if not line[0] == investigation_headers.STUDY:
                 tpl = "Expected {} but got {}"
-                msg = tpl.format(INVESTIGATION, line)
+                msg = tpl.format(investigation_headers.INVESTIGATION, line)
                 raise ParseIsatabException(msg)
             # Read the other lines in this section.
             section, comment_keys = self._read_single_column_section(
-                "Study", STUDY_INFO_KEYS, STUDY
+                "Study", investigation_headers.STUDY_INFO_KEYS, investigation_headers.STUDY
             )
             # From this, parse the basic information from the study
             comments = _parse_comments(section, comment_keys)
             basic_info = models.BasicInfo(
-                Path(section[STUDY_FILE_NAME]),
-                section[STUDY_IDENTIFIER],
-                section[STUDY_TITLE],
-                section[STUDY_DESCRIPTION],
-                _parse_date(section[STUDY_SUBMISSION_DATE]),
-                _parse_date(section[STUDY_PUBLIC_RELEASE_DATE]),
+                Path(section[investigation_headers.STUDY_FILE_NAME]),
+                section[investigation_headers.STUDY_IDENTIFIER],
+                section[investigation_headers.STUDY_TITLE],
+                section[investigation_headers.STUDY_DESCRIPTION],
+                _parse_date(section[investigation_headers.STUDY_SUBMISSION_DATE]),
+                _parse_date(section[investigation_headers.STUDY_PUBLIC_RELEASE_DATE]),
                 comments,
             )
             # Read the remaining sections for this study
@@ -379,16 +387,18 @@ class InvestigationReader:
     def _read_study_design_descriptors(self) -> Iterator[models.FreeTextOrTermRef]:
         # Read STUDY DESIGN DESCRIPTORS header
         line = self._read_next_line()
-        if not line[0] == STUDY_DESIGN_DESCRIPTORS:
+        if not line[0] == investigation_headers.STUDY_DESIGN_DESCRIPTORS:
             tpl = "Expected {} but got {}"
-            msg = tpl.format(STUDY_DESIGN_DESCRIPTORS, line)
+            msg = tpl.format(investigation_headers.STUDY_DESIGN_DESCRIPTORS, line)
             raise ParseIsatabException(msg)
         # Read the other lines in this section.
         section, comment_keys = self._read_multi_column_section(
-            "Study Design", STUDY_DESIGN_DESCR_KEYS, STUDY_DESIGN_DESCRIPTORS
+            "Study Design",
+            investigation_headers.STUDY_DESIGN_DESCR_KEYS,
+            investigation_headers.STUDY_DESIGN_DESCRIPTORS,
         )
         # Create resulting objects
-        columns = zip(*(section[k] for k in STUDY_DESIGN_DESCR_KEYS))
+        columns = zip(*(section[k] for k in investigation_headers.STUDY_DESIGN_DESCR_KEYS))
         for i, (type_term, type_term_acc, type_term_src) in enumerate(columns):
             otype = models.OntologyTermRef(
                 type_term, type_term_acc, type_term_src, self._ontology_refs
@@ -399,16 +409,18 @@ class InvestigationReader:
     def _read_study_publications(self) -> Iterator[models.PublicationInfo]:
         # Read STUDY PUBLICATIONS header
         line = self._read_next_line()
-        if not line[0] == STUDY_PUBLICATIONS:
+        if not line[0] == investigation_headers.STUDY_PUBLICATIONS:
             tpl = "Expected {} but got {}"
-            msg = tpl.format(STUDY_PUBLICATIONS, line)
+            msg = tpl.format(investigation_headers.STUDY_PUBLICATIONS, line)
             raise ParseIsatabException(msg)
         # Read the other lines in this section.
         section, comment_keys = self._read_multi_column_section(
-            "Study Pub", STUDY_PUBLICATIONS_KEYS, STUDY_PUBLICATIONS
+            "Study Pub",
+            investigation_headers.STUDY_PUBLICATIONS_KEYS,
+            investigation_headers.STUDY_PUBLICATIONS,
         )
         # Create resulting objects
-        columns = zip(*(section[k] for k in STUDY_PUBLICATIONS_KEYS))
+        columns = zip(*(section[k] for k in investigation_headers.STUDY_PUBLICATIONS_KEYS))
         for (
             i,
             (pubmed_id, doi, authors, title, status_term, status_term_acc, status_term_src),
@@ -422,16 +434,18 @@ class InvestigationReader:
     def _read_study_factors(self) -> Iterator[models.FactorInfo]:
         # Read STUDY FACTORS header
         line = self._read_next_line()
-        if not line[0] == STUDY_FACTORS:
+        if not line[0] == investigation_headers.STUDY_FACTORS:
             tpl = "Expected {} but got {}"
-            msg = tpl.format(STUDY_FACTORS, line)
+            msg = tpl.format(investigation_headers.STUDY_FACTORS, line)
             raise ParseIsatabException(msg)
         # Read the other lines in this section.
         section, comment_keys = self._read_multi_column_section(
-            "Study Factor", STUDY_FACTORS_KEYS, STUDY_FACTORS
+            "Study Factor",
+            investigation_headers.STUDY_FACTORS_KEYS,
+            investigation_headers.STUDY_FACTORS,
         )
         # Create resulting objects
-        columns = zip(*(section[k] for k in STUDY_FACTORS_KEYS))
+        columns = zip(*(section[k] for k in investigation_headers.STUDY_FACTORS_KEYS))
         for i, (name, type_term, type_term_acc, type_term_src) in enumerate(columns):
             otype = models.OntologyTermRef(
                 type_term, type_term_acc, type_term_src, self._ontology_refs
@@ -442,16 +456,18 @@ class InvestigationReader:
     def _read_study_assays(self) -> Iterator[models.AssayInfo]:
         # Read STUDY ASSAYS header
         line = self._read_next_line()
-        if not line[0] == STUDY_ASSAYS:
+        if not line[0] == investigation_headers.STUDY_ASSAYS:
             tpl = "Expected {} but got {}"
-            msg = tpl.format(STUDY_ASSAYS, line)
+            msg = tpl.format(investigation_headers.STUDY_ASSAYS, line)
             raise ParseIsatabException(msg)
         # Read the other lines in this section.
         section, comment_keys = self._read_multi_column_section(
-            "Study Assay", STUDY_ASSAYS_KEYS, STUDY_ASSAYS
+            "Study Assay",
+            investigation_headers.STUDY_ASSAYS_KEYS,
+            investigation_headers.STUDY_ASSAYS,
         )
         # Create resulting objects
-        columns = zip(*(section[k] for k in STUDY_ASSAYS_KEYS))
+        columns = zip(*(section[k] for k in investigation_headers.STUDY_ASSAYS_KEYS))
         for (
             i,
             (
@@ -482,8 +498,8 @@ class InvestigationReader:
                     '"{}", "{}", "{}", "{}", "{}", "{}", "{}", "{}"'
                 )
                 msg = tpl.format(
-                    STUDY_ASSAY_FILE_NAME,
-                    STUDY_ASSAYS,
+                    investigation_headers.STUDY_ASSAY_FILE_NAME,
+                    investigation_headers.STUDY_ASSAYS,
                     file_,
                     meas_type,
                     meas_type_term_acc,
@@ -508,16 +524,18 @@ class InvestigationReader:
     def _read_study_protocols(self) -> Iterator[models.ProtocolInfo]:
         # Read STUDY PROTOCOLS header
         line = self._read_next_line()
-        if not line[0] == STUDY_PROTOCOLS:
+        if not line[0] == investigation_headers.STUDY_PROTOCOLS:
             tpl = "Expected {} but got {}"
-            msg = tpl.format(STUDY_PROTOCOLS, line)
+            msg = tpl.format(investigation_headers.STUDY_PROTOCOLS, line)
             raise ParseIsatabException(msg)
         # Read the other lines in this section.
         section, comment_keys = self._read_multi_column_section(
-            "Study Protocol", STUDY_PROTOCOLS_KEYS, STUDY_PROTOCOLS
+            "Study Protocol",
+            investigation_headers.STUDY_PROTOCOLS_KEYS,
+            investigation_headers.STUDY_PROTOCOLS,
         )
         # Create resulting objects
-        columns = zip(*(section[k] for k in STUDY_PROTOCOLS_KEYS))
+        columns = zip(*(section[k] for k in investigation_headers.STUDY_PROTOCOLS_KEYS))
         for (
             i,
             (
@@ -539,7 +557,7 @@ class InvestigationReader:
         ) in enumerate(columns):
             if not name:  # don't allow unnamed assay columns
                 tpl = 'Expected protocol name in line {}; found: "{}"'
-                msg = tpl.format(STUDY_PROTOCOL_NAME, name)
+                msg = tpl.format(investigation_headers.STUDY_PROTOCOL_NAME, name)
                 raise ParseIsatabException(msg)
             type_ont = models.OntologyTermRef(
                 type_term, type_term_acc, type_term_src, self._ontology_refs
@@ -568,16 +586,18 @@ class InvestigationReader:
     def _read_study_contacts(self) -> Iterator[models.ContactInfo]:
         # Read STUDY CONTACTS header
         line = self._read_next_line()
-        if not line[0] == STUDY_CONTACTS:
+        if not line[0] == investigation_headers.STUDY_CONTACTS:
             tpl = "Expected {} but got {}"
-            msg = tpl.format(STUDY_CONTACTS, line)
+            msg = tpl.format(investigation_headers.STUDY_CONTACTS, line)
             raise ParseIsatabException(msg)
         # Read the other lines in this section.
         section, comment_keys = self._read_multi_column_section(
-            "Study Person", STUDY_CONTACTS_KEYS, STUDY_CONTACTS
+            "Study Person",
+            investigation_headers.STUDY_CONTACTS_KEYS,
+            investigation_headers.STUDY_CONTACTS,
         )
         # Create resulting objects
-        columns = zip(*(section[k] for k in STUDY_CONTACTS_KEYS))
+        columns = zip(*(section[k] for k in investigation_headers.STUDY_CONTACTS_KEYS))
         for (
             i,
             (

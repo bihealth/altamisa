@@ -13,8 +13,8 @@ from pathlib import Path
 import re
 from typing import Dict, Tuple, NamedTuple, Union
 
-from ..constants.table_headers import *  # noqa: F403
-from ..constants.table_restrictions import *  # noqa: F403
+from ..constants import table_headers
+from ..constants import table_restrictions
 from ..exceptions import ParseIsatabException
 
 
@@ -435,28 +435,31 @@ class Material(
         assay_info: AssayInfo,
     ):
         # Restrict certain annotations to corresponding material types
-        if extract_label and type != LABELED_EXTRACT_NAME:
+        if extract_label and type != table_headers.LABELED_EXTRACT_NAME:
             tpl = "Label not applied to Labeled Extract Name: {}."
             msg = tpl.format(type)
             raise ParseIsatabException(msg)
 
-        if characteristics and type in DATA_FILE_HEADERS:
+        if characteristics and type in table_headers.DATA_FILE_HEADERS:
             tpl = "Data nodes don't support Characteristics: {}."
             msg = tpl.format(characteristics)
             raise ParseIsatabException(msg)
 
         if material_type and type not in (
-            EXTRACT_NAME,
-            LABELED_EXTRACT_NAME,
-            SAMPLE_NAME,
-            SOURCE_NAME,
+            table_headers.EXTRACT_NAME,
+            table_headers.LABELED_EXTRACT_NAME,
+            table_headers.SAMPLE_NAME,
+            table_headers.SOURCE_NAME,
         ):
             tpl = "Material Type not applied to proper Material: {}."
             msg = tpl.format(type)
             raise ParseIsatabException(msg)
 
         # Restrict certain file types to corresponding assay measurement and technology
-        if type in RESTRICTED_TECH_FILES or type in RESTRICTED_MEAS_FILES:
+        if (
+            type in table_restrictions.RESTRICTED_TECH_FILES
+            or type in table_restrictions.RESTRICTED_MEAS_FILES
+        ):
             msg = ""
             if assay_info is None:
                 tpl = "Data {} not supported for unspecified assay."
@@ -464,25 +467,27 @@ class Material(
             else:
                 msgs = list()
                 if (
-                    type in RESTRICTED_TECH_FILES
-                    and assay_info.technology_type.name.lower() not in RESTRICTED_TECH_FILES[type]
+                    type in table_restrictions.RESTRICTED_TECH_FILES
+                    and assay_info.technology_type.name.lower()
+                    not in table_restrictions.RESTRICTED_TECH_FILES[type]
                 ):
                     tpl = "Data {} not supported by assay technology {} (only {})"
                     msg = tpl.format(
                         type,
                         assay_info.technology_type.name,
-                        ", ".join(RESTRICTED_TECH_FILES[type]),
+                        ", ".join(table_restrictions.RESTRICTED_TECH_FILES[type]),
                     )
                     msgs.append(msg)
                 if (
-                    type in RESTRICTED_MEAS_FILES
-                    and assay_info.measurement_type.name.lower() not in RESTRICTED_MEAS_FILES[type]
+                    type in table_restrictions.RESTRICTED_MEAS_FILES
+                    and assay_info.measurement_type.name.lower()
+                    not in table_restrictions.RESTRICTED_MEAS_FILES[type]
                 ):
                     tpl = "Data {} not supported by assay measurement {} (only {})"
                     msg = tpl.format(
                         type,
                         assay_info.measurement_type.name,
-                        ", ".join(RESTRICTED_MEAS_FILES[type]),
+                        ", ".join(table_restrictions.RESTRICTED_MEAS_FILES[type]),
                     )
                     msgs.append(msg)
                 if msgs:
