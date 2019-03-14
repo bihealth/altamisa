@@ -36,6 +36,7 @@ class ColumnHeader:
         return str(self)
 
     def get_simple_string(self) -> List[str]:
+        """Return a list of simple string representations of the column types"""
         return [self.column_type]
 
 
@@ -248,7 +249,7 @@ class FirstDimensionHeader(SimpleColumnHeader):
 
 
 class LabelHeader(SimpleColumnHeader):
-    """Material Type header in an assay"""
+    """Label header in an assay"""
 
     column_type = table_headers.LABEL
 
@@ -266,7 +267,7 @@ class PerformerHeader(SimpleColumnHeader):
 
 
 class SecondDimensionHeader(SimpleColumnHeader):
-    """SecondDimension header in an assay"""
+    """Second Dimension header in an assay"""
 
     column_type = table_headers.SECOND_DIMENSION
 
@@ -278,6 +279,7 @@ class TermRefAnnotationHeader(ColumnHeader):
         super().__init__(table_headers.TERM_SOURCE_REF, col_no, 2)
 
     def get_simple_string(self) -> List[str]:
+        """Return a list of simple string representations of the column types"""
         return [table_headers.TERM_SOURCE_REF, table_headers.TERM_ACCESSION_NUMBER]
 
 
@@ -308,23 +310,24 @@ class LabeledColumnHeader(ColumnHeader):
         return str(self)
 
     def get_simple_string(self):
+        """Return a list of simple string representations of the column types"""
         return ["".join((self.column_type, "[", self.label, "]"))]
 
 
 class CharacteristicsHeader(LabeledColumnHeader):
-    """Protocol Characteristics[*] header in a study or assay"""
+    """Material ``Characteristics[*]`` header in a study or assay"""
 
     column_type = table_headers.CHARACTERISTICS
 
 
 class CommentHeader(LabeledColumnHeader):
-    """Comment header in a study or assay"""
+    """``Comment`` header in a study or assay"""
 
     column_type = table_headers.COMMENT
 
 
 class FactorValueHeader(LabeledColumnHeader):
-    """Protocol ``Factor Value[*]`` header in a study or assay"""
+    """``Factor Value[*]`` header in a study or assay"""
 
     column_type = table_headers.FACTOR_VALUE
 
@@ -339,12 +342,17 @@ class ParameterValueHeader(LabeledColumnHeader):
 
 
 class HeaderParserBase:
-    """Helper base class for parsing a header from a study or assay file."""
+    """
+    Helper base class for parsing a header from a study or assay file.
+
+    :type tokens: list
+    :param tokens: List of strings, e.g. a split line read from a tsv/cvs file.
+    """
 
     #: Names of the allowed headers
     allowed_headers = None
 
-    #: Headers that are mapped to ``SimpleColumnHeader``s
+    #: Headers that are mapped to ``SimpleColumnHeader``
     simple_headers = {
         # Material headers
         table_headers.EXTRACT_NAME: ExtractHeader,
@@ -403,6 +411,7 @@ class HeaderParserBase:
         self.col_no = 0
 
     def run(self) -> Iterator[ColumnHeader]:
+        """Parse the header"""
         while True:
             try:
                 yield self._parse_next()

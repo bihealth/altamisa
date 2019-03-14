@@ -674,6 +674,11 @@ class StudyRowReader:
 
     This is a more low-level part of the interface.  Please prefer
     using :py:StudyReader: over using this class.
+
+    :type study_id: str
+    :param study_id: Unique identifier for the study, needed to disambiguate nodes between files.
+    :type input_file: TextIO
+    :param input_file: ISA-Tab study file
     """
 
     @classmethod
@@ -717,6 +722,11 @@ class StudyRowReader:
         return prev_line
 
     def read(self):
+        """
+        Read the study rows
+
+        :returns: Nodes per row of the study file
+        """
         builder = _StudyRowBuilder(self.header, self.study_id)
         while True:
             line = self._read_next_line()
@@ -737,6 +747,11 @@ class StudyReader:
 
     This is the main facade class for reading study objects.  Prefer it
     over using the more low-level code.
+
+    :type study_id: str
+    :param study_id: Unique identifier for the study, needed to disambiguate nodes between files.
+    :type input_file: TextIO
+    :param input_file: ISA-Tab study file
     """
 
     @classmethod
@@ -746,12 +761,18 @@ class StudyReader:
 
     def __init__(self, study_id: str, input_file: TextIO):
         self.row_reader = StudyRowReader.from_stream(study_id, input_file)
-        #: The file used for reading from
+        # The file used for reading from
         self.input_file = input_file
-        #: The header of the ISA study file
+        # The header of the ISA study file
         self.header = self.row_reader.header
 
     def read(self):
+        """
+        Parse the study file
+
+        :rtype: models.Study
+        :returns: Study model including graph of material and process nodes
+        """
         study_data = _AssayAndStudyBuilder(self.input_file.name, self.header, models.Study).build(
             list(self.row_reader.read())
         )
@@ -767,6 +788,13 @@ class AssayRowReader:
 
     This is a more low-level part of the interface.  Please prefer
     using :py:AssayReader: over using this class.
+
+    :type study_id: str
+    :param study_id: Unique identifier for the study, needed to disambiguate nodes between files.
+    :type assay_id: str
+    :param assay_id: Unique identifier for the assay, needed to disambiguate nodes between files.
+    :type input_file: TextIO
+    :param input_file: ISA-Tab assay file
     """
 
     @classmethod
@@ -811,6 +839,11 @@ class AssayRowReader:
         return prev_line
 
     def read(self):
+        """
+        Read assays rows
+
+        :return: Nodes per row of the assay file
+        """
         builder = _AssayRowBuilder(self.header, self.study_id, self.assay_id)
         while True:
             line = self._read_next_line()
@@ -831,6 +864,13 @@ class AssayReader:
 
     This is the main facade class for reading assay objects.  Prefer it
     over using the more low-level code.
+
+    :type study_id: str
+    :param study_id: Unique identifier for the study, needed to disambiguate nodes between files.
+    :type assay_id: str
+    :param assay_id: Unique identifier for the assay, needed to disambiguate nodes between files.
+    :type input_file: TextIO
+    :param input_file: ISA-Tab assay file
     """
 
     @classmethod
@@ -840,12 +880,18 @@ class AssayReader:
 
     def __init__(self, study_id: str, assay_id: str, input_file: TextIO):
         self.row_reader = AssayRowReader.from_stream(study_id, assay_id, input_file)
-        #: The file used for reading from
+        # The file used for reading from
         self.input_file = input_file
-        #: The header of the ISA assay file
+        # The header of the ISA assay file
         self.header = self.row_reader.header
 
     def read(self):
+        """
+        Parse the assay file
+
+        :rtype: models.Assay
+        :returns: Assay model including graph of material and process nodes
+        """
         assay_data = _AssayAndStudyBuilder(self.input_file.name, self.header, models.Assay).build(
             list(self.row_reader.read())
         )

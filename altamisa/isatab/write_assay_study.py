@@ -25,7 +25,7 @@ __author__ = (
 # Graph traversal -------------------------------------------------------
 
 
-class Digraph:
+class _Digraph:
     """Simple class encapsulating directed graph with vertices and arcs"""
 
     def __init__(self, vertices, arcs: Arc, starting_type: str):
@@ -48,7 +48,7 @@ class Digraph:
             self.outgoing.setdefault(s_name, []).append(t_name)
 
 
-class UnionFind:
+class _UnionFind:
     """Union-Find (disjoint set) data structure allowing to address by vertex
     name"""
 
@@ -95,17 +95,17 @@ class UnionFind:
         self._sz[i] += self._sz[j]
 
 
-class RefTableBuilder:
+class _RefTableBuilder:
     """Class for building reference table from a graph"""
 
     def __init__(self, nodes, arcs, starting_type: str):
         # Input directed graph
-        self.digraph = Digraph(nodes, arcs, starting_type)
+        self.digraph = _Digraph(nodes, arcs, starting_type)
         #: Output table rows
         self._rows = []
 
     def _partition(self):
-        uf = UnionFind(self.digraph.v_by_name.keys())
+        uf = _UnionFind(self.digraph.v_by_name.keys())
 
         for arc in self.digraph.arcs:
             uf.union_by_name(arc[0], arc[1])
@@ -154,7 +154,8 @@ class RefTableBuilder:
 
 
 class _WriterBase:
-    """Base class that writes a file from an ``Study`` or ``Assay`` object."""
+    """Base class that writes a file from an ``Study`` or ``Assay`` object.
+    """
 
     #: Note type starting a graph
     _starting_type = None
@@ -166,21 +167,21 @@ class _WriterBase:
     def from_stream(
         cls, study_or_assay: NamedTuple, output_file: TextIO, quote=None, lineterminator=None
     ):
-        """"""
+        """Construct from file-like object"""
         return cls(study_or_assay, output_file, quote, lineterminator)
 
     def __init__(
         self, study_or_assay: NamedTuple, output_file: TextIO, quote=None, lineterminator=None
     ):
-        #: Study or Assay model
+        # Study or Assay model
         self._model = study_or_assay
-        #: Nodes in the model (all materials/data and processes)
+        # Nodes in the model (all materials/data and processes)
         self._nodes = {**self._model.materials, **self._model.processes}
-        #: Output file
+        # Output file
         self.output_file = output_file
-        #: Character for quoting
+        # Character for quoting
         self.quote = quote
-        #: Csv file writer
+        # Csv file writer
         self._writer = csv.writer(
             output_file,
             delimiter="\t",
@@ -190,9 +191,9 @@ class _WriterBase:
             escapechar="\\",
             quotechar=self.quote if self.quote else "|",
         )
-        #: Reference table for output
+        # Reference table for output
         self._ref_table = None
-        #: Headers for output
+        # Headers for output
         self._headers = None
 
     def _write_next_line(self, line: [str]):
@@ -383,7 +384,7 @@ class _WriterBase:
 
     def write(self):
         """Write study or assay file"""
-        self._ref_table = RefTableBuilder(
+        self._ref_table = _RefTableBuilder(
             self._nodes.values(), self._model.arcs, self._starting_type
         ).run()
         self._extract_headers()
@@ -392,7 +393,18 @@ class _WriterBase:
 
 
 class StudyWriter(_WriterBase):
-    """Class that writes a file from an ``Study`` object."""
+    """
+    Class that writes a file from an ``Study`` object.
+
+    :type study_or_assay: models.Study
+    :param study_or_assay: The study model to write
+    :type output_file: TextIO
+    :param output_file: Output ISA-Tab study file
+    :type quote: str
+    :param quote: Optional quoting character (none by default)
+    :type lineterminator: str
+    :param lineterminator: Optional line terminator (OS specific by default)
+    """
 
     #: Node type starting a study graph
     _starting_type = "Source Name"
@@ -402,7 +414,18 @@ class StudyWriter(_WriterBase):
 
 
 class AssayWriter(_WriterBase):
-    """Class that writes a file from an ``Assay`` object."""
+    """
+    Class that writes a file from an ``Assay`` object.
+
+    :type study_or_assay: models.Assay
+    :param study_or_assay: The assay model to write
+    :type output_file: TextIO
+    :param output_file: Output ISA-Tab assay file
+    :type quote: str
+    :param quote: Optional quoting character (none by default)
+    :type lineterminator: str
+    :param lineterminator: Optional line terminator (OS specific by default)
+    """
 
     #: Node type starting an assay graph
     _starting_type = "Sample Name"

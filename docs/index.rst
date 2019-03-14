@@ -38,6 +38,30 @@ The main features are
 - well-tested code, and well-documented API,
 - example applications, e.g., conversion of ISA-tab to Graphviz dot.
 
+
+.. _special_extensions:
+
+Special Extensions
+------------------
+
+In addition to the default ISA-Tab format specifications, AltamISA supports the
+following special modifications to improve specific use cases:
+
+- **List of values** in ``Characterics`` or ``Parameter Value`` fields by using
+  semicolon-separators (";"). Note, for ontology terms the same number of
+  values is expected in the associated field ``Term Source REF`` and
+  ``Term Accession Number``.
+- **Material name** ``Library Name`` for improved library
+  annotation in nucleotide sequencing assays.
+
+.. note:: Although these modifications have been discussed by the ISA community
+          (`list of values`_; `library name`_), they are not supported by
+          official ISA software, yet.
+
+.. _list of values: https://groups.google.com/forum/?hl=en-GB#!topic/isaforum/HOTScd3EeDY
+.. _library name: https://groups.google.com/forum/?hl=en-GB#!topic/isaforum/yHlglEhrkI8
+
+
 Frequently Asked Questions
 --------------------------
 
@@ -81,10 +105,13 @@ What's the aim?
     :maxdepth: 1
     :titlesonly:
 
-    api_exceptions
-    api_headers
-    api_models
     api_parsers
+    api_writers
+    api_validators
+    api_models
+    api_constants
+    api_headers
+    api_exceptions
 
 .. toctree::
     :caption: Project Info

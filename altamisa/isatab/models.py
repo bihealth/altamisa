@@ -21,21 +21,6 @@ __author__ = "Manuel Holtgrewe <manuel.holtgrewe@bihealth.de>"
 
 class AnnotatedStr(str):
     """A ``str`` that can be flagged with values.
-
-    .. doctest::
-
-        >>> from altamisa.isatab.models import AnnotatedStr
-        >>> x = AnnotatedStr('EMPTY', was_empty=True, value_no=1)
-        >>> x
-        'EMPTY'
-        >>> hasattr(x, 'was_empty')
-        True
-        >>> x.was_empty
-        True
-        >>> hasattr(x, 'value_no')
-        True
-        >>> x.value_no
-        1
     """
 
     def __new__(cls, value, *args, **kwargs):
@@ -323,17 +308,17 @@ class ParameterValue(NamedTuple):
 class Material(NamedTuple):
     """Representation of a Material or Data node."""
 
+    #: The type of node (i.e. column name)
     type: str
     #: The unique name of the material node.
-    #:
-    #: In the case that the label was empty, an ``AnnotatedStr`` is used and
-    #: the attribute ``was_empty`` is set to ``True``.  As a ``str`` is used
-    #: otherwise, use ``getattr(m.name, 'was_empty', False)`` for obtaining
-    #: this information reliably.
+    #: This is usually created with respect to study/assay and column.
+    #: The unique name is necessary to distinguish materials of different type with potential
+    #: overlaps in names. Otherwise graph representation might be incorrect (ambiguous arcs, loops)
+    #: and the original relation of material and process not conclusively reproducible.
     unique_name: str
-    # Original name of a material or data file
+    #: Original name of a material or data file
     name: str
-    # The label of a Labeled Extract
+    #: The label of a Labeled Extract
     extract_label: FreeTextOrTermRef
     #: Material characteristics
     characteristics: Tuple[Characteristics]
@@ -353,18 +338,16 @@ class Process(NamedTuple):
     #: Referenced to protocol name from investigation
     protocol_ref: str
     #: The unique name of the process node.
-    #:
-    #: When "Protocol REF" is given without a further
-    #: qualifying name, this is generated from the protocol reference and
-    #: an auto-incrementing number. In this case that the label was empty,
-    #: an ``AnnotatedStr`` is used and the attribute ``was_empty`` is set to
-    #: ``True``. As a ``str`` is used otherwise, use
-    #: ``getattr(m.name, 'was_empty', False)`` for obtaining this information
-    #: reliably.
+    #: This is usually created with respect to study/assay and column.
+    #: The unique name is necessary to distinguish processes of different protocols with potential
+    #: overlaps in names. Otherwise graph representation might be incorrect (ambiguous arcs, loops)
+    #: and the original relation of material and process not conclusively reproducible.
+    #: When "Protocol REF" is given without a further qualifying name, this is generated from the
+    #: protocol reference with an auto-incrementing number.
     unique_name: str
-    # Original name of a process (e.g. from Assay Name etc.)
+    #: Original name of a process (e.g. from Assay Name etc.)
     name: str
-    # Type of original name (e.g. Assay Name)
+    #: Type of original name (e.g. Assay Name)
     name_type: str
     #: Process date
     date: date
@@ -375,26 +358,31 @@ class Process(NamedTuple):
     #: Tuple of process comments
     comments: Tuple[Comment]
 
-    #: Special case annotations
-    #: Technology types: "DNA microarray", "protein microarray"
-    #: Protocol types: "nucleic acid hybridization", "hybridization"
-    #: Array design reference
     array_design_ref: str
-
-    #: Technology types: "gel electrophoresis"
-    #: Protocol types: "electrophoresis"
-    #: First and second dimension (INSTEAD of Gel Electrophoresis Assay Name)
+    """
+    Array design reference (special case annotation)\n
+    Technology types: "DNA microarray", "protein microarray"\n
+    Protocol types: "nucleic acid hybridization", "hybridization"
+    """
     first_dimension: FreeTextOrTermRef
+    """
+    First dimension (special case annotation, INSTEAD of Gel Electrophoresis Assay Name)\n
+    Technology types: "gel electrophoresis"\n
+    Protocol types: "electrophoresis"
+    """
     second_dimension: FreeTextOrTermRef
+    """
+    Second dimension (special case annotation, INSTEAD of Gel Electrophoresis Assay Name)\n
+    Technology types: "gel electrophoresis"\n
+    Protocol types: "electrophoresis"
+    """
 
     #: Columns headers from/for ISA-tab parsing/writing
     headers: List[str]
 
 
 class Arc(NamedTuple):
-    """Representation of an arc between two ``Material`` and/or ``Process``
-    nodes.
-    """
+    """Representation of an arc between two ``Material`` and/or ``Process`` nodes."""
 
     #: The arc's tail name
     tail: str

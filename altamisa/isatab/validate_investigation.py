@@ -18,7 +18,7 @@ from ..exceptions import (
 )
 from .helpers import is_ontology_term_ref
 from . import models
-from .validate_assay_study import OntologyTermRefValidator
+from .validate_assay_study import _OntologyTermRefValidator
 
 
 __author__ = "Mathias Kuhring <mathias.kuhring@bihealth.de>"
@@ -70,17 +70,23 @@ def _validate_pubmed_id(pubmed_id) -> str:
 
 
 class InvestigationValidator:
-    """Validator for Investigation"""
+    """
+    Validator for Investigation
+
+    :type investigation: models.InvestigationInfo
+    :param investigation: The investigation model to validate
+    """
 
     def __init__(self, investigation: models.InvestigationInfo):
         self._investigation = investigation
-        self._ontology_validator = OntologyTermRefValidator(investigation.ontology_source_refs)
+        self._ontology_validator = _OntologyTermRefValidator(investigation.ontology_source_refs)
         self._study_ids = set()
         self._study_paths = set()
         self._study_titles = set()
         self._assay_paths = set()
 
     def validate(self):
+        """Validate the investigation"""
         self._validate_ontology_sources()
         self._validate_sections()
 

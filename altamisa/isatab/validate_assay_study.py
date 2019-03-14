@@ -27,7 +27,7 @@ MODEL_TYPE_STUDY = "study"
 # Validator classes --------------------------------------------------------------------
 
 
-class OntologyTermRefValidator:
+class _OntologyTermRefValidator:
     """Validator for OntologyTermRef values"""
 
     def __init__(self, ontology_source_refs: Dict[str, models.OntologyRef]):
@@ -61,14 +61,14 @@ class OntologyTermRefValidator:
             warnings.warn(msg, CriticalIsaValidationWarning)
 
 
-class MaterialValidator:
+class _MaterialValidator:
     """Validator for Material nodes"""
 
     def __init__(
         self,
         model_type,
         factor_refs: Dict[str, models.FactorInfo],
-        ontology_validator: OntologyTermRefValidator,
+        ontology_validator: _OntologyTermRefValidator,
         assay_info: models.AssayInfo = None,
     ):
         self._model_type = model_type
@@ -228,13 +228,13 @@ class MaterialValidator:
                 warnings.warn(msg, ModerateIsaValidationWarning)
 
 
-class ProcessValidator:
+class _ProcessValidator:
     """Validator for Process nodes"""
 
     def __init__(
         self,
         protocols: Dict[str, models.ProtocolInfo],
-        ontology_validator: OntologyTermRefValidator = None,
+        ontology_validator: _OntologyTermRefValidator = None,
         assay_info: models.AssayInfo = None,
     ):
         self._protocols = protocols
@@ -374,7 +374,7 @@ class ProcessValidator:
             self._ontology_validator.validate(process.second_dimension)
 
 
-class ArcValidator:
+class _ArcValidator:
     """Validator for Arcs"""
 
     def __init__(self, materials, processes, model_type):
@@ -418,16 +418,17 @@ class _AssayAndStudyValidator:
     _model_type = None
 
     def __init__(self, investigation: models.InvestigationInfo):
-        self._ontology_validator = OntologyTermRefValidator(investigation.ontology_source_refs)
+        self._ontology_validator = _OntologyTermRefValidator(investigation.ontology_source_refs)
 
     def validate(self):
+        """Validate the study or assay"""
         self._validate_materials()
         self._validate_processes()
         self._validate_arcs()
 
     def _validate_materials(self):
         # Iterate materials and validate
-        validator = MaterialValidator(
+        validator = _MaterialValidator(
             self._model_type, self._study_info.factors, self._ontology_validator, self._assay_info
         )
         for m in self._model.materials.values():
@@ -435,7 +436,7 @@ class _AssayAndStudyValidator:
 
     def _validate_processes(self):
         # Iterate processes and validate
-        validator = ProcessValidator(
+        validator = _ProcessValidator(
             self._study_info.protocols, self._ontology_validator, self._assay_info
         )
         for p in self._model.processes.values():
@@ -443,13 +444,22 @@ class _AssayAndStudyValidator:
 
     def _validate_arcs(self):
         # Iterate arcs and validate
-        validator = ArcValidator(self._model.materials, self._model.processes, self._model_type)
+        validator = _ArcValidator(self._model.materials, self._model.processes, self._model_type)
         for a in self._model.arcs:
             validator.validate(a)
 
 
 class StudyValidator(_AssayAndStudyValidator):
-    """Validator for Study"""
+    """
+    Validator for Study
+
+    :type investigation: models.InvestigationInfo
+    :param investigation: The corresponding investigation model
+    :type study_info: models.StudyInfo
+    :param study_info: The corresponding study information
+    :type study: models.Study
+    :param study: The Study model to validate
+    """
 
     _model_type = MODEL_TYPE_STUDY
 
@@ -467,7 +477,18 @@ class StudyValidator(_AssayAndStudyValidator):
 
 
 class AssayValidator(_AssayAndStudyValidator):
-    """Validator for Assay"""
+    """
+    Validator for Assay
+
+    :type investigation: models.InvestigationInfo
+    :param investigation: The corresponding investigation model
+    :type study_info: models.StudyInfo
+    :param study_info: The corresponding study information
+    :type assay_info: models.AssayInfo
+    :param assay_info: The corresponding assay information
+    :type assay: models.Assay
+    :param assay: The Assay model to validate
+    """
 
     _model_type = MODEL_TYPE_ASSAY
 

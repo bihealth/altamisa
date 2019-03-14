@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
-"""Exceptions and Warnings for the Altamisa library.
+"""
+Exceptions and Warnings used in the AltamISA library.
 """
 
 __author__ = "Manuel Holtgrewe <manuel.holtgrewe@bihealth.de>"
@@ -34,12 +35,12 @@ class IsaValidationWarning(IsaWarning):
 
 
 class AdvisoryIsaValidationWarning(IsaValidationWarning):
-    """Warning raised on uncritical problems validating ISA models or objects"""
+    """Warning raised on uncritical problems when validating ISA models or objects"""
 
 
 class ModerateIsaValidationWarning(IsaValidationWarning):
-    """Warning raised on problems validating ISA models or objects"""
+    """Warning raised on moderate problems when validating ISA models or objects"""
 
 
 class CriticalIsaValidationWarning(IsaValidationWarning):
-    """Warning raised on critical problems validating ISA models or objects"""
+    """Warning raised on critical problems when validating ISA models or objects"""
