@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""Constants for data and annotation restrictions in study and assay tables"""
+"""Constants used for validation of data and annotation restrictions in study and assay tables."""
 
 
 __author__ = (
@@ -12,47 +12,47 @@ from . import table_headers
 
 
 # Assay measurement types (only the once needed for special validations)
-PROTEIN_EXPRESSION_PROFILING = "protein expression profiling"
-PROTEIN_IDENTIFICATION = "protein identification"
-METABOLITE_PROFILING = "metabolite profiling"
+PROTEIN_EXPRESSION_PROFILING = "protein expression profiling"  #:
+PROTEIN_IDENTIFICATION = "protein identification"  #:
+METABOLITE_PROFILING = "metabolite profiling"  #:
 
 
 # Assay technology types (only the once needed for special validations)
-DNA_MICROARRAY = "dna microarray"
-GEL_ELECTROPHORESIS = "gel electrophoresis"
-PROTEIN_MICROARRAY = "protein microarray"
-NUCLEOTIDE_SEQUENCING = "nucleotide sequencing"
-MASS_SPECTROMETRY = "mass spectrometry"
+DNA_MICROARRAY = "dna microarray"  #:
+GEL_ELECTROPHORESIS = "gel electrophoresis"  #:
+PROTEIN_MICROARRAY = "protein microarray"  #:
+NUCLEOTIDE_SEQUENCING = "nucleotide sequencing"  #:
+MASS_SPECTROMETRY = "mass spectrometry"  #:
 
 
 # Protocol types (only the once needed for special validations)
-PT_DATA_COLLECTION = "data collection"
-PT_DATA_NORMALIZATION = "data normalization"
-PT_DATA_TRANSFORMATION = "data transformation"
-PT_ELECTROPHORESIS = "electrophoresis"
-PT_HYBRIDIZATION = "hybridization"
-PT_MASS_SPECTROMETRY = "mass spectrometry"
-PT_NUCLEIC_ACID_HYBRIDIZATION = "nucleic acid hybridization"
+PT_DATA_COLLECTION = "data collection"  #:
+PT_DATA_NORMALIZATION = "data normalization"  #:
+PT_DATA_TRANSFORMATION = "data transformation"  #:
+PT_ELECTROPHORESIS = "electrophoresis"  #:
+PT_HYBRIDIZATION = "hybridization"  #:
+PT_MASS_SPECTROMETRY = "mass spectrometry"  #:
+PT_NUCLEIC_ACID_HYBRIDIZATION = "nucleic acid hybridization"  #:
 
 
 # Material restrictions ----------------------------------------------------------------------------
 
 
-# Materials restricted to assay technology
+#: Materials restricted to certain assay technologies
 RESTRICTED_MATERIALS_ATECH = {
     # nucleotide sequencing
     table_headers.LIBRARY_NAME: {NUCLEOTIDE_SEQUENCING}
 }
 
 
-# Materials restricted to assay measurement
+#: Materials restricted to certain assay measurements
 RESTRICTED_MATERIALS_AMEAS = {}
 
 
 # Data file restrictions ---------------------------------------------------------------------------
 
 
-# Data files restricted to assay technology
+#: Data files restricted to certain assay technologies
 RESTRICTED_FILES_ATECH = {
     # microarray
     table_headers.ARRAY_DESIGN_FILE: {DNA_MICROARRAY, PROTEIN_MICROARRAY},
@@ -72,7 +72,7 @@ RESTRICTED_FILES_ATECH = {
 }
 
 
-# Data files restricted to assay measurement
+#: Data files restricted to certain assay measurements
 RESTRICTED_FILES_AMEAS = {
     # proteomics
     table_headers.PEPTIDE_ASSIGNMENT_FILE: {PROTEIN_EXPRESSION_PROFILING, PROTEIN_IDENTIFICATION},
@@ -89,7 +89,7 @@ RESTRICTED_FILES_AMEAS = {
 # Protocol restrictions ----------------------------------------------------------------------------
 
 
-# Protocol names restricted to assay technology
+#: Protocol names restricted to certain assay technologies
 RESTRICTED_PROTO_NAMES_ATECH = {
     # microarray
     table_headers.SCAN_NAME: {DNA_MICROARRAY, GEL_ELECTROPHORESIS, PROTEIN_MICROARRAY},
@@ -100,7 +100,7 @@ RESTRICTED_PROTO_NAMES_ATECH = {
     table_headers.MS_ASSAY_NAME: {MASS_SPECTROMETRY},
 }
 
-# Protocol names restricted by protocol type (ignore if ref is UNKNOWN)
+#: Protocol names restricted by certain protocol types (ignored if ref is UNKNOWN)
 RESTRICTED_PROTO_NAMES_PTYPE = {
     table_headers.DATA_TRANSFORMATION_NAME: {PT_DATA_TRANSFORMATION},
     table_headers.GEL_ELECTROPHORESIS_ASSAY_NAME: {PT_ELECTROPHORESIS},
@@ -110,7 +110,7 @@ RESTRICTED_PROTO_NAMES_PTYPE = {
     table_headers.SCAN_NAME: {PT_DATA_COLLECTION},
 }
 
-# Protocol special case annotations restricted to assay technology
+#: Protocol special case annotations restricted to certain assay technologies
 RESTRICTED_PROTO_ANNOS_ATECH = {
     # microarray
     table_headers.ARRAY_DESIGN_REF: {DNA_MICROARRAY, PROTEIN_MICROARRAY},
@@ -119,7 +119,7 @@ RESTRICTED_PROTO_ANNOS_ATECH = {
     table_headers.SECOND_DIMENSION: {GEL_ELECTROPHORESIS},
 }
 
-# Protocol special case annotations restricted to protocol type
+#: Protocol special case annotations restricted to certain protocol types
 RESTRICTED_PROTO_ANNOS_PTYPE = {
     table_headers.ARRAY_DESIGN_REF: {PT_HYBRIDIZATION, PT_NUCLEIC_ACID_HYBRIDIZATION},
     table_headers.FIRST_DIMENSION: {PT_ELECTROPHORESIS},

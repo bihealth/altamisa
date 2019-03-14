@@ -99,8 +99,11 @@ def _parse_date(date_string) -> datetime.date:
 
 
 class InvestigationReader:
-    """Helper class that reads an investigation file into a
-    ``InvestigationInfo`` object.
+    """
+    Main class to read an investigation file into an ``InvestigationInfo`` object.
+
+    :type input_file: TextIO
+    :param input_file: ISA-Tab investigation file
     """
 
     @classmethod
@@ -109,7 +112,7 @@ class InvestigationReader:
         return InvestigationReader(input_file)
 
     def __init__(self, input_file: TextIO):
-        self.input_file = input_file
+        self._input_file = input_file
         self._reader = csv.reader(input_file, delimiter="\t", quotechar='"')
         self._line = None
         self._read_next_line()
@@ -139,7 +142,14 @@ class InvestigationReader:
             return self._line[0].startswith(token)
 
     def read(self) -> models.InvestigationInfo:
-        """Read investigation file"""
+        """
+        Read the investigation file
+
+        :rtype: models.InvestigationInfo
+        :returns: Investigation model including all information from the investigation file
+        """
+        # Read sections in fixed order
+        # ("section headings MUST appear in the Investigation file (in order)")
         ontology_refs = {o.name: o for o in self._read_ontology_source_reference()}
         info = self._read_basic_info()
         publications = list(self._read_publications())
@@ -175,7 +185,7 @@ class InvestigationReader:
         if len(section) != len(ref_keys) + len(comment_keys):
             tpl = "Missing entries in section {}; only found: {}"
             msg = tpl.format(section_name, list(sorted(section)))
-            raise ParseIsatabException(msg)  # TODO: should be warning
+            raise ParseIsatabException(msg)  # TODO: should be warning?
         if not len(set([len(v) for v in section.values()])) == 1:
             tpl = "Inconsistent entry lengths in section {}"
             msg = tpl.format(section_name)
@@ -211,7 +221,7 @@ class InvestigationReader:
         if len(section) != len(ref_keys) + len(comment_keys):
             tpl = "Missing entries in section {}; only found: {}"
             msg = tpl.format(section_name, list(sorted(section)))
-            raise ParseIsatabException(msg)  # TODO: should be warning
+            raise ParseIsatabException(msg)  # TODO: should be warning?
         return section, comment_keys
 
     def _read_ontology_source_reference(self) -> Iterator[models.OntologyRef]:
@@ -257,7 +267,7 @@ class InvestigationReader:
         # TODO: do we really need the name of the investigation file?
         comments = _parse_comments(section, comment_keys)
         return models.BasicInfo(
-            Path(os.path.basename(self.input_file.name)),
+            Path(os.path.basename(self._input_file.name)),
             section[investigation_headers.INVESTIGATION_IDENTIFIER],
             section[investigation_headers.INVESTIGATION_TITLE],
             section[investigation_headers.INVESTIGATION_DESCRIPTION],
@@ -365,8 +375,10 @@ class InvestigationReader:
                 comments,
                 list(section.keys()),
             )
-            # Read the remaining sections for this study
-            # TODO: specs says "order MAY vary"
+            # Read the remaining sections for this study in fixed order
+            # (though the study specification says the "order MAY vary", the overall investigation
+            # specification demands that "section headings MUST appear in the Investigation file
+            # (in order)", which we perceive as higher priority.)
             design_descriptors = tuple(self._read_study_design_descriptors())
             publications = tuple(self._read_study_publications())
             factors = {f.name: f for f in self._read_study_factors()}

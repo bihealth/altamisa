@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""Token constants for study and assay table parsing and writing"""
+"""Token constants for study and assay table parsing and writing."""
 
 
 __author__ = (

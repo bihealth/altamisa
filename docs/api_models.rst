@@ -1,135 +1,147 @@
-.. _models:
+.. _api_models:
 
 ======
 Models
 ======
 
-- **TODO**: document constants that are necessary/useful for users when using parsers/writers and constructing objects?
+Class models for storing and representing ISA data, with particular focus on
+ISA-Tab compatibility. The modeling follows the structure of the specifications
+with different classes for each file type (investigation, study, assay),
+investigation sections, the different study and assay column types etc. In
+particular, study and assay data (i.e. corresponding materials and processes)
+are represented by use of directed acyclic graphs.
+
 
 .. contents::
 
 altamisa.isatab.AnnotatedStr
 ----------------------------
 
-.. autoexception:: altamisa.isatab.AnnotatedStr
+.. autoclass:: altamisa.isatab.AnnotatedStr
     :members:
 
 altamisa.isatab.OntologyTermRef
 -------------------------------
 
-.. autoexception:: altamisa.isatab.OntologyTermRef
+.. autoclass:: altamisa.isatab.OntologyTermRef
     :members:
 
 altamisa.isatab.Comment
 -----------------------
 
-.. autoexception:: altamisa.isatab.Comment
+.. autoclass:: altamisa.isatab.Comment
     :members:
 
 altamisa.isatab.OntologyRef
 ---------------------------
 
-.. autoexception:: altamisa.isatab.OntologyRef
+.. autoclass:: altamisa.isatab.OntologyRef
     :members:
 
 altamisa.isatab.BasicInfo
 -------------------------
 
-.. autoexception:: altamisa.isatab.BasicInfo
+.. autoclass:: altamisa.isatab.BasicInfo
+    :members:
+
+altamisa.isatab.PublicationInfo
+-------------------------------
+
+.. autoclass:: altamisa.isatab.PublicationInfo
     :members:
 
 altamisa.isatab.ContactInfo
 ---------------------------
 
-.. autoexception:: altamisa.isatab.ContactInfo
+.. autoclass:: altamisa.isatab.ContactInfo
     :members:
 
 altamisa.isatab.DesignDescriptorsInfo
 -------------------------------------
 
-.. autoexception:: altamisa.isatab.DesignDescriptorsInfo
+.. autoclass:: altamisa.isatab.DesignDescriptorsInfo
     :members:
 
 altamisa.isatab.FactorInfo
 --------------------------
 
-.. autoexception:: altamisa.isatab.FactorInfo
+.. autoclass:: altamisa.isatab.FactorInfo
     :members:
 
 altamisa.isatab.AssayInfo
 -------------------------
 
-.. autoexception:: altamisa.isatab.AssayInfo
+.. autoclass:: altamisa.isatab.AssayInfo
     :members:
 
 altamisa.isatab.ProtocolComponentInfo
 -------------------------------------
 
-.. autoexception:: altamisa.isatab.ProtocolComponentInfo
+.. autoclass:: altamisa.isatab.ProtocolComponentInfo
     :members:
 
 altamisa.isatab.ProtocolInfo
 ----------------------------
 
-.. autoexception:: altamisa.isatab.ProtocolInfo
+.. autoclass:: altamisa.isatab.ProtocolInfo
     :members:
 
 altamisa.isatab.StudyInfo
 -------------------------
 
-.. autoexception:: altamisa.isatab.StudyInfo
+.. autoclass:: altamisa.isatab.StudyInfo
     :members:
 
 altamisa.isatab.InvestigationInfo
 ---------------------------------
 
-.. autoexception:: altamisa.isatab.InvestigationInfo
+.. autoclass:: altamisa.isatab.InvestigationInfo
     :members:
 
 altamisa.isatab.Characteristics
 -------------------------------
 
-.. autoexception:: altamisa.isatab.Characteristics
+.. autoclass:: altamisa.isatab.Characteristics
     :members:
 
 altamisa.isatab.FactorValue
 ---------------------------
 
-.. autoexception:: altamisa.isatab.FactorValue
+.. autoclass:: altamisa.isatab.FactorValue
     :members:
 
 altamisa.isatab.ParameterValue
 ------------------------------
 
-.. autoexception:: altamisa.isatab.ParameterValue
+.. autoclass:: altamisa.isatab.ParameterValue
     :members:
 
 altamisa.isatab.Material
 ------------------------
 
-.. autoexception:: altamisa.isatab.Material
+.. autoclass:: altamisa.isatab.Material
     :members:
 
 altamisa.isatab.Process
 -----------------------
 
-.. autoexception:: altamisa.isatab.Process
+.. autoclass:: altamisa.isatab.Process
     :members:
 
 altamisa.isatab.Arc
 -------------------
 
-.. autoexception:: altamisa.isatab.Arc
+.. autoclass:: altamisa.isatab.Arc
     :members:
 
 altamisa.isatab.Study
 ---------------------
 
-.. autoexception:: altamisa.isatab.Study
+.. autoclass:: altamisa.isatab.Study
     :members:
 
 altamisa.isatab.Assay
 ---------------------
 
-.. autoexception:: altamisa.isatab.Assay
+.. autoclass:: altamisa.isatab.Assay
     :members:

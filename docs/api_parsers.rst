@@ -1,10 +1,12 @@
-.. _parsers:
+.. _api_parsers:
 
 =======
 Parsers
 =======
 
-- **TODO**: document constants that are necessary/useful for users when using parsers/writers and constructing objects?
+Classes to read data from ISA-Tab investigation, study and assay files and
+create the corresponding AltamISA models.
+
 
 .. contents::
 

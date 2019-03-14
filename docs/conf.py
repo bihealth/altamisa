@@ -33,7 +33,12 @@ import altamisa
 
 # Add any Sphinx extension module names here, as strings. They can be
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom ones.
-extensions = ["sphinx.ext.autodoc", "sphinx.ext.viewcode", "sphinx.ext.doctest"]
+extensions = [
+    "sphinx.ext.autodoc",
+    "sphinx.ext.viewcode",
+    "sphinx.ext.doctest",
+    "sphinx.ext.autosummary",
+]
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ["_templates"]
@@ -153,3 +158,9 @@ texinfo_documents = [
         "Miscellaneous",
     )
 ]
+
+# -- Options for automated documentation -------------------------------
+
+# Order of members (e.g. classes in module)
+autodoc_member_order = "bysource"
+autodoc_default_flags = ["members", "undoc-members"]

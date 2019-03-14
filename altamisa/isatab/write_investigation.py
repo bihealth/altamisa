@@ -52,7 +52,17 @@ def _init_multi_column_section(section_keys) -> dict:
 
 
 class InvestigationWriter:
-    """Helper class that writes an investigation file from an ``InvestigationInfo`` object.
+    """
+    Main class to write an investigation file from an ``InvestigationInfo`` object.
+
+    :type investigation: models.InvestigationInfo
+    :param investigation: The investigation model to write
+    :type output_file: TextIO
+    :param output_file: Output ISA-Tab investigation file
+    :type quote: str
+    :param quote: Optional quoting character (none by default)
+    :type lineterminator: str
+    :param lineterminator: Optional line terminator (OS specific by default)
     """
 
     @classmethod
@@ -63,7 +73,7 @@ class InvestigationWriter:
         quote=None,
         lineterminator=None,
     ):
-        """"""
+        """Construct from file-like object"""
         return InvestigationWriter(investigation, output_file, quote, lineterminator)
 
     def __init__(
@@ -73,13 +83,13 @@ class InvestigationWriter:
         quote=None,
         lineterminator=None,
     ):
-        #: Investigation model
+        # Investigation model
         self.investigation = investigation
-        #: Investigation output file
+        # Investigation output file
         self.output_file = output_file
-        #: Quote for csv export
+        # Quote for csv export
         self.quote = quote
-        #: Csv file writer
+        # Csv file writer
         self._writer = csv.writer(
             output_file,
             delimiter="\t",
