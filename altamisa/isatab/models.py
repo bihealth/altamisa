@@ -63,9 +63,7 @@ class OntologyTermRef(namedtuple("OntologyTermRef", "name accession ontology_nam
         if ontology_name or accession:
             # All three variables must be available
             if not all((name, ontology_name, accession)):
-                tpl = (
-                    "Incomplete ontology term reference:\n" "name: {}\nOntology: {}\nAccession: {}"
-                )
+                tpl = "Incomplete ontology term reference:\nName: {}\nOntology: {}\nAccession: {}"
                 msg = tpl.format(
                     name if name else "?",
                     ontology_name if ontology_name else "?",
@@ -462,7 +460,7 @@ class Characteristics(NamedTuple):
     #: Characteristics name
     name: str
     #: Characteristics value
-    value: FreeTextOrTermRef
+    value: List[FreeTextOrTermRef]
     #: Characteristics unit
     unit: FreeTextOrTermRef
 
@@ -484,7 +482,7 @@ class ParameterValue(NamedTuple):
     #: Parameter name
     name: str
     #: Parameter value
-    value: FreeTextOrTermRef
+    value: List[FreeTextOrTermRef]
     #: Parameter value unit
     unit: FreeTextOrTermRef
 
