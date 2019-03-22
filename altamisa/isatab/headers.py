@@ -64,6 +64,12 @@ class LabeledExtractHeader(SimpleColumnHeader):
     column_type = table_headers.LABELED_EXTRACT_NAME
 
 
+class LibraryHeader(SimpleColumnHeader):
+    """Library header in an assay"""
+
+    column_type = table_headers.LIBRARY_NAME
+
+
 class SampleHeader(SimpleColumnHeader):
     """Sample header in a study or assay"""
 
@@ -340,6 +346,7 @@ class HeaderParserBase:
         # Material headers
         table_headers.EXTRACT_NAME: ExtractHeader,
         table_headers.LABELED_EXTRACT_NAME: LabeledExtractHeader,
+        table_headers.LIBRARY_NAME: LibraryHeader,
         table_headers.SAMPLE_NAME: SampleHeader,
         table_headers.SOURCE_NAME: SourceHeader,
         # Data headers
@@ -493,6 +500,7 @@ class AssayHeaderParser(HeaderParserBase):
         # Material names
         table_headers.EXTRACT_NAME,
         table_headers.LABELED_EXTRACT_NAME,
+        table_headers.LIBRARY_NAME,
         table_headers.SAMPLE_NAME,
         # Data names
         table_headers.ARRAY_DATA_FILE,

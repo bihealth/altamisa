@@ -21,7 +21,19 @@ METABOLITE_PROFILING = "metabolite profiling"
 DNA_MICROARRAY = "dna microarray"
 GEL_ELECTROPHORESIS = "gel electrophoresis"
 PROTEIN_MICROARRAY = "protein microarray"
+NUCLEOTIDE_SEQUENCING = "nucleotide sequencing"
 MASS_SPECTROMETRY = "mass spectrometry"
+
+
+# Materials restricted to assay technology
+RESTRICTED_TECH_MATERIALS = {
+    # nucleotide sequencing
+    table_headers.LIBRARY_NAME: {NUCLEOTIDE_SEQUENCING}
+}
+
+
+# Materials restricted to assay measurement
+RESTRICTED_MEAS_MATERIALS = {}
 
 
 # Data files restricted to assay technology
