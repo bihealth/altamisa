@@ -12,10 +12,11 @@ from datetime import date
 from pathlib import Path
 import re
 from typing import Dict, List, Tuple, NamedTuple, Union
+import warnings
 
 from ..constants import table_headers
 from ..constants import table_restrictions
-from ..exceptions import ParseIsatabException
+from ..exceptions import ParseIsatabException, ParseIsatabWarning
 
 
 __author__ = "Manuel Holtgrewe <manuel.holtgrewe@bihealth.de>"
@@ -106,7 +107,7 @@ class Comment(NamedTuple):
     value: str
 
 
-# Pattern and functions for validate strings
+# Pattern and functions for validation
 # DATE_PATTERN = re.compile("^\\d{4}-(0[1-9]|1[0-2])-(0[1-9]|[12]\\d|3[01])$")
 MAIL_PATTERN = re.compile("^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\\.[a-zA-Z0-9-.]+$")
 PHONE_PATTERN = re.compile("^\\+?[\\d /()-]+$")  # only checks characters!
@@ -148,6 +149,61 @@ def _validate_pubmed_id(pubmed_id) -> str:
         msg = tpl.format(pubmed_id)
         raise ParseIsatabException(msg)
     return pubmed_id
+
+
+def _validate_assay_material_restrictions(type_, assay_info=None):
+    if type_ in {
+        **table_restrictions.RESTRICTED_MEAS_MATERIALS,
+        **table_restrictions.RESTRICTED_TECH_MATERIALS,
+        **table_restrictions.RESTRICTED_MEAS_FILES,
+        **table_restrictions.RESTRICTED_TECH_FILES,
+    }:
+        if assay_info is None:
+            tpl = "Material/data '{}' not recommended for unspecified assay."
+            msg = tpl.format(type_)
+            warnings.warn(msg, ParseIsatabException)
+        else:
+            _validate_restriction(
+                type_,
+                "Material",
+                "measurement",
+                assay_info.measurement_type,
+                table_restrictions.RESTRICTED_MEAS_MATERIALS,
+            )
+            _validate_restriction(
+                type_,
+                "Material",
+                "technology",
+                assay_info.technology_type,
+                table_restrictions.RESTRICTED_TECH_MATERIALS,
+            )
+            _validate_restriction(
+                type_,
+                "Data",
+                "measurement",
+                assay_info.measurement_type,
+                table_restrictions.RESTRICTED_MEAS_FILES,
+            )
+            _validate_restriction(
+                type_,
+                "Data",
+                "technology",
+                assay_info.technology_type,
+                table_restrictions.RESTRICTED_TECH_FILES,
+            )
+
+
+def _validate_restriction(type_, type_group, assay_info_type, assay_info_value, restrictions):
+    if type_ in restrictions and assay_info_value.name.lower() not in restrictions[type_]:
+        tpl = "{} '{}' not expected for assay {} '{}' (only '{}')"
+        msg = tpl.format(
+            type_group,
+            type_,
+            assay_info_type,
+            assay_info_value.name,
+            "', '".join(restrictions[type_]),
+        )
+        warnings.warn(msg, ParseIsatabWarning)
 
 
 # Types used in investigation files -------------------------------------------
@@ -443,7 +499,7 @@ class Material(
 
     def __new__(
         cls,
-        type,
+        type_,
         unique_name,
         name,
         extract_label,
@@ -455,69 +511,34 @@ class Material(
         headers=None,
     ):
         # Restrict certain annotations to corresponding material types
-        if extract_label and type != table_headers.LABELED_EXTRACT_NAME:
+        if extract_label and type_ != table_headers.LABELED_EXTRACT_NAME:
             tpl = "Label not applied to Labeled Extract Name: {}."
-            msg = tpl.format(type)
+            msg = tpl.format(type_)
             raise ParseIsatabException(msg)
 
-        if characteristics and type in table_headers.DATA_FILE_HEADERS:
+        if characteristics and type_ in table_headers.DATA_FILE_HEADERS:
             tpl = "Data nodes don't support Characteristics: {}."
             msg = tpl.format(characteristics)
             raise ParseIsatabException(msg)
 
-        if material_type and type not in (
+        if material_type and type_ not in (
+            # Only allow for actual materials and not for data files
             table_headers.EXTRACT_NAME,
             table_headers.LABELED_EXTRACT_NAME,
+            table_headers.LIBRARY_NAME,
             table_headers.SAMPLE_NAME,
             table_headers.SOURCE_NAME,
         ):
             tpl = "Material Type not applied to proper Material: {}."
-            msg = tpl.format(type)
+            msg = tpl.format(type_)
             raise ParseIsatabException(msg)
 
-        # Restrict certain file types to corresponding assay measurement and technology
-        if (
-            type in table_restrictions.RESTRICTED_TECH_FILES
-            or type in table_restrictions.RESTRICTED_MEAS_FILES
-        ):
-            msg = ""
-            if assay_info is None:
-                tpl = "Data {} not supported for unspecified assay."
-                msg = tpl.format(type)
-            else:
-                msgs = []
-                if (
-                    type in table_restrictions.RESTRICTED_TECH_FILES
-                    and assay_info.technology_type.name.lower()
-                    not in table_restrictions.RESTRICTED_TECH_FILES[type]
-                ):
-                    tpl = "Data {} not supported by assay technology {} (only {})"
-                    msg = tpl.format(
-                        type,
-                        assay_info.technology_type.name,
-                        ", ".join(table_restrictions.RESTRICTED_TECH_FILES[type]),
-                    )
-                    msgs.append(msg)
-                if (
-                    type in table_restrictions.RESTRICTED_MEAS_FILES
-                    and assay_info.measurement_type.name.lower()
-                    not in table_restrictions.RESTRICTED_MEAS_FILES[type]
-                ):
-                    tpl = "Data {} not supported by assay measurement {} (only {})"
-                    msg = tpl.format(
-                        type,
-                        assay_info.measurement_type.name,
-                        ", ".join(table_restrictions.RESTRICTED_MEAS_FILES[type]),
-                    )
-                    msgs.append(msg)
-                if msgs:
-                    msg = "\n".join(msgs)
-            if msg:
-                raise ParseIsatabException(msg)
+        # Restrict certain materials or file types to corresponding assay measurement and technology
+        _validate_assay_material_restrictions(type_, assay_info)
 
         return super(cls, Material).__new__(
             cls,
-            type,
+            type_,
             unique_name,
             name,
             extract_label,

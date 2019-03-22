@@ -206,7 +206,7 @@ def test_assay_row_reader_small_assay(small_investigation_file, small_assay_file
         "A1",
         small_assay_file,
     )
-    assert 8 == len(row_reader.header)
+    assert 9 == len(row_reader.header)
 
     # Read all rows in assay
     rows = list(row_reader.read())
@@ -216,7 +216,7 @@ def test_assay_row_reader_small_assay(small_investigation_file, small_assay_file
     first_row = rows[0]
     second_row = rows[1]
 
-    assert 7 == len(first_row)
+    assert 8 == len(first_row)
 
     expected = models.Material(
         "Sample Name",
@@ -231,6 +231,7 @@ def test_assay_row_reader_small_assay(small_investigation_file, small_assay_file
         [table_headers.SAMPLE_NAME],
     )
     assert expected == first_row[0]
+
     expected = models.Process(
         "library preparation",
         "S1-A1-library preparation-2-1",
@@ -246,9 +247,24 @@ def test_assay_row_reader_small_assay(small_investigation_file, small_assay_file
         [table_headers.PROTOCOL_REF],
     )
     assert expected == first_row[1]
+
+    expected = models.Material(
+        "Library Name",
+        "S1-A1-0815-N1-DNA1-COL3",
+        "0815-N1-DNA1",
+        None,
+        (),
+        (),
+        (),
+        None,
+        investigation.studies[0].assays["a_small.txt"],
+        [table_headers.LIBRARY_NAME],
+    )
+    assert expected == first_row[2]
+
     expected = models.Process(
         "nucleic acid sequencing",
-        "S1-A1-0815-N1-DNA1-WES1-4",
+        "S1-A1-0815-N1-DNA1-WES1-5",
         "0815-N1-DNA1-WES1",
         "Assay Name",
         None,
@@ -260,10 +276,11 @@ def test_assay_row_reader_small_assay(small_investigation_file, small_assay_file
         None,
         [table_headers.PROTOCOL_REF, table_headers.ASSAY_NAME],
     )
-    assert expected == first_row[2]
+    assert expected == first_row[3]
+
     expected = models.Material(
         "Raw Data File",
-        "S1-A1-0815-N1-DNA1-WES1_L???_???_R1.fastq.gz-COL5",
+        "S1-A1-0815-N1-DNA1-WES1_L???_???_R1.fastq.gz-COL6",
         "0815-N1-DNA1-WES1_L???_???_R1.fastq.gz",
         None,
         (),
@@ -273,10 +290,11 @@ def test_assay_row_reader_small_assay(small_investigation_file, small_assay_file
         investigation.studies[0].assays["a_small.txt"],
         [table_headers.RAW_DATA_FILE],
     )
-    assert expected == first_row[3]
+    assert expected == first_row[4]
+
     expected = models.Material(
         "Raw Data File",
-        "S1-A1-0815-N1-DNA1-WES1_L???_???_R2.fastq.gz-COL6",
+        "S1-A1-0815-N1-DNA1-WES1_L???_???_R2.fastq.gz-COL7",
         "0815-N1-DNA1-WES1_L???_???_R2.fastq.gz",
         None,
         (),
@@ -286,10 +304,11 @@ def test_assay_row_reader_small_assay(small_investigation_file, small_assay_file
         investigation.studies[0].assays["a_small.txt"],
         [table_headers.RAW_DATA_FILE],
     )
-    assert expected == first_row[4]
+    assert expected == first_row[5]
+
     expected = models.Process(
         "Unknown",
-        "S1-A1-somatic variant calling-1-7",
+        "S1-A1-somatic variant calling-1-8",
         "somatic variant calling-1",
         "Data Transformation Name",
         None,
@@ -301,10 +320,11 @@ def test_assay_row_reader_small_assay(small_investigation_file, small_assay_file
         None,
         [table_headers.DATA_TRANSFORMATION_NAME],
     )
-    assert expected == first_row[5]
+    assert expected == first_row[6]
+
     expected = models.Material(
         "Derived Data File",
-        "S1-A1-0815-somatic.vcf.gz-COL8",
+        "S1-A1-0815-somatic.vcf.gz-COL9",
         "0815-somatic.vcf.gz",
         None,
         (),
@@ -314,9 +334,9 @@ def test_assay_row_reader_small_assay(small_investigation_file, small_assay_file
         investigation.studies[0].assays["a_small.txt"],
         [table_headers.DERIVED_DATA_FILE],
     )
-    assert expected == first_row[6]
+    assert expected == first_row[7]
 
-    assert 7 == len(second_row)
+    assert 8 == len(second_row)
 
     expected = models.Material(
         "Sample Name",
@@ -331,6 +351,7 @@ def test_assay_row_reader_small_assay(small_investigation_file, small_assay_file
         [table_headers.SAMPLE_NAME],
     )
     assert expected == second_row[0]
+
     expected = models.Process(
         "library preparation",
         "S1-A1-library preparation-2-2",
@@ -346,9 +367,24 @@ def test_assay_row_reader_small_assay(small_investigation_file, small_assay_file
         [table_headers.PROTOCOL_REF],
     )
     assert expected == second_row[1]
+
+    expected = models.Material(
+        "Library Name",
+        "S1-A1-0815-T1-DNA1-COL3",
+        "0815-T1-DNA1",
+        None,
+        (),
+        (),
+        (),
+        None,
+        investigation.studies[0].assays["a_small.txt"],
+        [table_headers.LIBRARY_NAME],
+    )
+    assert expected == second_row[2]
+
     expected = models.Process(
         "nucleic acid sequencing",
-        "S1-A1-0815-T1-DNA1-WES1-4",
+        "S1-A1-0815-T1-DNA1-WES1-5",
         "0815-T1-DNA1-WES1",
         "Assay Name",
         None,
@@ -360,10 +396,11 @@ def test_assay_row_reader_small_assay(small_investigation_file, small_assay_file
         None,
         [table_headers.PROTOCOL_REF, table_headers.ASSAY_NAME],
     )
-    assert expected == second_row[2]
+    assert expected == second_row[3]
+
     expected = models.Material(
         "Raw Data File",
-        "S1-A1-0815-T1-DNA1-WES1_L???_???_R1.fastq.gz-COL5",
+        "S1-A1-0815-T1-DNA1-WES1_L???_???_R1.fastq.gz-COL6",
         "0815-T1-DNA1-WES1_L???_???_R1.fastq.gz",
         None,
         (),
@@ -373,10 +410,11 @@ def test_assay_row_reader_small_assay(small_investigation_file, small_assay_file
         investigation.studies[0].assays["a_small.txt"],
         [table_headers.RAW_DATA_FILE],
     )
-    assert expected == second_row[3]
+    assert expected == second_row[4]
+
     expected = models.Material(
         "Raw Data File",
-        "S1-A1-0815-T1-DNA1-WES1_L???_???_R2.fastq.gz-COL6",
+        "S1-A1-0815-T1-DNA1-WES1_L???_???_R2.fastq.gz-COL7",
         "0815-T1-DNA1-WES1_L???_???_R2.fastq.gz",
         None,
         (),
@@ -386,10 +424,11 @@ def test_assay_row_reader_small_assay(small_investigation_file, small_assay_file
         investigation.studies[0].assays["a_small.txt"],
         [table_headers.RAW_DATA_FILE],
     )
-    assert expected == second_row[4]
+    assert expected == second_row[5]
+
     expected = models.Process(
         "Unknown",
-        "S1-A1-somatic variant calling-1-7",
+        "S1-A1-somatic variant calling-1-8",
         "somatic variant calling-1",
         "Data Transformation Name",
         None,
@@ -401,10 +440,11 @@ def test_assay_row_reader_small_assay(small_investigation_file, small_assay_file
         None,
         [table_headers.DATA_TRANSFORMATION_NAME],
     )
-    assert expected == second_row[5]
+    assert expected == second_row[6]
+
     expected = models.Material(
         "Derived Data File",
-        "S1-A1-0815-somatic.vcf.gz-COL8",
+        "S1-A1-0815-somatic.vcf.gz-COL9",
         "0815-somatic.vcf.gz",
         None,
         (),
@@ -414,7 +454,7 @@ def test_assay_row_reader_small_assay(small_investigation_file, small_assay_file
         investigation.studies[0].assays["a_small.txt"],
         [table_headers.DERIVED_DATA_FILE],
     )
-    assert expected == second_row[6]
+    assert expected == second_row[7]
 
 
 def test_assay_reader_small_assay(small_investigation_file, small_assay_file):
@@ -431,17 +471,17 @@ def test_assay_reader_small_assay(small_investigation_file, small_assay_file):
         "A1",
         small_assay_file,
     )
-    assert 8 == len(reader.header)
+    assert 9 == len(reader.header)
 
     # Read assay
     assay = reader.read()
 
     # Check results
     assert os.path.normpath(str(assay.file)).endswith(os.path.normpath("data/i_small/a_small.txt"))
-    assert 8 == len(assay.header)
-    assert 7 == len(assay.materials)
+    assert 9 == len(assay.header)
+    assert 9 == len(assay.materials)
     assert 5 == len(assay.processes)
-    assert 11 == len(assay.arcs)
+    assert 13 == len(assay.arcs)
 
     expected = models.Material(
         "Sample Name",
@@ -471,7 +511,7 @@ def test_assay_reader_small_assay(small_investigation_file, small_assay_file):
     assert expected == assay.materials["S1-sample-0815-T1"]
     expected = models.Material(
         "Raw Data File",
-        "S1-A1-0815-N1-DNA1-WES1_L???_???_R1.fastq.gz-COL5",
+        "S1-A1-0815-N1-DNA1-WES1_L???_???_R1.fastq.gz-COL6",
         "0815-N1-DNA1-WES1_L???_???_R1.fastq.gz",
         None,
         (),
@@ -481,10 +521,10 @@ def test_assay_reader_small_assay(small_investigation_file, small_assay_file):
         investigation.studies[0].assays["a_small.txt"],
         [table_headers.RAW_DATA_FILE],
     )
-    assert expected == assay.materials["S1-A1-0815-N1-DNA1-WES1_L???_???_R1.fastq.gz-COL5"]
+    assert expected == assay.materials["S1-A1-0815-N1-DNA1-WES1_L???_???_R1.fastq.gz-COL6"]
     expected = models.Material(
         "Raw Data File",
-        "S1-A1-0815-N1-DNA1-WES1_L???_???_R2.fastq.gz-COL6",
+        "S1-A1-0815-N1-DNA1-WES1_L???_???_R2.fastq.gz-COL7",
         "0815-N1-DNA1-WES1_L???_???_R2.fastq.gz",
         None,
         (),
@@ -494,10 +534,10 @@ def test_assay_reader_small_assay(small_investigation_file, small_assay_file):
         investigation.studies[0].assays["a_small.txt"],
         [table_headers.RAW_DATA_FILE],
     )
-    assert expected == assay.materials["S1-A1-0815-N1-DNA1-WES1_L???_???_R2.fastq.gz-COL6"]
+    assert expected == assay.materials["S1-A1-0815-N1-DNA1-WES1_L???_???_R2.fastq.gz-COL7"]
     expected = models.Material(
         "Raw Data File",
-        "S1-A1-0815-T1-DNA1-WES1_L???_???_R1.fastq.gz-COL5",
+        "S1-A1-0815-T1-DNA1-WES1_L???_???_R1.fastq.gz-COL6",
         "0815-T1-DNA1-WES1_L???_???_R1.fastq.gz",
         None,
         (),
@@ -507,10 +547,10 @@ def test_assay_reader_small_assay(small_investigation_file, small_assay_file):
         investigation.studies[0].assays["a_small.txt"],
         [table_headers.RAW_DATA_FILE],
     )
-    assert expected == assay.materials["S1-A1-0815-T1-DNA1-WES1_L???_???_R1.fastq.gz-COL5"]
+    assert expected == assay.materials["S1-A1-0815-T1-DNA1-WES1_L???_???_R1.fastq.gz-COL6"]
     expected = models.Material(
         "Raw Data File",
-        "S1-A1-0815-T1-DNA1-WES1_L???_???_R2.fastq.gz-COL6",
+        "S1-A1-0815-T1-DNA1-WES1_L???_???_R2.fastq.gz-COL7",
         "0815-T1-DNA1-WES1_L???_???_R2.fastq.gz",
         None,
         (),
@@ -520,10 +560,10 @@ def test_assay_reader_small_assay(small_investigation_file, small_assay_file):
         investigation.studies[0].assays["a_small.txt"],
         [table_headers.RAW_DATA_FILE],
     )
-    assert expected == assay.materials["S1-A1-0815-T1-DNA1-WES1_L???_???_R2.fastq.gz-COL6"]
+    assert expected == assay.materials["S1-A1-0815-T1-DNA1-WES1_L???_???_R2.fastq.gz-COL7"]
     expected = models.Material(
         "Derived Data File",
-        "S1-A1-0815-somatic.vcf.gz-COL8",
+        "S1-A1-0815-somatic.vcf.gz-COL9",
         "0815-somatic.vcf.gz",
         None,
         (),
@@ -533,7 +573,7 @@ def test_assay_reader_small_assay(small_investigation_file, small_assay_file):
         investigation.studies[0].assays["a_small.txt"],
         [table_headers.DERIVED_DATA_FILE],
     )
-    assert expected == assay.materials["S1-A1-0815-somatic.vcf.gz-COL8"]
+    assert expected == assay.materials["S1-A1-0815-somatic.vcf.gz-COL9"]
 
     expected = models.Process(
         "library preparation",
@@ -567,7 +607,7 @@ def test_assay_reader_small_assay(small_investigation_file, small_assay_file):
     assert expected == assay.processes["S1-A1-library preparation-2-2"]
     expected = models.Process(
         "nucleic acid sequencing",
-        "S1-A1-0815-N1-DNA1-WES1-4",
+        "S1-A1-0815-N1-DNA1-WES1-5",
         "0815-N1-DNA1-WES1",
         "Assay Name",
         None,
@@ -579,10 +619,10 @@ def test_assay_reader_small_assay(small_investigation_file, small_assay_file):
         None,
         [table_headers.PROTOCOL_REF, table_headers.ASSAY_NAME],
     )
-    assert expected == assay.processes["S1-A1-0815-N1-DNA1-WES1-4"]
+    assert expected == assay.processes["S1-A1-0815-N1-DNA1-WES1-5"]
     expected = models.Process(
         "nucleic acid sequencing",
-        "S1-A1-0815-T1-DNA1-WES1-4",
+        "S1-A1-0815-T1-DNA1-WES1-5",
         "0815-T1-DNA1-WES1",
         "Assay Name",
         None,
@@ -594,33 +634,35 @@ def test_assay_reader_small_assay(small_investigation_file, small_assay_file):
         None,
         [table_headers.PROTOCOL_REF, table_headers.ASSAY_NAME],
     )
-    assert expected == assay.processes["S1-A1-0815-T1-DNA1-WES1-4"]
+    assert expected == assay.processes["S1-A1-0815-T1-DNA1-WES1-5"]
 
     expected = (
         models.Arc("S1-sample-0815-N1", "S1-A1-library preparation-2-1"),
-        models.Arc("S1-A1-library preparation-2-1", "S1-A1-0815-N1-DNA1-WES1-4"),
+        models.Arc("S1-A1-library preparation-2-1", "S1-A1-0815-N1-DNA1-COL3"),
+        models.Arc("S1-A1-0815-N1-DNA1-COL3", "S1-A1-0815-N1-DNA1-WES1-5"),
         models.Arc(
-            "S1-A1-0815-N1-DNA1-WES1-4", "S1-A1-0815-N1-DNA1-WES1_L???_???_R1.fastq.gz-COL5"
+            "S1-A1-0815-N1-DNA1-WES1-5", "S1-A1-0815-N1-DNA1-WES1_L???_???_R1.fastq.gz-COL6"
         ),
         models.Arc(
-            "S1-A1-0815-N1-DNA1-WES1_L???_???_R1.fastq.gz-COL5",
-            "S1-A1-0815-N1-DNA1-WES1_L???_???_R2.fastq.gz-COL6",
+            "S1-A1-0815-N1-DNA1-WES1_L???_???_R1.fastq.gz-COL6",
+            "S1-A1-0815-N1-DNA1-WES1_L???_???_R2.fastq.gz-COL7",
         ),
         models.Arc(
-            "S1-A1-0815-N1-DNA1-WES1_L???_???_R2.fastq.gz-COL6", "S1-A1-somatic variant calling-1-7"
+            "S1-A1-0815-N1-DNA1-WES1_L???_???_R2.fastq.gz-COL7", "S1-A1-somatic variant calling-1-8"
         ),
-        models.Arc("S1-A1-somatic variant calling-1-7", "S1-A1-0815-somatic.vcf.gz-COL8"),
+        models.Arc("S1-A1-somatic variant calling-1-8", "S1-A1-0815-somatic.vcf.gz-COL9"),
         models.Arc("S1-sample-0815-T1", "S1-A1-library preparation-2-2"),
-        models.Arc("S1-A1-library preparation-2-2", "S1-A1-0815-T1-DNA1-WES1-4"),
+        models.Arc("S1-A1-library preparation-2-2", "S1-A1-0815-T1-DNA1-COL3"),
+        models.Arc("S1-A1-0815-T1-DNA1-COL3", "S1-A1-0815-T1-DNA1-WES1-5"),
         models.Arc(
-            "S1-A1-0815-T1-DNA1-WES1-4", "S1-A1-0815-T1-DNA1-WES1_L???_???_R1.fastq.gz-COL5"
+            "S1-A1-0815-T1-DNA1-WES1-5", "S1-A1-0815-T1-DNA1-WES1_L???_???_R1.fastq.gz-COL6"
         ),
         models.Arc(
-            "S1-A1-0815-T1-DNA1-WES1_L???_???_R1.fastq.gz-COL5",
-            "S1-A1-0815-T1-DNA1-WES1_L???_???_R2.fastq.gz-COL6",
+            "S1-A1-0815-T1-DNA1-WES1_L???_???_R1.fastq.gz-COL6",
+            "S1-A1-0815-T1-DNA1-WES1_L???_???_R2.fastq.gz-COL7",
         ),
         models.Arc(
-            "S1-A1-0815-T1-DNA1-WES1_L???_???_R2.fastq.gz-COL6", "S1-A1-somatic variant calling-1-7"
+            "S1-A1-0815-T1-DNA1-WES1_L???_???_R2.fastq.gz-COL7", "S1-A1-somatic variant calling-1-8"
         ),
     )
     assert expected == assay.arcs

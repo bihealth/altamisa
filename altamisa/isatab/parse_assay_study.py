@@ -239,8 +239,6 @@ class _NodeBuilderBase:
 class _MaterialBuilder(_NodeBuilderBase):
     """Helper class to construct a ``Material`` object from a line"""
 
-    type_ = table_headers.MATERIAL
-
     name_headers = table_headers.MATERIAL_NAME_HEADERS
 
     allowed_column_types = (
@@ -571,6 +569,7 @@ class _AssayRowBuilder(_RowBuilderBase):
         table_headers.SAMPLE_NAME: _MaterialBuilder,
         table_headers.EXTRACT_NAME: _MaterialBuilder,
         table_headers.LABELED_EXTRACT_NAME: _MaterialBuilder,
+        table_headers.LIBRARY_NAME: _MaterialBuilder,
         # Data node builders
         table_headers.ARRAY_DATA_FILE: _MaterialBuilder,
         table_headers.ARRAY_DATA_MATRIX_FILE: _MaterialBuilder,

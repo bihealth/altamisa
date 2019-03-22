@@ -13,10 +13,9 @@ __author__ = (
 
 
 # Material types (nodes) descriptions
-MATERIAL = "Material"
-
 EXTRACT_NAME = "Extract Name"
 LABELED_EXTRACT_NAME = "Labeled Extract Name"
+LIBRARY_NAME = "Library Name"
 SAMPLE_NAME = "Sample Name"
 SOURCE_NAME = "Source Name"
 
@@ -98,6 +97,7 @@ MATERIAL_NAME_HEADERS = (
     # Material
     EXTRACT_NAME,
     LABELED_EXTRACT_NAME,
+    LIBRARY_NAME,
     SAMPLE_NAME,
     SOURCE_NAME,
     # Data
