@@ -212,15 +212,17 @@ class _NodeBuilderBase:
             if not is_secondary:
                 prev = header
 
-    def _build_complex(self, header, line, klass):
-        """Build a complex annotation (e.g., may have term referenc or unit."""
+    def _build_complex(self, header, line, klass, allow_list=False):
+        """Build a complex annotation (e.g., may have term reference or unit."""
         # First, build the individual components
-        value = self._build_freetext_or_term_ref(header, line)
+        value = self._build_freetext_or_term_ref(header, line, allow_list=allow_list)
         unit = self._build_freetext_or_term_ref(header.unit_header, line)
         # Then, constructing ``klass`` is easy
         return klass(header.label, value, unit)
 
-    def _build_freetext_or_term_ref(self, header, line: List[str]) -> models.FreeTextOrTermRef:
+    def _build_freetext_or_term_ref(
+        self, header, line: List[str], allow_list=False
+    ) -> models.FreeTextOrTermRef:
         if not header:
             return None
         elif header.term_source_ref_header:
@@ -228,12 +230,59 @@ class _NodeBuilderBase:
             name = line[header.col_no]
             ontology_name = line[header2.col_no]
             accession = line[header2.col_no + 1]
-            return models.OntologyTermRef(name, accession, ontology_name, self.ontology_source_refs)
+            # If list is allowed, split strings and create several ontology term references
+            if allow_list:
+                name = self._token_with_escape(name)
+                ontology_name = self._token_with_escape(ontology_name)
+                accession = self._token_with_escape(accession)
+                # There must be one ontology_name and accession per name
+                if len(name) == len(ontology_name) and len(name) == len(accession):
+                    term_refs = [
+                        models.OntologyTermRef(n, a, o, self.ontology_source_refs)
+                        for n, a, o in zip(name, accession, ontology_name)
+                    ]
+                    return term_refs
+                else:
+                    tpl = (
+                        "Irregular numbers of fields in ontology term columns"
+                        "(i.e. ';'-separated fields): {}"
+                    )
+                    msg = tpl.format(line[header.col_no : header2.col_no + 2])
+                    raise ParseIsatabException(msg)
+
+            # Else, just create single ontology term references
+            else:
+                return models.OntologyTermRef(
+                    name, accession, ontology_name, self.ontology_source_refs
+                )
         else:
+            if allow_list:
+                return self._token_with_escape(line[header.col_no])
             return line[header.col_no]
 
     def _build_simple_headers_list(self) -> List[str]:
         return [h for headers in self.column_headers for h in headers.get_simple_string()]
+
+    @staticmethod
+    def _token_with_escape(string, escape="\\", separator=";"):
+        # Source: https://rosettacode.org/wiki/Tokenize_a_string_with_escaping#Python
+        result = []
+        segment = ""
+        state = 0
+        for c in string:
+            if state == 0:
+                if c == escape:
+                    state = 1
+                elif c == separator:
+                    result.append(segment)
+                    segment = ""
+                else:
+                    segment += c
+            elif state == 1:
+                segment += c
+                state = 0
+        result.append(segment)
+        return result
 
 
 class _MaterialBuilder(_NodeBuilderBase):
@@ -287,7 +336,7 @@ class _MaterialBuilder(_NodeBuilderBase):
             unique_name = models.AnnotatedStr(name_val, was_empty=True)
         extract_label = self._build_freetext_or_term_ref(self.extract_label_header, line)
         characteristics = tuple(
-            self._build_complex(hdr, line, models.Characteristics)
+            self._build_complex(hdr, line, models.Characteristics, allow_list=True)
             for hdr in self.characteristic_headers
         )
         comments = tuple(
@@ -298,7 +347,8 @@ class _MaterialBuilder(_NodeBuilderBase):
         )
         material_type = self._build_freetext_or_term_ref(self.material_type_header, line)
         # Don't accept unnamed materials/data files if there are annotations
-        any_char = any([(char.value or char.unit) for char in characteristics])
+        # TODO: accept empty ontology as empty value
+        any_char = any([(any(v for v in char.value) or char.unit) for char in characteristics])
         any_comm = any([comm.value for comm in comments])
         any_fact = any([(fact.value or fact.unit) for fact in factor_values])
         if not name and any((any_char, any_comm, any_fact, extract_label, material_type)):
@@ -376,7 +426,7 @@ class _ProcessBuilder(_NodeBuilderBase):
             models.Comment(hdr.label, line[hdr.col_no]) for hdr in self.comment_headers
         )
         parameter_values = tuple(
-            self._build_complex(hdr, line, models.ParameterValue)
+            self._build_complex(hdr, line, models.ParameterValue, allow_list=True)
             for hdr in self.parameter_value_headers
         )
         # Check if parameter value is declared in corresponding protocol

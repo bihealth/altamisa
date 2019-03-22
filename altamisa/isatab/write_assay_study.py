@@ -12,7 +12,7 @@ from ..constants import table_headers
 from ..constants.table_tokens import TOKEN_UNKNOWN
 from ..exceptions import WriteIsatabException
 from .headers import AssayHeaderParser, StudyHeaderParser
-from .models import Arc, FactorInfo, Material, Process
+from .models import Arc, FactorInfo, Material, OntologyTermRef, Process
 
 
 __author__ = (
@@ -306,6 +306,33 @@ class _WriterBase:
         ):
             line.append(attribute.value.name or "")
             attributes[table_headers.TERM_SOURCE_REF] = attribute.value
+        # Cases for attributes with lists of values allowed (Characteristics, ParameterValue)
+        elif isinstance(attribute.value, list):
+            if (
+                hasattr(attribute.value[0], "name")
+                and hasattr(attribute.value[0], "ontology_name")
+                and hasattr(attribute.value[0], "accession")
+            ):
+                name = ";".join(
+                    [v.name.replace(";", "\\;") if v.name else "" for v in attribute.value]
+                )
+                accession = ";".join(
+                    [
+                        v.accession.replace(";", "\\;") if v.accession else ""
+                        for v in attribute.value
+                    ]
+                )
+                ontology_name = ";".join(
+                    [
+                        v.ontology_name.replace(";", "\\;") if v.ontology_name else ""
+                        for v in attribute.value
+                    ]
+                )
+                tmp_term_ref = OntologyTermRef(name, accession, ontology_name)
+                line.append(name or "")
+                attributes[table_headers.TERM_SOURCE_REF] = tmp_term_ref
+            else:
+                line.append(";".join([v.replace(";", "\\;") if v else "" for v in attribute.value]))
         else:
             line.append(attribute.value)
         # If available, add Unit to dict for next header
