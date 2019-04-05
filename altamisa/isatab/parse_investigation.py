@@ -14,7 +14,6 @@ import warnings
 from ..constants import investigation_headers
 from ..exceptions import ParseIsatabException, ParseIsatabWarning
 from . import models
-from .validate_investigation import InvestigationValidator
 
 
 __author__ = "Manuel Holtgrewe <manuel.holtgrewe@bihealth.de>"
@@ -139,7 +138,7 @@ class InvestigationReader:
         else:
             return self._line[0].startswith(token)
 
-    def read(self, validate=True) -> models.InvestigationInfo:
+    def read(self) -> models.InvestigationInfo:
         """Read investigation file"""
         ontology_refs = {o.name: o for o in self._read_ontology_source_reference()}
         info = self._read_basic_info()
@@ -149,8 +148,6 @@ class InvestigationReader:
         investigation = models.InvestigationInfo(
             ontology_refs, info, publications, contacts, studies
         )
-        if validate:
-            InvestigationValidator(investigation).validate()
         return investigation
 
     # reader for content of sections with possibly multiple columns

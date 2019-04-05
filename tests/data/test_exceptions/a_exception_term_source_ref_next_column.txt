@@ -1,0 +1,2 @@
+Sample Name	Characteristics[organism]	Term Source REF	Characteristics[age]
+0815-N1	Mus musculus	Mus musculus	NCBITAXON	90

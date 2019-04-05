@@ -1,18 +1,20 @@
 # -*- coding: utf-8 -*-
 """Tests for parsing ISA investigation files"""
 
+
 from datetime import date
 from pathlib import Path
 
 from altamisa.constants import investigation_headers
 from altamisa.isatab import models
-from altamisa.isatab import InvestigationReader
+from altamisa.isatab import InvestigationReader, InvestigationValidator
 
 
 def test_parse_minimal_investigation(minimal_investigation_file):
     # Read Investigation from file-like object
     reader = InvestigationReader.from_stream(minimal_investigation_file)
     investigation = reader.read()
+    InvestigationValidator(investigation).validate()
 
     # Check results
     # Investigation
@@ -53,6 +55,7 @@ def test_parse_small_investigation(small_investigation_file):
     # Read Investigation from file-like object
     reader = InvestigationReader.from_stream(small_investigation_file)
     investigation = reader.read()
+    InvestigationValidator(investigation).validate()
 
     # Check results
     # Investigation
@@ -111,6 +114,7 @@ def test_parse_full_investigation(full_investigation_file):
     # Read Investigation from file-like object
     reader = InvestigationReader.from_stream(full_investigation_file)
     investigation = reader.read()
+    InvestigationValidator(investigation).validate()
 
     # Check results
     # Investigation
@@ -611,6 +615,7 @@ def test_parse_comment_investigation(comment_investigation_file):
     # Read Investigation from file-like object
     reader = InvestigationReader.from_stream(comment_investigation_file)
     investigation = reader.read()
+    InvestigationValidator(investigation).validate()
 
     # Check results
     # Investigation
@@ -873,6 +878,7 @@ def test_parse_assays_investigation(assays_investigation_file):
     # Read Investigation from file-like object
     reader = InvestigationReader.from_stream(assays_investigation_file)
     investigation = reader.read()
+    InvestigationValidator(investigation).validate()
 
     # Check results
     # Investigation

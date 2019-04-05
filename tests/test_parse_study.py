@@ -3,13 +3,17 @@
 
 
 from datetime import date
-
-import pytest  # noqa # pylint: disable=unused-import
 import os
 
 from altamisa.constants import table_headers
 from altamisa.isatab import models
-from altamisa.isatab import InvestigationReader, StudyRowReader, StudyReader
+from altamisa.isatab import (
+    InvestigationReader,
+    InvestigationValidator,
+    StudyRowReader,
+    StudyReader,
+    StudyValidator,
+)
 
 
 def test_study_row_reader_minimal_study(minimal_investigation_file, minimal_study_file):
@@ -69,15 +73,15 @@ def test_study_reader_minimal_study(minimal_investigation_file, minimal_study_fi
     """
     # Load investigation (tested elsewhere)
     investigation = InvestigationReader.from_stream(minimal_investigation_file).read()
+    InvestigationValidator(investigation).validate()
 
     # Create new row reader and check read headers
-    reader = StudyReader.from_stream(
-        investigation, investigation.studies[0], "S1", minimal_study_file
-    )
+    reader = StudyReader.from_stream("S1", minimal_study_file)
     assert 3 == len(reader.header)
 
     # Read study
     study = reader.read()
+    StudyValidator(investigation, investigation.studies[0], study).validate()
 
     # Check results
     assert os.path.normpath(str(study.file)).endswith(
@@ -131,9 +135,13 @@ def test_study_reader_minimal_study(minimal_investigation_file, minimal_study_fi
 def test_study_row_reader_small_study(small_investigation_file, small_study_file):
     """Use ``StudyRowReader`` to read in small study file."""
 
-    # Create new row reader and check read headers
+    # Create new row reader and check read headers (+ string representation)
     row_reader = StudyRowReader.from_stream("S1", small_study_file)
     assert 13 == len(row_reader.header)
+    rep0 = "ColumnHeader(column_type='Source Name', col_no=0, span=1)"
+    rep1 = "LabeledColumnHeader(column_type='Characteristics', col_no=1, span=1, label='organism')"
+    assert rep0 == repr(row_reader.header[0])
+    assert rep1 == repr(row_reader.header[1])
 
     # Read all rows in study
     rows = list(row_reader.read())
@@ -306,15 +314,15 @@ def test_study_reader_small_study(small_investigation_file, small_study_file):
     """Use ``StudyReader`` to read in small study file."""
     # Load investigation (tested elsewhere)
     investigation = InvestigationReader.from_stream(small_investigation_file).read()
+    InvestigationValidator(investigation).validate()
 
     # Create new row reader and check read headers
-    reader = StudyReader.from_stream(
-        investigation, investigation.studies[0], "S1", small_study_file
-    )
+    reader = StudyReader.from_stream("S1", small_study_file)
     assert 13 == len(reader.header)
 
     # Read study
     study = reader.read()
+    StudyValidator(investigation, investigation.studies[0], study).validate()
 
     # Check results
     assert os.path.normpath(str(study.file)).endswith(os.path.normpath("data/i_small/s_small.txt"))

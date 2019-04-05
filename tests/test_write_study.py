@@ -3,11 +3,17 @@
 
 
 import filecmp
-import pytest  # noqa # pylint: disable=unused-import
+import pytest
 import os
 
-
-from altamisa.isatab import InvestigationReader, StudyReader, StudyWriter
+from altamisa.exceptions import IsaWarning, ParseIsatabWarning
+from altamisa.isatab import (
+    InvestigationReader,
+    InvestigationValidator,
+    StudyReader,
+    StudyValidator,
+    StudyWriter,
+)
 from .conftest import sort_file
 
 
@@ -15,15 +21,15 @@ from .conftest import sort_file
 def _parse_write_assert(investigation_file, tmp_path, quote=None):
     # Load investigation
     investigation = InvestigationReader.from_stream(investigation_file).read()
+    InvestigationValidator(investigation).validate()
     directory = os.path.normpath(os.path.dirname(investigation_file.name))
     # Iterate studies
     for s, study_info in enumerate(investigation.studies):
         # Load study
         path_in = os.path.join(directory, study_info.info.path)
         with open(path_in, "rt") as inputf:
-            study = StudyReader.from_stream(
-                investigation, study_info, "S{}".format(s + 1), inputf
-            ).read()
+            study = StudyReader.from_stream("S{}".format(s + 1), inputf).read()
+        StudyValidator(investigation, study_info, study).validate()
         # Write study to temporary file
         path_out = tmp_path / study_info.info.path
         with open(path_out, "wt") as file:
@@ -53,8 +59,17 @@ def test_study_writer_small2(small2_investigation_file, tmp_path):
 
 
 def test_study_writer_BII_I_1(BII_I_1_investigation_file, tmp_path):
-    _parse_write_assert(BII_I_1_investigation_file, tmp_path, quote='"')
+    with pytest.warns(IsaWarning) as record:
+        _parse_write_assert(BII_I_1_investigation_file, tmp_path, quote='"')
+    # Check warnings
+    assert 1 == len(record)
 
 
 def test_study_writer_gelelect(gelelect_investigation_file, tmp_path):
-    _parse_write_assert(gelelect_investigation_file, tmp_path, quote='"')
+    with pytest.warns(IsaWarning) as record:
+        _parse_write_assert(gelelect_investigation_file, tmp_path, quote='"')
+    # Check warnings
+    assert 1 == len(record)
+    msg = "Skipping empty ontology source: , , , "
+    assert record[0].category == ParseIsatabWarning
+    assert str(record[0].message) == msg
