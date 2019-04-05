@@ -9,8 +9,9 @@ writing) and provide a comprehensive list of warnings of different degree.
 
 import re
 from typing import Dict, Tuple
+import warnings
 
-from ..exceptions import ParseIsatabException
+from ..exceptions import AdvisoryIsaValidationWarning, CriticalIsaValidationWarning
 from .helpers import is_ontology_term_ref
 from . import models
 from .validate_assay_study import OntologyTermRefValidator
@@ -34,7 +35,7 @@ def _validate_mail_address(mail_address) -> str:
     if mail_address and not MAIL_PATTERN.match(mail_address):
         tpl = "Invalid mail address: {}"
         msg = tpl.format(mail_address)
-        raise ParseIsatabException(msg)
+        warnings.warn(msg, AdvisoryIsaValidationWarning)
 
 
 def _validate_phone_number(phone_number) -> str:
@@ -42,7 +43,7 @@ def _validate_phone_number(phone_number) -> str:
     if phone_number and not PHONE_PATTERN.match(phone_number):
         tpl = "Invalid phone/fax number: {}"
         msg = tpl.format(phone_number)
-        raise ParseIsatabException(msg)
+        warnings.warn(msg, AdvisoryIsaValidationWarning)
 
 
 def _validate_doi(doi) -> str:
@@ -50,7 +51,7 @@ def _validate_doi(doi) -> str:
     if doi and not DOI_PATTERN.match(doi):
         tpl = "Invalid doi string: {}"
         msg = tpl.format(doi)
-        raise ParseIsatabException(msg)
+        warnings.warn(msg, AdvisoryIsaValidationWarning)
 
 
 def _validate_pubmed_id(pubmed_id) -> str:
@@ -58,7 +59,7 @@ def _validate_pubmed_id(pubmed_id) -> str:
     if pubmed_id and not PMID_PATTERN.match(pubmed_id):
         tpl = "Invalid pubmed_id string: {}"
         msg = tpl.format(pubmed_id)
-        raise ParseIsatabException(msg)
+        warnings.warn(msg, AdvisoryIsaValidationWarning)
 
 
 # Validator classes --------------------------------------------------------------------
@@ -83,7 +84,7 @@ class InvestigationValidator:
                 msg = tpl.format(
                     source.name, source.file, source.version, source.description, source.comments
                 )
-                raise ParseIsatabException(msg)  # TODO: critical warning
+                warnings.warn(msg, CriticalIsaValidationWarning)
 
     def _validate_sections(self):
         self._validate_publications(self._investigation.publications)

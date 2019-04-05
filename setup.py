@@ -45,7 +45,12 @@ setup(
         "Programming Language :: Python :: 3.7",
         "Programming Language :: Python :: 3.8",
     ],
-    entry_points={"console_scripts": ("isatab2dot = altamisa.apps.isatab2dot:main",)},
+    entry_points={
+        "console_scripts": (
+            "isatab2dot = altamisa.apps.isatab2dot:main",
+            "isatab2isatab = altamisa.apps.isatab2isatab:main",
+        )
+    },
     description="Implementation of ISA-tools data model and ISA-TAB",
     install_requires=install_requirements,
     license="MIT license",

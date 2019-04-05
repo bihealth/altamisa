@@ -1,0 +1,2 @@
+Sample Name	Parameter Value[Speed]
+0815-N1	200

@@ -12,7 +12,6 @@ from typing import List, TextIO
 
 from ..constants import table_tokens
 from ..constants import table_headers
-from . import validate_assay_study
 from ..exceptions import ParseIsatabException
 from .headers import ColumnHeader, StudyHeaderParser, AssayHeaderParser
 from . import models
@@ -105,51 +104,37 @@ class _NodeBuilderBase:
                 self.parameter_value_headers.append(header)
             elif header.column_type == table_headers.MATERIAL_TYPE:
                 if self.material_type_header:
-                    tpl = 'Seen "Material Type" header for same entity in ' "col {}"
-                    msg = tpl.format(header.col_no)
-                    raise ParseIsatabException(msg)
+                    self._raise_seen_before("Material Type", header.col_no)
                 else:
                     self.material_type_header = header
             elif header.column_type == table_headers.ARRAY_DESIGN_REF:
                 if self.array_design_ref_header:
-                    tpl = 'Seen "Array Design REF" header for same entity ' "in col {}"
-                    msg = tpl.format(header.col_no)
-                    raise ParseIsatabException(msg)
+                    self._raise_seen_before("Array Design REF", header.col_no)
                 else:
                     self.array_design_ref_header = header
             elif header.column_type == table_headers.FIRST_DIMENSION:
                 if self.first_dimension_header:
-                    tpl = 'Seen "First Dimension" header for same entity in col {}'
-                    msg = tpl.format(header.col_no)
-                    raise ParseIsatabException(msg)
+                    self._raise_seen_before("First Dimension", header.col_no)
                 else:
                     self.first_dimension_header = header
             elif header.column_type == table_headers.SECOND_DIMENSION:
                 if self.second_dimension_header:
-                    tpl = 'Seen "Second Dimension" header for same entity in col {}'
-                    msg = tpl.format(header.col_no)
-                    raise ParseIsatabException(msg)
+                    self._raise_seen_before("Second Dimension", header.col_no)
                 else:
                     self.second_dimension_header = header
             elif header.column_type == table_headers.LABEL:
                 if self.extract_label_header:
-                    tpl = 'Seen "Label" header for same entity in col {}'
-                    msg = tpl.format(header.col_no)
-                    raise ParseIsatabException(msg)
+                    self._raise_seen_before("Label", header.col_no)
                 else:
                     self.extract_label_header = header
             elif header.column_type == table_headers.DATE:
                 if self.date_header:
-                    tpl = 'Seen "Date" header for same entity in col {}'
-                    msg = tpl.format(header.col_no)
-                    raise ParseIsatabException(msg)
+                    self._raise_seen_before("Date", header.col_no)
                 else:
                     self.date_header = header
             elif header.column_type == table_headers.PERFORMER:
                 if self.performer_header:
-                    tpl = 'Seen "Performer" header for same entity in col {}'
-                    msg = tpl.format(header.col_no)
-                    raise ParseIsatabException(msg)
+                    self._raise_seen_before("Performer", header.col_no)
                 else:
                     self.performer_header = header
             elif header.column_type == table_headers.TERM_SOURCE_REF:
@@ -189,15 +174,18 @@ class _NodeBuilderBase:
                     is_secondary = True
             elif header.column_type == table_headers.UNIT:
                 if prev.unit_header or prev.column_type == table_headers.UNIT:
-                    tpl = 'Seen "Unit" header for same entity in col {}'
-                    msg = tpl.format(header.col_no)
-                    raise ParseIsatabException(msg)
+                    self._raise_seen_before("Unit", header.col_no)
                 else:
                     # The previous non-secondary header is annotated with a unit.
                     prev.unit_header = header
             # Update is secondary flag or not
             if not is_secondary:
                 prev = header
+
+    def _raise_seen_before(self, name, col_no):
+        tpl = 'Seen "{}" header for same entity in col {}'
+        msg = tpl.format(name, col_no)
+        raise ParseIsatabException(msg)
 
     def _build_complex(self, header, line, klass, allow_list=False):
         """Build a complex annotation (e.g., may have term reference or unit."""
@@ -751,39 +739,21 @@ class StudyReader:
     """
 
     @classmethod
-    def from_stream(
-        klass,
-        investigation: models.InvestigationInfo,
-        study: models.StudyInfo,
-        study_id: str,
-        input_file: TextIO,
-    ):
+    def from_stream(klass, study_id: str, input_file: TextIO):
         """Construct from file-like object"""
-        return StudyReader(investigation, study, study_id, input_file)
+        return StudyReader(study_id, input_file)
 
-    def __init__(
-        self,
-        investigation: models.InvestigationInfo,
-        study: models.StudyInfo,
-        study_id: str,
-        input_file: TextIO,
-    ):
+    def __init__(self, study_id: str, input_file: TextIO):
         self.row_reader = StudyRowReader.from_stream(study_id, input_file)
-        self.investigation = investigation
-        self.study = study
         #: The file used for reading from
         self.input_file = input_file
         #: The header of the ISA study file
         self.header = self.row_reader.header
 
-    def read(self, validate=True):
+    def read(self):
         study_data = _AssayAndStudyBuilder(self.input_file.name, self.header, models.Study).build(
             list(self.row_reader.read())
         )
-        if validate:
-            validate_assay_study.StudyValidator(
-                self.investigation, self.study, study_data
-            ).validate()
         return study_data
 
 
@@ -863,42 +833,19 @@ class AssayReader:
     """
 
     @classmethod
-    def from_stream(
-        klass,
-        investigation: models.InvestigationInfo,
-        study: models.StudyInfo,
-        assay: models.AssayInfo,
-        study_id: str,
-        assay_id: str,
-        input_file: TextIO,
-    ):
+    def from_stream(klass, study_id: str, assay_id: str, input_file: TextIO):
         """Construct from file-like object"""
-        return AssayReader(investigation, study, assay, study_id, assay_id, input_file)
+        return AssayReader(study_id, assay_id, input_file)
 
-    def __init__(
-        self,
-        investigation: models.InvestigationInfo,
-        study: models.StudyInfo,
-        assay: models.AssayInfo,
-        study_id: str,
-        assay_id: str,
-        input_file: TextIO,
-    ):
+    def __init__(self, study_id: str, assay_id: str, input_file: TextIO):
         self.row_reader = AssayRowReader.from_stream(study_id, assay_id, input_file)
-        self.investigation = investigation
-        self.study = study
-        self.assay = assay
         #: The file used for reading from
         self.input_file = input_file
         #: The header of the ISA assay file
         self.header = self.row_reader.header
 
-    def read(self, validate=True):
+    def read(self):
         assay_data = _AssayAndStudyBuilder(self.input_file.name, self.header, models.Assay).build(
             list(self.row_reader.read())
         )
-        if validate:
-            validate_assay_study.AssayValidator(
-                self.investigation, self.study, self.assay, assay_data
-            ).validate()
         return assay_data

@@ -2,12 +2,19 @@
 """Tests for parsing ISA assay files"""
 
 
-import pytest  # noqa # pylint: disable=unused-import
+import pytest
 import os
 
 from altamisa.constants import table_headers
+from altamisa.exceptions import IsaWarning
 from altamisa.isatab import models
-from altamisa.isatab import InvestigationReader, AssayRowReader, AssayReader
+from altamisa.isatab import (
+    InvestigationReader,
+    InvestigationValidator,
+    AssayRowReader,
+    AssayReader,
+    AssayValidator,
+)
 
 
 def test_assay_row_reader_minimal_assay(minimal_investigation_file, minimal_assay_file):
@@ -87,20 +94,20 @@ def test_assay_reader_minimal_assay(minimal_investigation_file, minimal_assay_fi
     """
     # Load investigation (tested elsewhere)
     investigation = InvestigationReader.from_stream(minimal_investigation_file).read()
+    InvestigationValidator(investigation).validate()
 
     # Create new row reader and check read headers
-    reader = AssayReader.from_stream(
+    reader = AssayReader.from_stream("S1", "A1", minimal_assay_file)
+    assert 5 == len(reader.header)
+
+    # Read and validate assay
+    assay = reader.read()
+    AssayValidator(
         investigation,
         investigation.studies[0],
         investigation.studies[0].assays["a_minimal.txt"],
-        "S1",
-        "A1",
-        minimal_assay_file,
-    )
-    assert 5 == len(reader.header)
-
-    # Read assay
-    assay = reader.read()
+        assay,
+    ).validate()
 
     # Check results
     assert os.path.normpath(str(assay.file)).endswith(
@@ -427,20 +434,24 @@ def test_assay_reader_small_assay(small_investigation_file, small_assay_file):
     """Use ``AssayReader`` to read in small assay file."""
     # Load investigation (tested elsewhere)
     investigation = InvestigationReader.from_stream(small_investigation_file).read()
+    InvestigationValidator(investigation).validate()
 
     # Create new row reader and check read headers
-    reader = AssayReader.from_stream(
-        investigation,
-        investigation.studies[0],
-        investigation.studies[0].assays["a_small.txt"],
-        "S1",
-        "A1",
-        small_assay_file,
-    )
+    reader = AssayReader.from_stream("S1", "A1", small_assay_file)
     assert 9 == len(reader.header)
 
     # Read assay
-    assay = reader.read()
+    with pytest.warns(IsaWarning) as record:
+        assay = reader.read()
+        AssayValidator(
+            investigation,
+            investigation.studies[0],
+            investigation.studies[0].assays["a_small.txt"],
+            assay,
+        ).validate()
+
+    # Check warnings
+    assert 1 == len(record)
 
     # Check results
     assert os.path.normpath(str(assay.file)).endswith(os.path.normpath("data/i_small/a_small.txt"))
@@ -631,20 +642,20 @@ def test_assay_reader_small2_assay(small2_investigation_file, small2_assay_file)
     """Use ``AssayReader`` to read in small assay file."""
     # Load investigation (tested elsewhere)
     investigation = InvestigationReader.from_stream(small2_investigation_file).read()
+    InvestigationValidator(investigation).validate()
 
     # Create new row reader and check read headers
-    reader = AssayReader.from_stream(
-        investigation,
-        investigation.studies[0],
-        investigation.studies[0].assays["a_small2.txt"],
-        "S1",
-        "A1",
-        small2_assay_file,
-    )
+    reader = AssayReader.from_stream("S1", "A1", small2_assay_file)
     assert 14 == len(reader.header)
 
     # Read assay
     assay = reader.read()
+    AssayValidator(
+        investigation,
+        investigation.studies[0],
+        investigation.studies[0].assays["a_small2.txt"],
+        assay,
+    ).validate()
 
     # Check results
     assert os.path.normpath(str(assay.file)).endswith(
@@ -741,24 +752,28 @@ def test_assay_reader_small2_assay(small2_investigation_file, small2_assay_file)
 
 def test_assay_reader_gelelect(gelelect_investigation_file, gelelect_assay_file):
     """Use ``AssayReader`` to read in small assay file."""
-    # Load investigation
-    investigation = InvestigationReader.from_stream(gelelect_investigation_file).read()
+    with pytest.warns(IsaWarning) as record:
+        # Load investigation
+        investigation = InvestigationReader.from_stream(gelelect_investigation_file).read()
+        InvestigationValidator(investigation).validate()
 
-    # Create new row reader and check read headers
-    reader = AssayReader.from_stream(
-        investigation,
-        investigation.studies[0],
-        investigation.studies[0].assays[
-            "a_study01_protein_expression_profiling_gel_electrophoresis.txt"
-        ],
-        "S1",
-        "A1",
-        gelelect_assay_file,
-    )
-    assert 22 == len(reader.header)
+        # Create new row reader and check read headers
+        reader = AssayReader.from_stream("S1", "A1", gelelect_assay_file)
+        assert 22 == len(reader.header)
 
-    # Read assay
-    assay = reader.read()
+        # Read assay
+        assay = reader.read()
+        AssayValidator(
+            investigation,
+            investigation.studies[0],
+            investigation.studies[0].assays[
+                "a_study01_protein_expression_profiling_gel_electrophoresis.txt"
+            ],
+            assay,
+        ).validate()
+
+    # Check warnings
+    assert 3 == len(record)
 
     # Check results
     assert os.path.normpath(str(assay.file)).endswith(

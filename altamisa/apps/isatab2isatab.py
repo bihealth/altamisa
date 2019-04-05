@@ -5,70 +5,88 @@
 import argparse
 import os
 import sys
+import warnings
 
 from altamisa.isatab import (
     AssayReader,
+    AssayValidator,
     AssayWriter,
     InvestigationReader,
+    InvestigationValidator,
     InvestigationWriter,
     StudyReader,
+    StudyValidator,
     StudyWriter,
 )
 from altamisa.exceptions import IsaException
 
 
 def run(args):
-    # Check if input and output directory are different
-    path_in = os.path.normpath(os.path.dirname(args.input_investigation_file.name))
-    path_out = os.path.normpath(os.path.dirname(args.output_investigation_file.name))
-    if path_in == path_out:
-        tpl = "Can't output ISA-tab files to same directory as as input: {} == {}"
-        msg = tpl.format(path_in, path_out)
-        raise IsaException(msg)
+    # Collect warnings
+    with warnings.catch_warnings(record=True) as records:
 
-    # Read investigation
-    investigation = InvestigationReader.from_stream(args.input_investigation_file).read()
+        # Check if input and output directory are different
+        path_in = os.path.normpath(os.path.dirname(args.input_investigation_file.name))
+        path_out = os.path.normpath(os.path.dirname(args.output_investigation_file.name))
+        if path_in == path_out:
+            tpl = "Can't output ISA-tab files to same directory as as input: {} == {}"
+            msg = tpl.format(path_in, path_out)
+            raise IsaException(msg)
 
-    # Read studies and assays
-    studies = {}
-    assays = {}
-    for s, study_info in enumerate(investigation.studies):
-        with open(os.path.join(path_in, study_info.info.path), "rt") as inputf:
-            studies[s] = StudyReader.from_stream(
-                investigation, study_info, "S{}".format(s + 1), inputf
-            ).read()
-        if study_info.assays:
-            assays[s] = {}
-        for a, assay_info in enumerate(study_info.assays.values()):
-            with open(os.path.join(path_in, assay_info.path), "rt") as inputf:
-                assays[s][a] = AssayReader.from_stream(
-                    investigation,
-                    study_info,
-                    assay_info,
-                    "S{}".format(s + 1),
-                    "A{}".format(a + 1),
-                    inputf,
-                ).read()
+        # Read investigation
+        investigation = InvestigationReader.from_stream(args.input_investigation_file).read()
 
-    # TODO: independent validation should go here
-
-    # Write investigation
-    InvestigationWriter.from_stream(
-        investigation, args.output_investigation_file, args.quotes
-    ).write()
-
-    # Write studies and assays
-    for s, study_info in enumerate(investigation.studies):
-        if args.output_investigation_file.name == "<stdout>":
-            StudyWriter.from_stream(studies[s], args.output_investigation_file).write()
+        # Read studies and assays
+        studies = {}
+        assays = {}
+        for s, study_info in enumerate(investigation.studies):
+            with open(os.path.join(path_in, study_info.info.path), "rt") as inputf:
+                studies[s] = StudyReader.from_stream("S{}".format(s + 1), inputf).read()
+            if study_info.assays:
+                assays[s] = {}
             for a, assay_info in enumerate(study_info.assays.values()):
-                AssayWriter.from_stream(assays[s][a], args.output_investigation_file).write()
-        else:
-            with open(os.path.join(path_out, study_info.info.path), "wt") as outputf:
-                StudyWriter.from_stream(studies[s], outputf).write()
+                with open(os.path.join(path_in, assay_info.path), "rt") as inputf:
+                    assays[s][a] = AssayReader.from_stream(
+                        "S{}".format(s + 1), "A{}".format(a + 1), inputf
+                    ).read()
+
+        # Validate investigation
+        InvestigationValidator(investigation).validate()
+
+        # Validate studies and assays
+        for s, study_info in enumerate(investigation.studies):
+            StudyValidator(investigation, study_info, studies[s]).validate()
             for a, assay_info in enumerate(study_info.assays.values()):
-                with open(os.path.join(path_out, assay_info.path), "wt") as outputf:
-                    AssayWriter.from_stream(assays[s][a], outputf).write()
+                AssayValidator(investigation, study_info, assay_info, assays[s][a]).validate()
+
+        # Write investigation
+        InvestigationWriter.from_stream(
+            investigation, args.output_investigation_file, quote=args.quotes
+        ).write()
+
+        # Write studies and assays
+        for s, study_info in enumerate(investigation.studies):
+            if args.output_investigation_file.name == "<stdout>":
+                StudyWriter.from_stream(
+                    studies[s], args.output_investigation_file, quote=args.quotes
+                ).write()
+                for a, assay_info in enumerate(study_info.assays.values()):
+                    AssayWriter.from_stream(
+                        assays[s][a], args.output_investigation_file, quote=args.quotes
+                    ).write()
+            else:
+                with open(os.path.join(path_out, study_info.info.path), "wt") as outputf:
+                    StudyWriter.from_stream(studies[s], outputf, quote=args.quotes).write()
+                for a, assay_info in enumerate(study_info.assays.values()):
+                    with open(os.path.join(path_out, assay_info.path), "wt") as outputf:
+                        AssayWriter.from_stream(assays[s][a], outputf, quote=args.quotes).write()
+
+    # Print warnings
+    if not args.no_warnings:
+        for record in records:
+            warnings.showwarning(
+                record.message, record.category, record.filename, record.lineno, record.line
+            )
 
 
 def main(argv=None):
@@ -92,8 +110,19 @@ def main(argv=None):
         ),
     )
     parser.add_argument(
-        "-q", "--quotes", default=None, type=str, help="Character for quoting (None by default)"
+        "-q",
+        "--quotes",
+        default=None,
+        type=str,
+        help='Character for quoting, e.g. "\\"" (None by default)',
     )
+    parser.add_argument(
+        "--no-warnings",
+        dest="no_warnings",
+        action="store_true",
+        help="Suppress ISA-tab related warnings (False by default)",
+    )
+    parser.set_defaults(no_warnings=False)
 
     args = parser.parse_args(argv)
     return run(args)

@@ -1,0 +1,2 @@
+Sample Name	Factor Value[Group]
+0815-N1	A

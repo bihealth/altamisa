@@ -304,6 +304,9 @@ class LabeledColumnHeader(ColumnHeader):
         tpl = "LabeledColumnHeader(column_type={}, col_no={}, span={}, label={})"
         return tpl.format(*map(repr, (self.column_type, self.col_no, self.span, self.label)))
 
+    def __repr__(self):
+        return str(self)
+
     def get_simple_string(self):
         return ["".join((self.column_type, "[", self.label, "]"))]
 
@@ -412,17 +415,13 @@ class HeaderParserBase:
         # Process either by exact match to "Term Source REF", or other exact
         # matches, or any of the prefix matches (e.g., "Comment[Label])"
         if val == table_headers.TERM_SOURCE_REF:
-            if val not in self.allowed_headers:
-                tpl = 'Header "{}" not allowed in {}.'
-                msg = tpl.format(val, self.file_type)
-                raise ParseIsatabException(msg)
-            return self._parse_term_source_ref(val)
+            return self._parse_term_source_ref()
         elif val in self.simple_headers:
             if val not in self.allowed_headers:
                 tpl = 'Header "{}" not allowed in {}.'
                 msg = tpl.format(val, self.file_type)
                 raise ParseIsatabException(msg)
-            return self._parse_simple_column_header(val, self.simple_headers[val])
+            return self._parse_simple_column_header(self.simple_headers[val])
         else:
             for label, type_ in self.labeled_headers.items():
                 if val.startswith(label):
@@ -436,18 +435,21 @@ class HeaderParserBase:
         msg = tpl.format(val)
         raise ParseIsatabException(msg)
 
-    def _parse_term_source_ref(self, val):
-        # Getting a StopIeration here is NOT okay, there must be a column
+    def _parse_term_source_ref(self):
+        # Getting a StopIteration here is NOT okay, there must be a column
         # after "Term Source REF" giving the ontology the term is from.
         try:
-            next(self.it)
+            val = next(self.it)
         except StopIteration as e:
-            msg = 'Expected two more columns on seeing "Term Source REF"'
+            msg = 'Expected one more column on seeing "Term Source REF"'
             raise ParseIsatabException(msg) from e
+        if val != table_headers.TERM_ACCESSION_NUMBER:
+            msg = 'Expected column "Term Accession Number" after seeing "Term Source REF"'
+            raise ParseIsatabException(msg)
         self.col_no += 2
         return TermRefAnnotationHeader(self.col_no - 2)
 
-    def _parse_simple_column_header(self, val, type_):
+    def _parse_simple_column_header(self, type_):
         self.col_no += 1
         return type_(self.col_no - 1)
 
@@ -455,7 +457,7 @@ class HeaderParserBase:
         tok = val[len(key) :]  # strip '^{key}'
         if not tok or tok[0] != "[" or tok[-1] != "]":
             tpl = "Problem parsing labeled header {}"
-            msg = tpl.format(tpl.format(val))
+            msg = tpl.format(val)
             raise ParseIsatabException(msg)
         self.col_no += 1
         return type_(self.col_no - 1, tok[1:-1])
