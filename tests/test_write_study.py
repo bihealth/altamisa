@@ -6,7 +6,7 @@ import filecmp
 import pytest
 import os
 
-from altamisa.exceptions import IsaWarning, ParseIsatabWarning
+from altamisa.exceptions import ModerateIsaValidationWarning, IsaWarning, ParseIsatabWarning
 from altamisa.isatab import (
     InvestigationReader,
     InvestigationValidator,
@@ -43,15 +43,24 @@ def _parse_write_assert(investigation_file, tmp_path, quote=None):
 
 
 def test_study_writer_minimal(minimal_investigation_file, tmp_path):
-    _parse_write_assert(minimal_investigation_file, tmp_path)
+    with pytest.warns(IsaWarning) as record:
+        _parse_write_assert(minimal_investigation_file, tmp_path)
+    # Check warnings
+    assert 1 == len(record)
 
 
 def test_study_writer_minimal2(minimal2_investigation_file, tmp_path):
-    _parse_write_assert(minimal2_investigation_file, tmp_path)
+    with pytest.warns(IsaWarning) as record:
+        _parse_write_assert(minimal2_investigation_file, tmp_path)
+    # Check warnings
+    assert 1 == len(record)
 
 
 def test_study_writer_small(small_investigation_file, tmp_path):
-    _parse_write_assert(small_investigation_file, tmp_path)
+    with pytest.warns(IsaWarning) as record:
+        _parse_write_assert(small_investigation_file, tmp_path)
+    # Check warnings
+    assert 1 == len(record)
 
 
 def test_study_writer_small2(small2_investigation_file, tmp_path):
@@ -69,7 +78,10 @@ def test_study_writer_gelelect(gelelect_investigation_file, tmp_path):
     with pytest.warns(IsaWarning) as record:
         _parse_write_assert(gelelect_investigation_file, tmp_path, quote='"')
     # Check warnings
-    assert 1 == len(record)
+    assert 2 == len(record)
     msg = "Skipping empty ontology source: , , , "
     assert record[0].category == ParseIsatabWarning
     assert str(record[0].message) == msg
+    msg = "Study without title:\nID:\tstudy01\nTitle:\t\nPath:\ts_study01.txt"
+    assert record[1].category == ModerateIsaValidationWarning
+    assert str(record[1].message) == msg

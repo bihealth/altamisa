@@ -282,7 +282,7 @@ class InvestigationWriter:
             investigation_headers.STUDY_DESCRIPTION: [basic_info.description],
             investigation_headers.STUDY_SUBMISSION_DATE: [basic_info.submission_date],
             investigation_headers.STUDY_PUBLIC_RELEASE_DATE: [basic_info.public_release_date],
-            investigation_headers.STUDY_FILE_NAME: [basic_info.path],
+            investigation_headers.STUDY_FILE_NAME: [basic_info.path or ""],
         }
         comments = _extract_comments([basic_info])
         headers = _extract_section_header(basic_info, investigation_headers.STUDY)
@@ -371,8 +371,8 @@ class InvestigationWriter:
     def _write_study_assays(self, study: models.StudyInfo):
         # Write STUDY ASSAYS section
         section = _init_multi_column_section(investigation_headers.STUDY_ASSAYS_KEYS)
-        for assay in study.assays.values():
-            section[investigation_headers.STUDY_ASSAY_FILE_NAME].append(assay.path)
+        for assay in study.assays:
+            section[investigation_headers.STUDY_ASSAY_FILE_NAME].append(assay.path or "")
 
             if is_ontology_term_ref(assay.measurement_type):
                 section[investigation_headers.STUDY_ASSAY_MEASUREMENT_TYPE].append(
@@ -418,10 +418,9 @@ class InvestigationWriter:
 
             section[investigation_headers.STUDY_ASSAY_TECHNOLOGY_PLATFORM].append(assay.platform)
 
-        comments = _extract_comments(study.assays.values())
+        comments = _extract_comments(study.assays)
         headers = _extract_section_header(
-            list(study.assays.values())[0] if study.assays else None,
-            investigation_headers.STUDY_ASSAYS,
+            list(study.assays)[0] if study.assays else None, investigation_headers.STUDY_ASSAYS
         )
         self._write_section(investigation_headers.STUDY_ASSAYS, section, comments, headers)
 

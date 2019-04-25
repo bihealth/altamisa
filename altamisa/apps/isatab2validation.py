@@ -18,45 +18,53 @@ from altamisa.isatab import (
 
 
 def run(args):
+    # Show all warnings of same type and content
     if args.show_duplicate_warnings:
         warnings.simplefilter("always")
 
     # Collect warnings
     with warnings.catch_warnings(record=True) as records:
-
-        # Read investigation
-        investigation = InvestigationReader.from_stream(args.input_investigation_file).read()
-        args.input_investigation_file.close()
-
-        # Read studies and assays
-        path_in = os.path.normpath(os.path.dirname(args.input_investigation_file.name))
-        studies = {}
-        assays = {}
-        for s, study_info in enumerate(investigation.studies):
-            with open(os.path.join(path_in, study_info.info.path), "rt") as inputf:
-                studies[s] = StudyReader.from_stream("S{}".format(s + 1), inputf).read()
-            if study_info.assays:
-                assays[s] = {}
-            for a, assay_info in enumerate(study_info.assays.values()):
-                with open(os.path.join(path_in, assay_info.path), "rt") as inputf:
-                    assays[s][a] = AssayReader.from_stream(
-                        "S{}".format(s + 1), "A{}".format(a + 1), inputf
-                    ).read()
-
-        # Validate investigation
-        InvestigationValidator(investigation).validate()
-
-        # Validate studies and assays
-        for s, study_info in enumerate(investigation.studies):
-            StudyValidator(investigation, study_info, studies[s]).validate()
-            for a, assay_info in enumerate(study_info.assays.values()):
-                AssayValidator(investigation, study_info, assay_info, assays[s][a]).validate()
+        run_warnings_caught(args)
 
     # Print warnings
     for record in records:
         warnings.showwarning(
             record.message, record.category, record.filename, record.lineno, record.line
         )
+
+
+def run_warnings_caught(args):
+    # Read investigation
+    investigation = InvestigationReader.from_stream(args.input_investigation_file).read()
+    args.input_investigation_file.close()
+
+    # Validate investigation
+    InvestigationValidator(investigation).validate()
+
+    # Read studies and assays
+    path_in = os.path.normpath(os.path.dirname(args.input_investigation_file.name))
+    studies = {}
+    assays = {}
+    for s, study_info in enumerate(investigation.studies):
+        if study_info.info.path:
+            with open(os.path.join(path_in, study_info.info.path), "rt") as inputf:
+                studies[s] = StudyReader.from_stream("S{}".format(s + 1), inputf).read()
+        if study_info.assays:
+            assays[s] = {}
+        for a, assay_info in enumerate(study_info.assays):
+            if assay_info.path:
+                with open(os.path.join(path_in, assay_info.path), "rt") as inputf:
+                    assays[s][a] = AssayReader.from_stream(
+                        "S{}".format(s + 1), "A{}".format(a + 1), inputf
+                    ).read()
+
+    # Validate studies and assays
+    for s, study_info in enumerate(investigation.studies):
+        if study_info.info.path:
+            StudyValidator(investigation, study_info, studies[s]).validate()
+        for a, assay_info in enumerate(study_info.assays):
+            if assay_info.path:
+                AssayValidator(investigation, study_info, assay_info, assays[s][a]).validate()
 
 
 def main(argv=None):

@@ -30,7 +30,7 @@ Investigation Person Roles
 Investigation Person Roles Term Accession Number
 Investigation Person Roles Term Source REF
 STUDY
-Study Identifier	s_assays_1
+Study Identifier	s_assays
 Study Title	Minimal Germline Study
 Study Description
 Comment[Study Grant Number]
@@ -92,7 +92,7 @@ Study Person Roles
 Study Person Roles Term Accession Number
 Study Person Roles Term Source REF
 STUDY
-Study Identifier	s_assays_2
+Study Identifier	s_assays
 Study Title	Minimal Germline Study
 Study Description
 Comment[Study Grant Number]
