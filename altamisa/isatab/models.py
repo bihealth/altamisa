@@ -261,8 +261,8 @@ class StudyInfo(NamedTuple):
     publications: Tuple[PublicationInfo]
     #: Study factors by name
     factors: Dict[str, FactorInfo]
-    #: Study assays by name
-    assays: Dict[str, AssayInfo]
+    #: Study assays
+    assays: Tuple[AssayInfo]
     #: Study protocols by name
     protocols: Dict[str, ProtocolInfo]
     #: Study contact list

@@ -5,17 +5,26 @@
 import filecmp
 import pytest
 
-from altamisa.exceptions import IsaWarning, ParseIsatabWarning, WriteIsatabWarning
+from altamisa.exceptions import (
+    CriticalIsaValidationWarning,
+    IsaWarning,
+    ModerateIsaValidationWarning,
+    ParseIsatabWarning,
+    WriteIsatabWarning,
+)
 from altamisa.isatab import InvestigationReader, InvestigationWriter, InvestigationValidator
 
 
 # Tests with one-time reading and writing
 
 
-def test_parse_minimal_investigation(minimal_investigation_file, tmp_path):
+def test_write_minimal_investigation(minimal_investigation_file, tmp_path):
     # Read Investigation from file-like object
-    investigation = InvestigationReader.from_stream(minimal_investigation_file).read()
-    InvestigationValidator(investigation).validate()
+    with pytest.warns(IsaWarning) as record:
+        investigation = InvestigationReader.from_stream(minimal_investigation_file).read()
+        InvestigationValidator(investigation).validate()
+    # Check warnings
+    assert 1 == len(record)
     # Write Investigation to temporary file
     path = tmp_path / "i_minimal.txt"
     with pytest.warns(IsaWarning) as record:
@@ -30,10 +39,13 @@ def test_parse_minimal_investigation(minimal_investigation_file, tmp_path):
     assert filecmp.cmp(minimal_investigation_file.name, path, shallow=False)
 
 
-def test_parse_small_investigation(small_investigation_file, tmp_path):
+def test_write_small_investigation(small_investigation_file, tmp_path):
     # Read Investigation from file-like object
-    investigation = InvestigationReader.from_stream(small_investigation_file).read()
-    InvestigationValidator(investigation).validate()
+    with pytest.warns(IsaWarning) as record:
+        investigation = InvestigationReader.from_stream(small_investigation_file).read()
+        InvestigationValidator(investigation).validate()
+    # Check warnings
+    assert 1 == len(record)
     # Write Investigation to temporary file
     path = tmp_path / "i_small.txt"
     with pytest.warns(IsaWarning) as record:
@@ -50,7 +62,7 @@ def test_parse_small_investigation(small_investigation_file, tmp_path):
     assert filecmp.cmp(small_investigation_file.name, path, shallow=False)
 
 
-def test_parse_comment_investigation(comment_investigation_file, tmp_path):
+def test_write_comment_investigation(comment_investigation_file, tmp_path):
     # Read Investigation from file-like object
     investigation = InvestigationReader.from_stream(comment_investigation_file).read()
     InvestigationValidator(investigation).validate()
@@ -62,10 +74,28 @@ def test_parse_comment_investigation(comment_investigation_file, tmp_path):
     assert filecmp.cmp(comment_investigation_file.name, path, shallow=False)
 
 
-def test_parse_full2_investigation(full2_investigation_file, tmp_path):
+def test_write_full2_investigation(full2_investigation_file, tmp_path):
     # Read Investigation from file-like object
-    investigation = InvestigationReader.from_stream(full2_investigation_file).read()
-    InvestigationValidator(investigation).validate()
+    with pytest.warns(IsaWarning) as record:
+        investigation = InvestigationReader.from_stream(full2_investigation_file).read()
+        InvestigationValidator(investigation).validate()
+    # Check warnings
+    assert 3 == len(record)
+    msg = "Study with incomplete minimal information (ID and path):\nID:\t\nTitle:\t\nPath:\t"
+    assert record[0].category == CriticalIsaValidationWarning
+    assert str(record[0].message) == msg
+    msg = "Study without title:\nID:\t\nTitle:\t\nPath:\t"
+    assert record[1].category == ModerateIsaValidationWarning
+    assert str(record[1].message) == msg
+    msg = (
+        "Assay with incomplete minimal information (path, measurement and technology type):\n"
+        "Path:\t\n"
+        "Measurement Type:\tmetabolite profiling\n"
+        "Technology Type:\tmass spectrometry\n"
+        "Technology Platform:\tLC-MS/MS"
+    )
+    assert record[2].category == CriticalIsaValidationWarning
+    assert str(record[2].message) == msg
     # Write Investigation to temporary file
     path = tmp_path / "i_fullinvest2.txt"
     with open(path, "wt") as file:
@@ -74,22 +104,7 @@ def test_parse_full2_investigation(full2_investigation_file, tmp_path):
     assert filecmp.cmp(full2_investigation_file.name, path, shallow=False)
 
 
-def test_parse_assays2_investigation(assays2_investigation_file, tmp_path):
-    # Read Investigation from file-like object
-    investigation = InvestigationReader.from_stream(assays2_investigation_file).read()
-    InvestigationValidator(investigation).validate()
-    # Write Investigation to temporary file
-    path = tmp_path / "i_assays2.txt"
-    with pytest.warns(IsaWarning) as record:
-        with open(path, "wt") as file:
-            InvestigationWriter.from_stream(investigation, file, lineterminator="\n").write()
-    # Check warnings
-    assert 12 == len(record)
-    # Compare input and output
-    assert filecmp.cmp(assays2_investigation_file.name, path, shallow=False)
-
-
-def test_parse_BII_I_2_investigation(BII_I_2_investigation_file, tmp_path):
+def test_write_BII_I_2_investigation(BII_I_2_investigation_file, tmp_path):
     # Read Investigation from file-like object
     investigation = InvestigationReader.from_stream(BII_I_2_investigation_file).read()
     InvestigationValidator(investigation).validate()
@@ -104,10 +119,13 @@ def test_parse_BII_I_2_investigation(BII_I_2_investigation_file, tmp_path):
 # Tests with second reading and writing for normalization
 
 
-def test_parse_assays_investigation(assays_investigation_file, tmp_path):
+def test_write_assays_investigation(assays_investigation_file, tmp_path):
     # Read Investigation from file-like object
     investigation = InvestigationReader.from_stream(assays_investigation_file).read()
-    InvestigationValidator(investigation).validate()
+    with pytest.warns(IsaWarning) as record:
+        InvestigationValidator(investigation).validate()
+    # Check warnings
+    assert 5 == len(record)
     # Write Investigation to temporary file
     path1 = tmp_path / "i_assays.txt"
     with pytest.warns(IsaWarning) as record:
@@ -119,7 +137,10 @@ def test_parse_assays_investigation(assays_investigation_file, tmp_path):
     with open(path1, "rt") as file:
         reader = InvestigationReader.from_stream(file)
         investigation = reader.read()
-    InvestigationValidator(investigation).validate()
+    with pytest.warns(IsaWarning) as record:
+        InvestigationValidator(investigation).validate()
+    # Check warnings
+    assert 5 == len(record)
     # Write Investigation to second temporary file
     path2 = tmp_path / "i_assays_2.txt"
     with pytest.warns(IsaWarning) as record:
@@ -131,7 +152,7 @@ def test_parse_assays_investigation(assays_investigation_file, tmp_path):
     assert filecmp.cmp(path1, path2, shallow=False)
 
 
-def test_parse_full_investigation(full_investigation_file, tmp_path):
+def test_write_full_investigation(full_investigation_file, tmp_path):
     # Read Investigation from file-like object
     investigation = InvestigationReader.from_stream(full_investigation_file).read()
     InvestigationValidator(investigation).validate()
@@ -151,7 +172,7 @@ def test_parse_full_investigation(full_investigation_file, tmp_path):
     assert filecmp.cmp(path1, path2, shallow=False)
 
 
-def test_parse_BII_I_1_investigation(BII_I_1_investigation_file, tmp_path):
+def test_write_BII_I_1_investigation(BII_I_1_investigation_file, tmp_path):
     # Read Investigation from file-like object
     with pytest.warns(IsaWarning) as record:
         investigation = InvestigationReader.from_stream(BII_I_1_investigation_file).read()

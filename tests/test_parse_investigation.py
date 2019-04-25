@@ -4,8 +4,14 @@
 
 from datetime import date
 from pathlib import Path
+import pytest
 
 from altamisa.constants import investigation_headers
+from altamisa.exceptions import (
+    IsaWarning,
+    CriticalIsaValidationWarning,
+    ModerateIsaValidationWarning,
+)
 from altamisa.isatab import models
 from altamisa.isatab import InvestigationReader, InvestigationValidator
 
@@ -14,7 +20,11 @@ def test_parse_minimal_investigation(minimal_investigation_file):
     # Read Investigation from file-like object
     reader = InvestigationReader.from_stream(minimal_investigation_file)
     investigation = reader.read()
-    InvestigationValidator(investigation).validate()
+    with pytest.warns(IsaWarning) as record:
+        InvestigationValidator(investigation).validate()
+
+    # Check warnings
+    assert 1 == len(record)
 
     # Check results
     # Investigation
@@ -44,7 +54,7 @@ def test_parse_minimal_investigation(minimal_investigation_file):
 
     # Assays
     assert len(investigation.studies[0].assays) == 1
-    assay = investigation.studies[0].assays["a_minimal.txt"]
+    assay = investigation.studies[0].assays[0]
     assert Path("a_minimal.txt") == assay.path
 
     # Study contacts
@@ -55,7 +65,11 @@ def test_parse_small_investigation(small_investigation_file):
     # Read Investigation from file-like object
     reader = InvestigationReader.from_stream(small_investigation_file)
     investigation = reader.read()
-    InvestigationValidator(investigation).validate()
+    with pytest.warns(IsaWarning) as record:
+        InvestigationValidator(investigation).validate()
+
+    # Check warnings
+    assert 1 == len(record)
 
     # Check results
     # Investigation
@@ -103,7 +117,7 @@ def test_parse_small_investigation(small_investigation_file):
 
     # Assays
     assert len(investigation.studies[0].assays) == 1
-    assay = investigation.studies[0].assays["a_small.txt"]
+    assay = investigation.studies[0].assays[0]
     assert Path("a_small.txt") == assay.path
 
     # Study contacts
@@ -348,7 +362,7 @@ def test_parse_full_investigation(full_investigation_file):
         (models.Comment("Extra Info", "a"),),
         expected_headers,
     )
-    assert expected == study.assays["a_proteome.txt"]
+    assert expected == study.assays[0]
     expected = models.AssayInfo(
         models.OntologyTermRef(
             "transcription profiling", "http://purl.obolibrary.org/obo/OBI_0000424", "OBI"
@@ -361,7 +375,7 @@ def test_parse_full_investigation(full_investigation_file):
         (models.Comment("Extra Info", "c"),),
         expected_headers,
     )
-    assert expected == study.assays["a_transcriptome.txt"]
+    assert expected == study.assays[2]
 
     # Study 1 - Protocols
     assert 7 == len(study.protocols)
@@ -566,7 +580,7 @@ def test_parse_full_investigation(full_investigation_file):
         (),
         [*investigation_headers.STUDY_ASSAYS_KEYS],
     )
-    assert expected == study.assays["a_microarray.txt"]
+    assert expected == study.assays[0]
 
     # Study 2 - Protocols
     assert 10 == len(study.protocols)
@@ -784,7 +798,7 @@ def test_parse_comment_investigation(comment_investigation_file):
             *investigation_headers.STUDY_ASSAYS_KEYS[5:],
         ],
     )
-    assert expected == study.assays["a_transcriptome.txt"]
+    assert expected == study.assays[2]
 
     # Study 1 - Protocols
     assert 7 == len(study.protocols)
@@ -878,7 +892,23 @@ def test_parse_assays_investigation(assays_investigation_file):
     # Read Investigation from file-like object
     reader = InvestigationReader.from_stream(assays_investigation_file)
     investigation = reader.read()
-    InvestigationValidator(investigation).validate()
+    with pytest.warns(IsaWarning) as record:
+        InvestigationValidator(investigation).validate()
+
+    # Check warnings
+    assert 5 == len(record)
+    msg = "No assays declared in study 's_assays' of investigation 'i_assays.txt'"
+    assert record[0].category == CriticalIsaValidationWarning
+    assert str(record[0].message) == msg
+    msg = "Study identifier used more than once: s_assays"
+    assert record[1].category == CriticalIsaValidationWarning
+    assert str(record[1].message) == msg
+    msg = "Study path used more than once: s_assays.txt"
+    assert record[2].category == CriticalIsaValidationWarning
+    assert str(record[2].message) == msg
+    msg = "Study title used more than once: Minimal Germline Study"
+    assert record[3].category == ModerateIsaValidationWarning
+    assert str(record[3].message) == msg
 
     # Check results
     # Investigation
@@ -890,3 +920,17 @@ def test_parse_assays_investigation(assays_investigation_file):
     # Assays
     assert 0 == len(investigation.studies[0].assays)
     assert 0 == len(investigation.studies[1].assays)
+
+
+def test_parse_only_investigation(only_investigation_file):
+    # Read Investigation from file-like object
+    reader = InvestigationReader.from_stream(only_investigation_file)
+    investigation = reader.read()
+    with pytest.warns(IsaWarning) as record:
+        InvestigationValidator(investigation).validate()
+
+    # Check warnings
+    assert 1 == len(record)
+    msg = "No studies declared in investigation: i_onlyinvest.txt"
+    assert record[0].category == CriticalIsaValidationWarning
+    assert str(record[0].message) == msg

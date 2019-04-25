@@ -340,7 +340,6 @@ class InvestigationReader:
             )
 
     def _read_studies(self) -> Iterator[models.StudyInfo]:
-        # TODO: is it legal to have no study in the investigation?
         while self._line:
             # Read STUDY header
             line = self._read_next_line()
@@ -355,7 +354,9 @@ class InvestigationReader:
             # From this, parse the basic information from the study
             comments = _parse_comments(section, comment_keys)
             basic_info = models.BasicInfo(
-                Path(section[investigation_headers.STUDY_FILE_NAME]),
+                Path(section[investigation_headers.STUDY_FILE_NAME])
+                if section[investigation_headers.STUDY_FILE_NAME]
+                else None,
                 section[investigation_headers.STUDY_IDENTIFIER],
                 section[investigation_headers.STUDY_TITLE],
                 section[investigation_headers.STUDY_DESCRIPTION],
@@ -369,7 +370,7 @@ class InvestigationReader:
             design_descriptors = tuple(self._read_study_design_descriptors())
             publications = tuple(self._read_study_publications())
             factors = {f.name: f for f in self._read_study_factors()}
-            assays = {a.path.name: a for a in self._read_study_assays()}
+            assays = tuple(self._read_study_assays())
             protocols = {p.name: p for p in self._read_study_protocols()}
             contacts = tuple(self._read_study_contacts())
             # Create study object
@@ -470,25 +471,8 @@ class InvestigationReader:
                 tech_plat,
             ),
         ) in enumerate(columns):
-            if not file_ and any(
+            if any(
                 (
-                    meas_type,
-                    meas_type_term_acc,
-                    meas_type_term_src,
-                    tech_type,
-                    tech_type_term_acc,
-                    tech_type_term_src,
-                    tech_plat,
-                )
-            ):
-                # don't allow assay columns without assay file
-                tpl = (
-                    "Found assay with no {} in {}; found: "
-                    '"{}", "{}", "{}", "{}", "{}", "{}", "{}", "{}"'
-                )
-                msg = tpl.format(
-                    investigation_headers.STUDY_ASSAY_FILE_NAME,
-                    investigation_headers.STUDY_ASSAYS,
                     file_,
                     meas_type,
                     meas_type_term_acc,
@@ -498,13 +482,17 @@ class InvestigationReader:
                     tech_type_term_src,
                     tech_plat,
                 )
-                raise ParseIsatabException(msg)
-            elif file_:  # if at least a file exists --> AssayInfo
+            ):
                 meas = models.OntologyTermRef(meas_type, meas_type_term_acc, meas_type_term_src)
                 tech = models.OntologyTermRef(tech_type, tech_type_term_acc, tech_type_term_src)
                 comments = _parse_comments(section, comment_keys, i)
                 yield models.AssayInfo(
-                    meas, tech, tech_plat, Path(file_), comments, list(section.keys())
+                    meas,
+                    tech,
+                    tech_plat,
+                    Path(file_) if file_ else None,
+                    comments,
+                    list(section.keys()),
                 )
             # else, i.e. if all assay fields are empty --> Nothing
 

@@ -94,7 +94,11 @@ def test_assay_reader_minimal_assay(minimal_investigation_file, minimal_assay_fi
     """
     # Load investigation (tested elsewhere)
     investigation = InvestigationReader.from_stream(minimal_investigation_file).read()
-    InvestigationValidator(investigation).validate()
+    with pytest.warns(IsaWarning) as record:
+        InvestigationValidator(investigation).validate()
+
+    # Check warnings
+    assert 1 == len(record)
 
     # Create new row reader and check read headers
     reader = AssayReader.from_stream("S1", "A1", minimal_assay_file)
@@ -103,10 +107,7 @@ def test_assay_reader_minimal_assay(minimal_investigation_file, minimal_assay_fi
     # Read and validate assay
     assay = reader.read()
     AssayValidator(
-        investigation,
-        investigation.studies[0],
-        investigation.studies[0].assays["a_minimal.txt"],
-        assay,
+        investigation, investigation.studies[0], investigation.studies[0].assays[0], assay
     ).validate()
 
     # Check results
@@ -434,7 +435,11 @@ def test_assay_reader_small_assay(small_investigation_file, small_assay_file):
     """Use ``AssayReader`` to read in small assay file."""
     # Load investigation (tested elsewhere)
     investigation = InvestigationReader.from_stream(small_investigation_file).read()
-    InvestigationValidator(investigation).validate()
+    with pytest.warns(IsaWarning) as record:
+        InvestigationValidator(investigation).validate()
+
+    # Check warnings
+    assert 1 == len(record)
 
     # Create new row reader and check read headers
     reader = AssayReader.from_stream("S1", "A1", small_assay_file)
@@ -444,10 +449,7 @@ def test_assay_reader_small_assay(small_investigation_file, small_assay_file):
     with pytest.warns(IsaWarning) as record:
         assay = reader.read()
         AssayValidator(
-            investigation,
-            investigation.studies[0],
-            investigation.studies[0].assays["a_small.txt"],
-            assay,
+            investigation, investigation.studies[0], investigation.studies[0].assays[0], assay
         ).validate()
 
     # Check warnings
@@ -651,10 +653,7 @@ def test_assay_reader_small2_assay(small2_investigation_file, small2_assay_file)
     # Read assay
     assay = reader.read()
     AssayValidator(
-        investigation,
-        investigation.studies[0],
-        investigation.studies[0].assays["a_small2.txt"],
-        assay,
+        investigation, investigation.studies[0], investigation.studies[0].assays[0], assay
     ).validate()
 
     # Check results
@@ -764,16 +763,11 @@ def test_assay_reader_gelelect(gelelect_investigation_file, gelelect_assay_file)
         # Read assay
         assay = reader.read()
         AssayValidator(
-            investigation,
-            investigation.studies[0],
-            investigation.studies[0].assays[
-                "a_study01_protein_expression_profiling_gel_electrophoresis.txt"
-            ],
-            assay,
+            investigation, investigation.studies[0], investigation.studies[0].assays[0], assay
         ).validate()
 
     # Check warnings
-    assert 3 == len(record)
+    assert 4 == len(record)
 
     # Check results
     assert os.path.normpath(str(assay.file)).endswith(

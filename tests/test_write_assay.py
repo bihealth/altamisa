@@ -6,7 +6,12 @@ import filecmp
 import os
 import pytest
 
-from altamisa.exceptions import IsaWarning, ModerateIsaValidationWarning, ParseIsatabWarning
+from altamisa.exceptions import (
+    AdvisoryIsaValidationWarning,
+    IsaWarning,
+    ModerateIsaValidationWarning,
+    ParseIsatabWarning,
+)
 from altamisa.isatab import (
     InvestigationReader,
     InvestigationValidator,
@@ -25,7 +30,7 @@ def _parse_write_assert_assay(investigation_file, tmp_path, quote=None, normaliz
     directory = os.path.normpath(os.path.dirname(investigation_file.name))
     # Iterate assays
     for s, study_info in enumerate(investigation.studies):
-        for a, assay_info in enumerate(study_info.assays.values()):
+        for a, assay_info in enumerate(study_info.assays):
             if skip and str(assay_info.path) in skip:
                 continue
             # Load assay
@@ -59,11 +64,17 @@ def _parse_write_assert_assay(investigation_file, tmp_path, quote=None, normaliz
 
 
 def test_assay_writer_minimal_assay(minimal_investigation_file, tmp_path):
-    _parse_write_assert_assay(minimal_investigation_file, tmp_path)
+    with pytest.warns(IsaWarning) as record:
+        _parse_write_assert_assay(minimal_investigation_file, tmp_path)
+    # Check warnings
+    assert 1 == len(record)
 
 
 def test_assay_writer_minimal2_assay(minimal2_investigation_file, tmp_path):
-    _parse_write_assert_assay(minimal2_investigation_file, tmp_path)
+    with pytest.warns(IsaWarning) as record:
+        _parse_write_assert_assay(minimal2_investigation_file, tmp_path)
+    # Check warnings
+    assert 1 == len(record)
 
 
 def test_assay_writer_small_assay(small_investigation_file, tmp_path):
@@ -71,13 +82,21 @@ def test_assay_writer_small_assay(small_investigation_file, tmp_path):
         _parse_write_assert_assay(small_investigation_file, tmp_path)
 
     # Check warnings
-    assert 1 == len(record)
+    assert 2 == len(record)
+    msg = (
+        "Assay without platform:\nPath:\ta_small.txt"
+        "\nMeasurement Type:\texome sequencing assay"
+        "\nTechnology Type:\tnucleotide sequencing"
+        "\nTechnology Platform:\t"
+    )
+    assert record[0].category == AdvisoryIsaValidationWarning
+    assert str(record[0].message) == msg
     msg = (
         "Can't validate parameter values and names for process with undeclared protocol "
         '"Unknown" and name type "Data Transformation Name"'
     )
-    assert record[0].category == ModerateIsaValidationWarning
-    assert str(record[0].message) == msg
+    assert record[1].category == ModerateIsaValidationWarning
+    assert str(record[1].message) == msg
 
 
 def test_assay_writer_small2_assay(small2_investigation_file, tmp_path):
@@ -145,12 +164,15 @@ def test_assay_writer_gelelect(gelelect_investigation_file, tmp_path):
     with pytest.warns(IsaWarning) as record:
         _parse_write_assert_assay(gelelect_investigation_file, tmp_path, quote='"')
     # Check warnings
-    assert 3 == len(record)
+    assert 4 == len(record)
     msg = "Skipping empty ontology source: , , , "
     assert record[0].category == ParseIsatabWarning
     assert str(record[0].message) == msg
-    msg = '"Normalization Name" not supported by protocol type "normalization" (only "data normalization")'
+    msg = "Study without title:\nID:\tstudy01\nTitle:\t\nPath:\ts_study01.txt"
     assert record[1].category == ModerateIsaValidationWarning
     assert str(record[1].message) == msg
+    msg = '"Normalization Name" not supported by protocol type "normalization" (only "data normalization")'
     assert record[2].category == ModerateIsaValidationWarning
     assert str(record[2].message) == msg
+    assert record[3].category == ModerateIsaValidationWarning
+    assert str(record[3].message) == msg

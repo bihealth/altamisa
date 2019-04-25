@@ -182,7 +182,8 @@ class _NodeBuilderBase:
             if not is_secondary:
                 prev = header
 
-    def _raise_seen_before(self, name, col_no):
+    @staticmethod
+    def _raise_seen_before(name, col_no):
         tpl = 'Seen "{}" header for same entity in col {}'
         msg = tpl.format(name, col_no)
         raise ParseIsatabException(msg)

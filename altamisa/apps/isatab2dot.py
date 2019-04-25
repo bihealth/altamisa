@@ -61,24 +61,17 @@ def run(args):
 
     for s, study_info in enumerate(investigation.studies):
         with open(os.path.join(path, study_info.info.path), "rt") as inputf:
-            study = StudyReader.from_stream(
-                investigation, study_info, "S{}".format(s + 1), inputf
-            ).read()
+            study = StudyReader.from_stream("S{}".format(s + 1), inputf).read()
         print("  /* study {} */".format(study_info.info.path), file=args.output_file)
         print("  subgraph clusterStudy{} {{".format(s), file=args.output_file)
         print('    label = "Study: {}"'.format(study_info.info.path), file=args.output_file)
         print_dot(study, args.output_file)
         print("  }", file=args.output_file)
 
-        for a, assay_info in enumerate(study_info.assays.values()):
+        for a, assay_info in enumerate(study_info.assays):
             with open(os.path.join(path, assay_info.path), "rt") as inputf:
                 assay = AssayReader.from_stream(
-                    investigation,
-                    study_info,
-                    assay_info,
-                    "S{}".format(s + 1),
-                    "A{}".format(a + 1),
-                    inputf,
+                    "S{}".format(s + 1), "A{}".format(a + 1), inputf
                 ).read()
             print("  /* assay {} */".format(assay_info.path), file=args.output_file)
             print("  subgraph clusterAssayS{}A{} {{".format(s, a), file=args.output_file)

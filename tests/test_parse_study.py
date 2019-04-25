@@ -4,8 +4,10 @@
 
 from datetime import date
 import os
+import pytest
 
 from altamisa.constants import table_headers
+from altamisa.exceptions import IsaWarning
 from altamisa.isatab import models
 from altamisa.isatab import (
     InvestigationReader,
@@ -73,7 +75,11 @@ def test_study_reader_minimal_study(minimal_investigation_file, minimal_study_fi
     """
     # Load investigation (tested elsewhere)
     investigation = InvestigationReader.from_stream(minimal_investigation_file).read()
-    InvestigationValidator(investigation).validate()
+    with pytest.warns(IsaWarning) as record:
+        InvestigationValidator(investigation).validate()
+
+    # Check warnings
+    assert 1 == len(record)
 
     # Create new row reader and check read headers
     reader = StudyReader.from_stream("S1", minimal_study_file)
@@ -313,8 +319,12 @@ def test_study_row_reader_small_study(small_investigation_file, small_study_file
 def test_study_reader_small_study(small_investigation_file, small_study_file):
     """Use ``StudyReader`` to read in small study file."""
     # Load investigation (tested elsewhere)
-    investigation = InvestigationReader.from_stream(small_investigation_file).read()
-    InvestigationValidator(investigation).validate()
+    with pytest.warns(IsaWarning) as record:
+        investigation = InvestigationReader.from_stream(small_investigation_file).read()
+        InvestigationValidator(investigation).validate()
+
+    # Check warnings
+    assert 1 == len(record)
 
     # Create new row reader and check read headers
     reader = StudyReader.from_stream("S1", small_study_file)

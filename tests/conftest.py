@@ -239,3 +239,10 @@ def assay_file_exception_invalid_column_type():
     )
     with open(path, "rt") as file:
         yield file
+
+
+@pytest.fixture
+def only_investigation_file():
+    path = os.path.join(os.path.dirname(__file__), "data/i_onlyinvest/i_onlyinvest.txt")
+    with open(path, "rt") as file:
+        yield file
