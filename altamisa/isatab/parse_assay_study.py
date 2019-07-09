@@ -28,7 +28,9 @@ class _NodeBuilderBase:
     #: Allowed ``column_type``s.
     allowed_column_types = None
 
-    def __init__(self, column_headers: List[ColumnHeader], study_id: str, assay_id: str):
+    def __init__(
+        self, column_headers: List[ColumnHeader], filename: str, study_id: str, assay_id: str
+    ):
         #: The column descriptions to build ``Material`` from.
         self.column_headers = column_headers
         #: The "Protocol REF" header, if any
@@ -67,6 +69,8 @@ class _NodeBuilderBase:
         #: Study and assay ids used for unique node naming
         self.study_id = study_id
         self.assay_id = assay_id
+        #: Original file name
+        self.filename = filename
 
     def _next_counter(self):
         """Increment counter value and return"""
@@ -462,8 +466,8 @@ class _ProcessBuilder(_NodeBuilderBase):
                 )
                 unique_name = models.AnnotatedStr(name_val, was_empty=True)
         if not protocol_ref:  # pragma: no cover
-            tpl = "Missing protocol reference in column {}"
-            msg = tpl.format(self.protocol_ref_header.col_no + 1)
+            tpl = "Missing protocol reference in column {} of file {} "
+            msg = tpl.format(self.protocol_ref_header.col_no + 1, self.filename)
             raise ParseIsatabException(msg)
         return protocol_ref, unique_name, name, name_type
 
@@ -474,8 +478,11 @@ class _RowBuilderBase:
     #: Registry of column header to node builder
     node_builders = None
 
-    def __init__(self, header: List[ColumnHeader], study_id: str, assay_id: str = None):
+    def __init__(
+        self, header: List[ColumnHeader], filename: str, study_id: str, assay_id: str = None
+    ):
         self.header = header
+        self.filename = filename
         self.study_id = study_id
         self.assay_id = assay_id
         self._builders = list(self._make_builders())
@@ -486,7 +493,7 @@ class _RowBuilderBase:
         for start, end in zip(breaks, breaks[1:]):
             self._intercept_duplicates(start, end)
             klass = self.node_builders[self.header[start].column_type]
-            yield klass(self.header[start:end], self.study_id, self.assay_id)
+            yield klass(self.header[start:end], self.filename, self.study_id, self.assay_id)
 
     def _intercept_duplicates(self, start, end):
         """Check for duplicate primary annotations per node/builder
@@ -722,13 +729,14 @@ class StudyRowReader:
     """
 
     @classmethod
-    def from_stream(klass, study_id: str, input_file: TextIO):
+    def from_stream(klass, study_id: str, input_file: TextIO, filename: str = None):
         """Construct from file-like object"""
-        return StudyRowReader(study_id, input_file)
+        return StudyRowReader(study_id, input_file, filename)
 
-    def __init__(self, study_id: str, input_file: TextIO):
+    def __init__(self, study_id: str, input_file: TextIO, filename: str):
         self.study_id = study_id
         self.input_file = input_file
+        self.filename = filename or getattr(input_file, "name", "<no file>")
         self.unique_rows = set()
         self.duplicate_rows = []
         self._reader = csv.reader(input_file, delimiter="\t", quotechar='"')
@@ -767,7 +775,7 @@ class StudyRowReader:
 
         :returns: Nodes per row of the study file
         """
-        builder = _StudyRowBuilder(self.header, self.study_id)
+        builder = _StudyRowBuilder(self.header, self.filename, self.study_id)
         while True:
             line = self._read_next_line()
             if line:
@@ -800,7 +808,7 @@ class StudyReader:
         return StudyReader(study_id, input_file, filename)
 
     def __init__(self, study_id: str, input_file: TextIO, filename=None):
-        self.row_reader = StudyRowReader.from_stream(study_id, input_file)
+        self.row_reader = StudyRowReader.from_stream(study_id, input_file, filename)
         # The file used for reading from
         self.input_file = input_file
         # A file name override
@@ -840,14 +848,15 @@ class AssayRowReader:
     """
 
     @classmethod
-    def from_stream(klass, study_id: str, assay_id: str, input_file: TextIO):
+    def from_stream(klass, study_id: str, assay_id: str, input_file: TextIO, filename: str = None):
         """Construct from file-like object"""
-        return AssayRowReader(study_id, assay_id, input_file)
+        return AssayRowReader(study_id, assay_id, input_file, filename)
 
-    def __init__(self, study_id: str, assay_id: str, input_file: TextIO):
+    def __init__(self, study_id: str, assay_id: str, input_file: TextIO, filename: str):
         self.study_id = study_id
         self.assay_id = assay_id
         self.input_file = input_file
+        self.filename = filename or getattr(input_file, "name", "<no file>")
         self.unique_rows = set()
         self.duplicate_rows = []
         self._reader = csv.reader(input_file, delimiter="\t", quotechar='"')
@@ -886,7 +895,7 @@ class AssayRowReader:
 
         :return: Nodes per row of the assay file
         """
-        builder = _AssayRowBuilder(self.header, self.study_id, self.assay_id)
+        builder = _AssayRowBuilder(self.header, self.filename, self.study_id, self.assay_id)
         while True:
             line = self._read_next_line()
             if line:
@@ -921,7 +930,7 @@ class AssayReader:
         return AssayReader(study_id, assay_id, input_file, filename)
 
     def __init__(self, study_id: str, assay_id: str, input_file: TextIO, filename=None):
-        self.row_reader = AssayRowReader.from_stream(study_id, assay_id, input_file)
+        self.row_reader = AssayRowReader.from_stream(study_id, assay_id, input_file, filename)
         # The file used for reading from
         self.input_file = input_file
         self._filename = filename or getattr(input_file, "name", "<no file>")
