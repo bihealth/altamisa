@@ -92,8 +92,8 @@ Study Person Roles
 Study Person Roles Term Accession Number
 Study Person Roles Term Source REF
 STUDY
-Study Identifier	s_assays
-Study Title	Minimal Germline Study
+Study Identifier	s_assays 
+Study Title	 Minimal Germline Study
 Study Description
 Comment[Study Grant Number]
 Comment[Study Funding Agency]

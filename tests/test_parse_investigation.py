@@ -5,6 +5,8 @@
 from datetime import date
 from pathlib import Path
 import pytest
+import warnings
+
 
 from altamisa.constants import investigation_headers
 from altamisa.exceptions import (
@@ -12,6 +14,7 @@ from altamisa.exceptions import (
     CriticalIsaValidationWarning,
     IsaWarning,
     ModerateIsaValidationWarning,
+    ParseIsatabWarning,
 )
 from altamisa.isatab import models
 from altamisa.isatab import InvestigationReader, InvestigationValidator
@@ -891,25 +894,34 @@ def test_parse_comment_investigation(comment_investigation_file):
 
 def test_parse_assays_investigation(assays_investigation_file):
     # Read Investigation from file-like object
+    warnings.simplefilter("always")
     reader = InvestigationReader.from_stream(assays_investigation_file)
-    investigation = reader.read()
     with pytest.warns(IsaWarning) as record:
+        investigation = reader.read()
         InvestigationValidator(investigation).validate()
 
     # Check warnings
-    assert 5 == len(record)
-    msg = "No assays declared in study 's_assays' of investigation 'i_assays.txt'"
-    assert record[0].category == AdvisoryIsaValidationWarning
+    assert 7 == len(record)
+    msg = "Removed trailing whitespaces in fields of line: ['Study Identifier', 's_assays ']"
+    assert record[0].category == ParseIsatabWarning
     assert str(record[0].message) == msg
-    msg = "Study identifier used more than once: s_assays"
-    assert record[1].category == CriticalIsaValidationWarning
+    msg = (
+        "Removed trailing whitespaces in fields of line: ['Study Title', ' Minimal Germline Study']"
+    )
+    assert record[1].category == ParseIsatabWarning
     assert str(record[1].message) == msg
-    msg = "Study path used more than once: s_assays.txt"
-    assert record[2].category == CriticalIsaValidationWarning
+    msg = "No assays declared in study 's_assays' of investigation 'i_assays.txt'"
+    assert record[2].category == AdvisoryIsaValidationWarning
     assert str(record[2].message) == msg
-    msg = "Study title used more than once: Minimal Germline Study"
-    assert record[3].category == ModerateIsaValidationWarning
+    msg = "Study identifier used more than once: s_assays"
+    assert record[3].category == CriticalIsaValidationWarning
     assert str(record[3].message) == msg
+    msg = "Study path used more than once: s_assays.txt"
+    assert record[4].category == CriticalIsaValidationWarning
+    assert str(record[4].message) == msg
+    msg = "Study title used more than once: Minimal Germline Study"
+    assert record[5].category == ModerateIsaValidationWarning
+    assert str(record[5].message) == msg
 
     # Check results
     # Investigation
