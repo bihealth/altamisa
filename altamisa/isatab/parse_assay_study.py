@@ -14,6 +14,7 @@ from ..constants import table_tokens
 from ..constants import table_headers
 from ..exceptions import ParseIsatabException
 from .headers import ColumnHeader, StudyHeaderParser, AssayHeaderParser, LabeledColumnHeader
+from .helpers import list_strip
 from . import models
 
 
@@ -757,9 +758,9 @@ class StudyRowReader:
         """Read next line, skipping comments starting with ``'#'``."""
         prev_line = self._line
         try:
-            self._line = next(self._reader)
+            self._line = list_strip(next(self._reader))
             while self._line is not None and (not self._line or self._line[0].startswith("#")):
-                self._line = next(self._reader)
+                self._line = list_strip(next(self._reader))
             # Test and collect row duplicates
             if "\t".join(self._line) in self.unique_rows:
                 self.duplicate_rows.append("\t".join(self._line))
@@ -877,9 +878,9 @@ class AssayRowReader:
         """Read next line, skipping comments starting with ``'#'``."""
         prev_line = self._line
         try:
-            self._line = next(self._reader)
+            self._line = list_strip(next(self._reader))
             while self._line is not None and (not self._line or self._line[0].startswith("#")):
-                self._line = next(self._reader)
+                self._line = list_strip(next(self._reader))
             # Test and collect row duplicates
             if "\t".join(self._line) in self.unique_rows:
                 self.duplicate_rows.append("\t".join(self._line))

@@ -13,6 +13,7 @@ import warnings
 
 from ..constants import investigation_headers
 from ..exceptions import ParseIsatabException, ParseIsatabWarning
+from .helpers import list_strip
 from . import models
 
 
@@ -126,9 +127,9 @@ class InvestigationReader:
         """Read next line, skipping comments starting with ``'#'``."""
         prev_line = self._line
         try:
-            self._line = next(self._reader)
+            self._line = list_strip(next(self._reader))
             while self._line is not None and (not self._line or self._line[0].startswith("#")):
-                self._line = next(self._reader)
+                self._line = list_strip(next(self._reader))
         except StopIteration:
             self._line = None
         return prev_line

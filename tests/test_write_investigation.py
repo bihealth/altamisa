@@ -121,11 +121,11 @@ def test_write_BII_I_2_investigation(BII_I_2_investigation_file, tmp_path):
 
 def test_write_assays_investigation(assays_investigation_file, tmp_path):
     # Read Investigation from file-like object
-    investigation = InvestigationReader.from_stream(assays_investigation_file).read()
     with pytest.warns(IsaWarning) as record:
+        investigation = InvestigationReader.from_stream(assays_investigation_file).read()
         InvestigationValidator(investigation).validate()
     # Check warnings
-    assert 5 == len(record)
+    assert 7 == len(record)
     # Write Investigation to temporary file
     path1 = tmp_path / "i_assays.txt"
     with pytest.warns(IsaWarning) as record:
