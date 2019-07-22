@@ -44,12 +44,12 @@ The main features are
 Special Extensions
 ------------------
 
-In addition to the default ISA-Tab format specifications, AltamISA supports the
-following special modifications to improve specific use cases:
+In addition to the original ISA-Tab format specifications, AltamISA supports
+ the following special modifications to improve specific use cases:
 
 - **List of values** in ``Characterics`` or ``Parameter Value`` fields by using
   semicolon-separators (";"). Note, for ontology terms the same number of
-  values is expected in the associated field ``Term Source REF`` and
+  splits is expected in the associated field ``Term Source REF`` and
   ``Term Accession Number``.
 - **Material name** ``Library Name`` for improved library
   annotation in nucleotide sequencing assays.
