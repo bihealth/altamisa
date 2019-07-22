@@ -19,13 +19,18 @@ Project Info
 Quick Example
 -------------
 
-TODO
+Start parsing an ISA-Tab dataset by reading and validating the investigation file:
 
-::
+.. code-block:: python
 
-    .. literalinclude:: ../examples/add_filter/add_filter.py
-        :language: python
+    from altamisa import isatab
+	
+    with open("path/to/an/investigation.txt", "rt") as investigation_file:
+        investigation = InvestigationReader.from_stream(investigation_file).read()
+		
+    InvestigationValidator(investigation).validate()
 
+For more inspiration on how to use AltamISA, see :ref:`examples`.
 
 Features
 --------
