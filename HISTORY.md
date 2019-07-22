@@ -2,6 +2,7 @@
 
 ## HEAD (unreleased)
 
+- Adding JOSS paper draft.
 - Fixing problem with writing empty lines on Windows (#52).
 - Update documentation with examples for manual model creation.
 
