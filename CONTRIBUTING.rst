@@ -121,8 +121,13 @@ A reminder for the maintainers on how to deploy.
 Make sure all your changes are committed (including an entry in HISTORY.rst).
 Then run::
 
-$ bumpversion patch # possible: major / minor / patch
+$ git tag vMAJOR.MINOR.PATCH
 $ git push
 $ git push --tags
 
-Travis will then deploy to PyPI if tests pass.
+This will create a release on Github.
+Now, release to PyPI using `twine`::
+
+$ twine upload --repository-url https://test.pypi.org/legacy/ dist/altamisa-*.tar.gz
+$ twine upload dist/altamisa-*.tar.gz
+

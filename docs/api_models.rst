@@ -4,13 +4,23 @@
 Models
 ======
 
-Class models for storing and representing ISA data, with particular focus on
-ISA-Tab compatibility. The modeling follows the structure of the specifications
-with different classes for each file type (investigation, study, assay),
-investigation sections, the different study and assay column types etc. In
-particular, study and assay data (i.e. corresponding materials and processes)
-are represented by use of directed acyclic graphs.
+Class models for storing and representing ISA data, with particular focus on ISA-Tab compatibility.
+The modeling follows the structure of the specifications with different classes for each file type (investigation, study, assay), investigation sections, the different study and assay column types etc. In
+particular, study and assay data (i.e. corresponding materials and processes) are represented by use of directed acyclic graphs.
 
+Note that all models are *immutable* after construction.
+Here is a common pattern for getting a *copy* with modifying select members.
+
+.. code-block:: doctest
+
+    >>> import attr
+    >>> from altamisa.isatab import Comment
+    >>> c1 = Comment(name="Name", value="the value")
+    >>> c1
+    Comment(name='Name', value='value')
+    >>> c2 = Comment(**{**attr.asdict(c1), "name": "Another Name"})
+    >>> c2
+    Comment(name='Another Name', value='value')
 
 .. contents::
 

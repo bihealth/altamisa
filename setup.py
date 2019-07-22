@@ -23,7 +23,7 @@ def parse_requirements(path):
     return requirements
 
 
-with open("README.rst") as readme_file:
+with open("README.md") as readme_file:
     readme = readme_file.read()
 
 with open("HISTORY.rst") as history_file:
@@ -36,11 +36,14 @@ setup(
     author="Mathias Kuhring, Manuel Holtgrewe",
     author_email="mathias.kuhring@bihealth.de, manuel.holtgrewe@bihealth.de",
     classifiers=[
-        "Development Status :: 2 - Pre-Alpha",
+        "Development Status :: 4 - Beta",
         "Intended Audience :: Developers",
         "License :: OSI Approved :: MIT License",
         "Natural Language :: English",
+        "Topic :: Scientific/Engineering :: Bio-Informatics",
         "Programming Language :: Python :: 3",
+        "Programming Language :: Python :: 3.4",
+        "Programming Language :: Python :: 3.5",
         "Programming Language :: Python :: 3.6",
         "Programming Language :: Python :: 3.7",
         "Programming Language :: Python :: 3.8",
@@ -56,6 +59,7 @@ setup(
     install_requires=install_requirements,
     license="MIT license",
     long_description=readme + "\n\n" + history,
+    long_description_content_type="text/markdown",
     include_package_data=True,
     keywords="altamisa",
     name="altamisa",
