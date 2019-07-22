@@ -14,28 +14,28 @@ study/assay nodes or investigation sections (or section entries).
 .. contents::
 
 
-Investigation headers
+Investigation Headers
 ---------------------
 
 .. automodule:: altamisa.constants.investigation_headers
     :members:
 
 
-Table headers
+Table Headers
 -------------
 
 .. automodule:: altamisa.constants.table_headers
     :members:
 
 
-Table restrictions
+Table Restrictions
 ------------------
 
 .. automodule:: altamisa.constants.table_restrictions
     :members:
 
 
-Table tokens
+Table Tokens
 ------------
 
 .. automodule:: altamisa.constants.table_tokens

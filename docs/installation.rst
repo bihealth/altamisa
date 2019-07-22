@@ -6,9 +6,8 @@
 Installation
 ============
 
-
-Stable release
---------------
+Using ``pip``
+-------------
 
 To install AltamISA, run this command in your terminal:
 
@@ -18,17 +17,23 @@ To install AltamISA, run this command in your terminal:
 
 This is the preferred method to install AltamISA, as it will always install the most recent stable release.
 
-If you don't have `pip`_ installed, this `Python installation guide`_ can guide
+If you don't have `pip <https://pip.pypa.io>`_ installed, this `Python installation guide <http://docs.python-guide.org/en/latest/starting/installation/>`_ can guide
 you through the process.
 
-.. _pip: https://pip.pypa.io
-.. _Python installation guide: http://docs.python-guide.org/en/latest/starting/installation/
+Using ``conda``
+---------------
 
+If you like `conda <https://docs.conda.io/en/latest/>`_ as much as we do, you can install AltamISA from the `Bioconda <https://bioconda.github.io/>`_ channel.
+This assumes that you have already setup conda and the Bioconda channel `as described in the Bioconda manual <https://bioconda.github.io/user/install.html>`_.
+
+.. code-block:: console
+
+    $ conda install altamisa
 
 From sources
 ------------
 
-The sources for AltamISA can be downloaded from the `Github repo`_.
+The sources for AltamISA can be downloaded from the `Github repo <https://github.com/bihealth/altamisa>`_.
 
 You can either clone the public repository:
 
@@ -36,7 +41,7 @@ You can either clone the public repository:
 
     $ git clone git://github.com/bihealth/altamisa
 
-Or download the `tarball`_:
+Or download the `tarball <https://github.com/bihealth/altamisa/tarball/master>`_:
 
 .. code-block:: console
 
@@ -48,6 +53,3 @@ Once you have a copy of the source, you can install it with:
 
     $ python setup.py install
 
-
-.. _Github repo: https://github.com/bihealth/altamisa
-.. _tarball: https://github.com/bihealth/altamisa/tarball/master

@@ -4,9 +4,8 @@
 Writers
 =======
 
-Classes to write AltamISA models (i.e. investigation or study and
-assay graphs) to corresponding ISA-tab text files.
-
+Classes to write AltamISA model files to ISA-Tab investigation, study and assay files.
+Note that writers can issue warnings, see :ref:`api_Writers` on how to capture them properly.
 
 .. contents::
 

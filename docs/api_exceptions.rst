@@ -4,6 +4,5 @@
 Exceptions
 ==========
 
-
 .. automodule:: altamisa.exceptions
     :members:

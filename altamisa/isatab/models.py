@@ -1,16 +1,16 @@
 # -*- coding: utf-8 -*-
-"""Low-level models for representing ISA-Tab data structure as
-``ImmutableTuple`` objects.
+"""Low-level models for representing ISA-Tab data structure as ``ImmutableTuple`` objects.
 
-The objects is done by containment in lists (a tree-like structure) and by
-string names only.  However, the tree is only built within one file (e.g.,
-a list of all materials in a study or all comments for a material).
+The objects is done by containment in lists (a tree-like structure) and by string names only.
+However, the tree is only built within one file (e.g., a list of all materials in a study or all
+comments for a material).
 """
 
-from collections import namedtuple
 from datetime import date
 from pathlib import Path
-from typing import Dict, List, Tuple, NamedTuple, Union
+from typing import Dict, List, Tuple, Union
+
+import attr
 
 
 __author__ = "Manuel Holtgrewe <manuel.holtgrewe@bihealth.de>"
@@ -21,6 +21,16 @@ __author__ = "Manuel Holtgrewe <manuel.holtgrewe@bihealth.de>"
 
 class AnnotatedStr(str):
     """A ``str`` that can be flagged with values.
+
+    **Example Usage**
+
+    >>> x = AnnotateStr("text", key1="value1", key2=2)
+    >>> x
+    "text"
+    >>> x.key1
+    "value1"
+    >>> x.key2
+    2
     """
 
     def __new__(cls, value, *args, **kwargs):
@@ -33,27 +43,34 @@ class AnnotatedStr(str):
             setattr(self, key, value)
 
 
-class OntologyTermRef(namedtuple("OntologyTermRef", "name accession ontology_name")):
-    """Reference to a term into an ontology
+@attr.s(auto_attribs=True, frozen=True)
+class OntologyTermRef:
+    """Reference to a term into an ontology.
+    
+    Can be either initialized with
+
+    - all three of a `name`, an `accession`, and an `ontology_name`
+    - only a `name`
+    - nothing (empty)
     """
 
-    def __new__(cls, name, accession, ontology_name, ontology_refs=None):
-        # If accession or ontology_name is available --> OntologyTermRef
-        if ontology_name or accession:
-            return super(cls, OntologyTermRef).__new__(cls, name, accession, ontology_name)
-        # Only the name is available --> Text only OntologyTermRef
-        elif name:
-            return super(cls, OntologyTermRef).__new__(cls, name, None, None)
-        # Nothing available --> Empty OntologyTermRef
-        else:
-            return super(cls, OntologyTermRef).__new__(cls, None, None, None)
+    def __attrs_post_init__(self):
+        """Ensure that the name/accession/ontology_name are initialized consistently.
+        
+        cf. http://www.attrs.org/en/stable/init.html#post-init-hook
+        """
+        if not self.ontology_name and not self.accession:
+            if not self.name:
+                object.__setattr__(self, "name", None)
+            object.__setattr__(self, "accession", None)
+            object.__setattr__(self, "ontology_name", None)
 
     #: Human-readable name of the term
-    name: str
+    name: str = None
     #: The accession of the referenced term
-    accession: str
+    accession: str = None
     #: Name of the ontology (links to ``OntologyRef.name``)
-    ontology_name: str
+    ontology_name: str = None
 
 
 #: Shortcut for the commonly used "free text or reference to a term in an
@@ -61,7 +78,8 @@ class OntologyTermRef(namedtuple("OntologyTermRef", "name accession ontology_nam
 FreeTextOrTermRef = Union[OntologyTermRef, str]
 
 
-class Comment(NamedTuple):
+@attr.s(auto_attribs=True, frozen=True)
+class Comment:
     """Representation of a ``Comment[*]`` cell."""
 
     #: Comment name
@@ -73,7 +91,8 @@ class Comment(NamedTuple):
 # Types used in investigation files -------------------------------------------
 
 
-class OntologyRef(NamedTuple):
+@attr.s(auto_attribs=True, frozen=True)
+class OntologyRef:
     """Description of an ontology term source, as used for investigation file.
     """
 
@@ -91,9 +110,9 @@ class OntologyRef(NamedTuple):
     headers: List[str]
 
 
-class BasicInfo(NamedTuple):
-    """Basic metadata for an investigation or study (``INVESTIGATION``
-    or ``STUDY``).
+@attr.s(auto_attribs=True, frozen=True)
+class BasicInfo:
+    """Basic metadata for an investigation or study (``INVESTIGATION`` or ``STUDY``).
     """
 
     #: Path to the investigation or study file
@@ -114,9 +133,9 @@ class BasicInfo(NamedTuple):
     headers: List[str]
 
 
-class PublicationInfo(NamedTuple):
-    """Information regarding an investigation publication
-    (``INVESTIGATION PUBLICATIONS``).
+@attr.s(auto_attribs=True, frozen=True)
+class PublicationInfo:
+    """Information regarding an investigation publication (``INVESTIGATION PUBLICATIONS``).
     """
 
     #: Publication PubMed ID
@@ -135,7 +154,8 @@ class PublicationInfo(NamedTuple):
     headers: List[str]
 
 
-class ContactInfo(NamedTuple):
+@attr.s(auto_attribs=True, frozen=True)
+class ContactInfo:
     """Investigation contact information"""
 
     #: Last name of contact
@@ -162,7 +182,8 @@ class ContactInfo(NamedTuple):
     headers: List[str]
 
 
-class DesignDescriptorsInfo(NamedTuple):
+@attr.s(auto_attribs=True, frozen=True)
+class DesignDescriptorsInfo:
     """Study design descriptors information"""
 
     #: Design descriptors type
@@ -173,7 +194,8 @@ class DesignDescriptorsInfo(NamedTuple):
     headers: List[str]
 
 
-class FactorInfo(NamedTuple):
+@attr.s(auto_attribs=True, frozen=True)
+class FactorInfo:
     """Study factor information"""
 
     #: Factor name
@@ -186,7 +208,8 @@ class FactorInfo(NamedTuple):
     headers: List[str]
 
 
-class AssayInfo(NamedTuple):
+@attr.s(auto_attribs=True, frozen=True)
+class AssayInfo:
     """Study assay information"""
 
     #: Assay measurement type
@@ -203,7 +226,8 @@ class AssayInfo(NamedTuple):
     headers: List[str]
 
 
-class ProtocolComponentInfo(NamedTuple):
+@attr.s(auto_attribs=True, frozen=True)
+class ProtocolComponentInfo:
     """Protocol component information"""
 
     #: Protocol component name
@@ -212,7 +236,8 @@ class ProtocolComponentInfo(NamedTuple):
     type: FreeTextOrTermRef
 
 
-class ProtocolInfo(NamedTuple):
+@attr.s(auto_attribs=True, frozen=True)
+class ProtocolInfo:
     """Protocol information"""
 
     #: Protocol name
@@ -235,7 +260,8 @@ class ProtocolInfo(NamedTuple):
     headers: List[str]
 
 
-class StudyInfo(NamedTuple):
+@attr.s(auto_attribs=True, frozen=True)
+class StudyInfo:
     """The full metadata regarding one study"""
 
     #: Basic study information
@@ -254,7 +280,8 @@ class StudyInfo(NamedTuple):
     contacts: Tuple[ContactInfo]
 
 
-class InvestigationInfo(NamedTuple):
+@attr.s(auto_attribs=True, frozen=True)
+class InvestigationInfo:
     """Representation of an ISA investigation"""
 
     #: Ontologies defined for investigation
@@ -272,7 +299,8 @@ class InvestigationInfo(NamedTuple):
 # Types used in study and assay files -----------------------------------------
 
 
-class Characteristics(NamedTuple):
+@attr.s(auto_attribs=True, frozen=True)
+class Characteristics:
     """Representation of a ``Characteristics[*]`` cell."""
 
     #: Characteristics name
@@ -283,7 +311,8 @@ class Characteristics(NamedTuple):
     unit: FreeTextOrTermRef
 
 
-class FactorValue(NamedTuple):
+@attr.s(auto_attribs=True, frozen=True)
+class FactorValue:
     """Representation of a ``Factor Value[*]`` cell."""
 
     #: Factor name
@@ -294,7 +323,8 @@ class FactorValue(NamedTuple):
     unit: FreeTextOrTermRef
 
 
-class ParameterValue(NamedTuple):
+@attr.s(auto_attribs=True, frozen=True)
+class ParameterValue:
     """Representation of a ``Parameter Value[*]`` cell."""
 
     #: Parameter name
@@ -305,7 +335,8 @@ class ParameterValue(NamedTuple):
     unit: FreeTextOrTermRef
 
 
-class Material(NamedTuple):
+@attr.s(auto_attribs=True, frozen=True)
+class Material:
     """Representation of a Material or Data node."""
 
     #: The type of node (i.e. column name)
@@ -332,7 +363,8 @@ class Material(NamedTuple):
     headers: List[str]
 
 
-class Process(NamedTuple):
+@attr.s(auto_attribs=True, frozen=True)
+class Process:
     """Representation of a Process or Assay node."""
 
     #: Referenced to protocol name from investigation
@@ -381,7 +413,8 @@ class Process(NamedTuple):
     headers: List[str]
 
 
-class Arc(NamedTuple):
+@attr.s(auto_attribs=True, frozen=True)
+class Arc:
     """Representation of an arc between two ``Material`` and/or ``Process`` nodes."""
 
     #: The arc's tail name
@@ -389,8 +422,18 @@ class Arc(NamedTuple):
     #: The arc's head name
     head: str
 
+    # TODO: remove this again?
+    def __getitem__(self, idx):
+        if idx == 0:
+            return self.tail
+        elif idx == 1:
+            return self.head
+        else:
+            raise IndexError("Invalid index: %d" % idx)
 
-class Study(NamedTuple):
+
+@attr.s(auto_attribs=True, frozen=True)
+class Study:
     """Representation of an ISA study."""
 
     #: Path to ISA study file
@@ -406,7 +449,8 @@ class Study(NamedTuple):
     arcs: Tuple[Arc]
 
 
-class Assay(NamedTuple):
+@attr.s(auto_attribs=True, frozen=True)
+class Assay:
     """Representation of an ISA assay."""
 
     #: Path to ISA assay file

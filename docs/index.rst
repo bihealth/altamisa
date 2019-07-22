@@ -4,7 +4,6 @@ Welcome to AltamISA's documentation!
 ====================================
 
 AltamISA is a Python 3 library for representing the `ISA-tools <http://isa-tools.org/>`_ `data model <http://isa-specs.readthedocs.io/en/latest/isamodel.html>`_ and reading and writing `ISA-Tab file format <http://isa-specs.readthedocs.io/en/latest/isatab.html>`_.
-AltamISA is a Python 3 library for reading and writing ISA-Tab files.
 The documentation is split into three parts (accessible through the navigation on the left):
 
 Installation & Getting Started
@@ -84,12 +83,14 @@ Is validation a big deal?
     Here, strict syntax and ideally semantic validation is key.
 
 What's the state?
-    Reading ISA-tab works fine.
-    We are extending the amount of validation in the library and plan to implement writing soon.
-    Further, we have extended the model a bit here and there, e.g., for allowing lists of values and ontology terms.
+    The ISA standard and ISA-Tab file I/O is fully implemented, tested, and we're actively using it in other applications.
+    The validation is also working stably yet we are planning several extensions and additional checks.
 
 What's the aim?
     The aim is to have a stable and correct library for parsing, representing, and writing ISA-tab.
+
+What's on the roadmap?
+    Mostly fine-tuning, stabilization, and additional validations.
     At some point we might want to add support for ISA-JSON but that is a secondary aim at the moment.
     The advantage of ISA-Tab is that you can edit it with spreadsheet application.
 

@@ -1,3 +1,3 @@
 # Base requirements
 
-# -- nothing -- pure Python >=3.6
+attrs

@@ -4,9 +4,8 @@
 Parsers
 =======
 
-Classes to read data from ISA-Tab investigation, study and assay files and
-create the corresponding AltamISA models.
-
+Classes to read data from ISA-Tab investigation, study and assay files and create the corresponding AltamISA models.
+Note that parsers can issue warnings, see :ref:`api_validators` on how to capture them properly.
 
 .. contents::
 
