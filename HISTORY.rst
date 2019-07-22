@@ -6,6 +6,8 @@ History
 HEAD (unreleased)
 -----------------
 
+- Switching to ``attrs`` instead of using ``Namedtuple``.
+  This gets rid of some warts regarding constructor overriding but should offer the same functionality otherwise.
 - Various updates to the documentation.
 
 ------

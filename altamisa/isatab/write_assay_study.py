@@ -214,7 +214,7 @@ class _WriterBase:
                 # TODO: check that headers and attributes match
                 self._headers.append(list(self._header_parser(node.headers).run()))
                 # self._headers.append(node.headers)
-            else:
+            else:  # pragma: no cover
                 # TODO: create new headers based on attributes
                 tpl = "No reference headers available in node {} of first row"
                 msg = tpl.format(node.unique_name)
@@ -240,7 +240,7 @@ class _WriterBase:
                     # Append next attribute according to header
                     self._append_attribute(line, attributes, header, node)
                 # Iterating the headers should deplete attributes
-                if len(attributes) > 0:
+                if len(attributes) > 0:  # pragma: no cover
                     tpl = "Leftover attributes {} found in node {}"
                     msg = tpl.format(attributes, node.unique_name)
                     raise WriteIsatabException(msg)
@@ -266,7 +266,7 @@ class _WriterBase:
             else:
                 line.append(attribute)
             self._previous_attribute = attribute
-        else:
+        else:  # pragma: no cover
             tpl = "Expected {} not found in node {} after/for attribute {}"
             msg = tpl.format(header, node.unique_name, self._previous_attribute)
             raise WriteIsatabException(msg)
@@ -276,7 +276,7 @@ class _WriterBase:
         # Append expected ontology reference
         if is_ontology_term_ref(attribute):
             line.extend([attribute.ontology_name or "", attribute.accession or ""])
-        else:
+        else:  # pragma: no cover
             tpl = "Expected {} not found in attribute {} of node {}"
             msg = tpl.format(header, attribute, node.unique_name)
             raise WriteIsatabException(msg)
@@ -330,7 +330,7 @@ class _WriterBase:
             attributes = self._extract_material(node)
         elif hasattr(node, "parameter_values"):  # is process node
             attributes = self._extract_process(node)
-        else:  # unknown node type
+        else:  # unknown node type  # pragma: no cover
             tpl = "Node of unexpected type (not material/data nor process): {}"
             msg = tpl.format(node)
             raise WriteIsatabException(msg)

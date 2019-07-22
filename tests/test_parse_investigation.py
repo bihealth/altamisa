@@ -934,3 +934,58 @@ def test_parse_only_investigation(only_investigation_file):
     msg = "No studies declared in investigation: i_onlyinvest.txt"
     assert record[0].category == CriticalIsaValidationWarning
     assert str(record[0].message) == msg
+
+
+def test_parse_warnings_investigation(warnings_investigation_file):
+    # Read Investigation from file-like object
+    reader = InvestigationReader.from_stream(warnings_investigation_file)
+    investigation = reader.read()
+    with pytest.warns(IsaWarning) as record:
+        InvestigationValidator(investigation).validate()
+
+    # Check warnings
+    messages = [str(x.message) for x in record]
+    print(messages)
+    assert 11 == len(record)
+    assert "Invalid mail address: invalid_mail" in messages
+    assert "Invalid phone/fax number: CALL-ME" in messages
+    assert "Invalid phone/fax number: FAX-ME" in messages
+    assert "Invalid pubmed_id string: not-pubmed" in messages
+    assert "Invalid doi string: not-a-doi" in messages
+    assert "Assay path used more than once: a_warnings.txt" in messages
+    assert [m for m in messages if m.startswith("Assay without platform")]
+    assert 4 == len([m for m in messages if m.startswith("Incomplete ontology source")])
+
+    # Check results
+    # Investigation
+    assert investigation
+
+    # Ontology sources
+    assert 5 == len(investigation.ontology_source_refs)
+    expected = models.OntologyRef(
+        "OBI",
+        "http://data.bioontology.org/ontologies/OBI",
+        "31",
+        "Ontology for Biomedical Investigations",
+        (),
+        [*investigation_headers.ONTOLOGY_SOURCE_REF_KEYS],
+    )
+    assert expected == investigation.ontology_source_refs["OBI"]
+
+    # Basic info
+    assert "Investigation with Warnings" == investigation.info.title
+    assert "i_warnings" == investigation.info.identifier
+
+    # Studies
+    assert len(investigation.studies) == 1
+    assert "s_warnings" == investigation.studies[0].info.identifier
+    assert "Germline Study with Warnings" == investigation.studies[0].info.title
+    assert Path("s_warnings.txt") == investigation.studies[0].info.path
+
+    # Assays
+    assert len(investigation.studies[0].assays) == 2
+    assay = investigation.studies[0].assays[0]
+    assert Path("a_warnings.txt") == assay.path
+
+    # Study contacts
+    assert 0 == len(investigation.studies[0].contacts)

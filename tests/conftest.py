@@ -246,3 +246,13 @@ def only_investigation_file():
     path = os.path.join(os.path.dirname(__file__), "data/i_onlyinvest/i_onlyinvest.txt")
     with open(path, "rt") as file:
         yield file
+
+
+# File fixtures for testing warnings ---------------------------------------------------------------
+
+
+@pytest.fixture
+def warnings_investigation_file():
+    path = os.path.join(os.path.dirname(__file__), "data/i_warnings/i_warnings.txt")
+    with open(path, "rt") as file:
+        yield file
