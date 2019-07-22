@@ -4,6 +4,7 @@
 [![Codacy Badge](https://api.codacy.com/project/badge/Grade/a853a56253604aa7ab87d2bcdcd9da51)](https://www.codacy.com/app/bihealth/altamisa?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=bihealth/altamisa&amp;utm_campaign=Badge_Grade)
 [![Coverage Badge](https://api.codacy.com/project/badge/Coverage/a853a56253604aa7ab87d2bcdcd9da51)](https://www.codacy.com/app/bihealth/altamisa?utm_source=github.com&utm_medium=referral&utm_content=bihealth/altamisa&utm_campaign=Badge_Coverage)
 [![Documentation Status](https://readthedocs.org/projects/altamisa/badge/?version=latest)](https://altamisa.readthedocs.io/en/latest/?badge=latest)
+[![DOI](https://zenodo.org/badge/122444339.svg)](https://zenodo.org/badge/latestdoi/122444339)
 
 # AltamISA
 
