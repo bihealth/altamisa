@@ -45,6 +45,6 @@ Further, the scope of `isa-api` was much broader (including between ISA-Tab and 
 
 - Programming Language: Python 3 (with **full type annotations**)
 - License: MIT
-- Test Coverage: >95%
+- Test Coverage: >90%
 - Documentation: [see here](https://altamisa.readthedocs.org)
 - Code Style: [black](https://github.com/python/black), 100 characters/line
