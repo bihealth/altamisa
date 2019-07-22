@@ -24,7 +24,7 @@ def _parse_comments(section, comment_keys, i=None):
     def _parse_comment_header(val):
         # key might start with "Comment[" or "Comment ["
         tok = val[len("Comment") :].strip()
-        if not tok or tok[0] != "[" or tok[-1] != "]":
+        if not tok or tok[0] != "[" or tok[-1] != "]":  # pragma: no cover
             tpl = "Problem parsing comment header {}"
             msg = tpl.format(val)
             raise ParseIsatabException(msg)
@@ -46,11 +46,11 @@ def _split_study_protocols_parameters(
     names = names.split(";")
     name_term_accs = name_term_accs.split(";")
     name_term_srcs = name_term_srcs.split(";")
-    if not (len(names) == len(name_term_accs) == len(name_term_srcs)):
+    if not (len(names) == len(name_term_accs) == len(name_term_srcs)):  # pragma: no cover
         tpl = 'Unequal protocol parameter splits; found: "{}", "{}", "{}"'
         msg = tpl.format(names, name_term_accs, name_term_srcs)
         raise ParseIsatabException(msg)
-    if len(names) > len(set(names)):
+    if len(names) > len(set(names)):  # pragma: no cover
         tpl = "Repeated protocol parameter; found: {}"
         msg = tpl.format(names)
         raise ParseIsatabException(msg)
@@ -67,15 +67,19 @@ def _split_study_protocols_components(
     types = types.split(";")
     type_term_accs = type_term_accs.split(";")
     type_term_srcs = type_term_srcs.split(";")
-    if not (len(names) == len(types) == len(type_term_accs) == len(type_term_srcs)):
+    if not (
+        len(names) == len(types) == len(type_term_accs) == len(type_term_srcs)
+    ):  # pragma: no cover
         tpl = "Unequal protocol component splits; " 'found: "{}", "{}", "{}", "{}"'
         msg = tpl.format(names, types, type_term_accs, type_term_srcs)
         raise ParseIsatabException(msg)
-    if len(names) > len(set(names)):
+    if len(names) > len(set(names)):  # pragma: no cover
         tpl = "Repeated protocol components; found: {}"
         msg = tpl.format(names)
         raise ParseIsatabException(msg)
-    for (name, ctype, acc, src) in zip(names, types, type_term_accs, type_term_srcs):
+    for (name, ctype, acc, src) in zip(
+        names, types, type_term_accs, type_term_srcs
+    ):  # pragma: no cover
         if not name and any((ctype, acc, src)):
             tpl = "Missing protocol component name; " 'found: "{}", "{}", "{}", "{}"'
             msg = tpl.format(name, ctype, acc, src)
@@ -89,7 +93,7 @@ def _parse_date(date_string) -> datetime.date:
     if date_string:
         try:
             date = datetime.strptime(date_string, "%Y-%m-%d").date()
-        except ValueError as e:
+        except ValueError as e:  # pragma: no cover
             tpl = 'Invalid ISO8601 date "{}"'
             msg = tpl.format(date_string)
             raise ParseIsatabException(msg) from e
@@ -172,21 +176,21 @@ class InvestigationReader:
             key = line[0]
             if key.startswith("Comment"):
                 comment_keys.append(key)
-            elif key not in ref_keys:
+            elif key not in ref_keys:  # pragma: no cover
                 tpl = "Line must start with one of {} but is {}"
                 msg = tpl.format(ref_keys, line)
                 raise ParseIsatabException(msg)
-            if key in section:
+            if key in section:  # pragma: no cover
                 tpl = 'Key {} repeated, previous value "{}"'
                 msg = tpl.format(key, section[key])
                 raise ParseIsatabException(msg)
             section[key] = line[1:]
         # Check that all keys are given and all contain the same number of entries
-        if len(section) != len(ref_keys) + len(comment_keys):
+        if len(section) != len(ref_keys) + len(comment_keys):  # pragma: no cover
             tpl = "Missing entries in section {}; only found: {}"
             msg = tpl.format(section_name, list(sorted(section)))
             raise ParseIsatabException(msg)  # TODO: should be warning?
-        if not len(set([len(v) for v in section.values()])) == 1:
+        if not len(set([len(v) for v in section.values()])) == 1:  # pragma: no cover
             tpl = "Inconsistent entry lengths in section {}"
             msg = tpl.format(section_name)
             raise ParseIsatabException(msg)
@@ -200,25 +204,25 @@ class InvestigationReader:
         comment_keys = []
         while self._next_line_startswith(prefix) or self._next_line_startswith_comment():
             line = self._read_next_line()
-            if len(line) > 2:
+            if len(line) > 2:  # pragma: no cover
                 tpl = "Line {} contains more than one value: {}"
                 msg = tpl.format(line[0], line[1:])
                 raise ParseIsatabException(msg)
             key = line[0]
             if key.startswith("Comment"):
                 comment_keys.append(key)
-            elif key not in ref_keys:
+            elif key not in ref_keys:  # pragma: no cover
                 tpl = "Line must start with one of {} but is {}"
                 msg = tpl.format(ref_keys, line)
                 raise ParseIsatabException(msg)
-            if key in section:
+            if key in section:  # pragma: no cover
                 tpl = 'Key {} repeated, previous value "{}"'
                 msg = tpl.format(key, section[key])
                 raise ParseIsatabException(msg)
             # read value if field is available, empty string else
             section[key] = line[1] if len(line) > 1 else ""
         # Check that all keys are given
-        if len(section) != len(ref_keys) + len(comment_keys):
+        if len(section) != len(ref_keys) + len(comment_keys):  # pragma: no cover
             tpl = "Missing entries in section {}; only found: {}"
             msg = tpl.format(section_name, list(sorted(section)))
             raise ParseIsatabException(msg)  # TODO: should be warning?
@@ -227,7 +231,7 @@ class InvestigationReader:
     def _read_ontology_source_reference(self) -> Iterator[models.OntologyRef]:
         # Read ONTOLOGY SOURCE REFERENCE header
         line = self._read_next_line()
-        if not line[0] == investigation_headers.ONTOLOGY_SOURCE_REFERENCE:
+        if not line[0] == investigation_headers.ONTOLOGY_SOURCE_REFERENCE:  # pragma: no cover
             tpl = "Expected {} but got {}"
             msg = tpl.format(investigation_headers.ONTOLOGY_SOURCE_REFERENCE, line)
             raise ParseIsatabException(msg)
@@ -253,7 +257,7 @@ class InvestigationReader:
     def _read_basic_info(self) -> models.BasicInfo:
         # Read INVESTIGATION header
         line = self._read_next_line()
-        if not line[0] == investigation_headers.INVESTIGATION:
+        if not line[0] == investigation_headers.INVESTIGATION:  # pragma: no cover
             tpl = "Expected {} but got {}"
             msg = tpl.format(investigation_headers.INVESTIGATION, line)
             raise ParseIsatabException(msg)
@@ -280,7 +284,7 @@ class InvestigationReader:
     def _read_publications(self) -> Iterator[models.PublicationInfo]:
         # Read INVESTIGATION PUBLICATIONS header
         line = self._read_next_line()
-        if not line[0] == investigation_headers.INVESTIGATION_PUBLICATIONS:
+        if not line[0] == investigation_headers.INVESTIGATION_PUBLICATIONS:  # pragma: no cover
             tpl = "Expected {} but got {}"
             msg = tpl.format(investigation_headers.INVESTIGATION_PUBLICATIONS, line)
             raise ParseIsatabException(msg)
@@ -305,7 +309,7 @@ class InvestigationReader:
     def _read_contacts(self) -> Iterator[models.ContactInfo]:
         # Read INVESTIGATION CONTACTS header
         line = self._read_next_line()
-        if not line[0] == investigation_headers.INVESTIGATION_CONTACTS:
+        if not line[0] == investigation_headers.INVESTIGATION_CONTACTS:  # pragma: no cover
             tpl = "Expected {} but got {}"
             msg = tpl.format(investigation_headers.INVESTIGATION_CONTACTS, line)
             raise ParseIsatabException(msg)
@@ -353,7 +357,7 @@ class InvestigationReader:
         while self._line:
             # Read STUDY header
             line = self._read_next_line()
-            if not line[0] == investigation_headers.STUDY:
+            if not line[0] == investigation_headers.STUDY:  # pragma: no cover
                 tpl = "Expected {} but got {}"
                 msg = tpl.format(investigation_headers.INVESTIGATION, line)
                 raise ParseIsatabException(msg)
@@ -393,7 +397,7 @@ class InvestigationReader:
     def _read_study_design_descriptors(self) -> Iterator[models.FreeTextOrTermRef]:
         # Read STUDY DESIGN DESCRIPTORS header
         line = self._read_next_line()
-        if not line[0] == investigation_headers.STUDY_DESIGN_DESCRIPTORS:
+        if not line[0] == investigation_headers.STUDY_DESIGN_DESCRIPTORS:  # pragma: no cover
             tpl = "Expected {} but got {}"
             msg = tpl.format(investigation_headers.STUDY_DESIGN_DESCRIPTORS, line)
             raise ParseIsatabException(msg)
@@ -413,7 +417,7 @@ class InvestigationReader:
     def _read_study_publications(self) -> Iterator[models.PublicationInfo]:
         # Read STUDY PUBLICATIONS header
         line = self._read_next_line()
-        if not line[0] == investigation_headers.STUDY_PUBLICATIONS:
+        if not line[0] == investigation_headers.STUDY_PUBLICATIONS:  # pragma: no cover
             tpl = "Expected {} but got {}"
             msg = tpl.format(investigation_headers.STUDY_PUBLICATIONS, line)
             raise ParseIsatabException(msg)
@@ -438,7 +442,7 @@ class InvestigationReader:
     def _read_study_factors(self) -> Iterator[models.FactorInfo]:
         # Read STUDY FACTORS header
         line = self._read_next_line()
-        if not line[0] == investigation_headers.STUDY_FACTORS:
+        if not line[0] == investigation_headers.STUDY_FACTORS:  # pragma: no cover
             tpl = "Expected {} but got {}"
             msg = tpl.format(investigation_headers.STUDY_FACTORS, line)
             raise ParseIsatabException(msg)
@@ -458,7 +462,7 @@ class InvestigationReader:
     def _read_study_assays(self) -> Iterator[models.AssayInfo]:
         # Read STUDY ASSAYS header
         line = self._read_next_line()
-        if not line[0] == investigation_headers.STUDY_ASSAYS:
+        if not line[0] == investigation_headers.STUDY_ASSAYS:  # pragma: no cover
             tpl = "Expected {} but got {}"
             msg = tpl.format(investigation_headers.STUDY_ASSAYS, line)
             raise ParseIsatabException(msg)
@@ -511,7 +515,7 @@ class InvestigationReader:
     def _read_study_protocols(self) -> Iterator[models.ProtocolInfo]:
         # Read STUDY PROTOCOLS header
         line = self._read_next_line()
-        if not line[0] == investigation_headers.STUDY_PROTOCOLS:
+        if not line[0] == investigation_headers.STUDY_PROTOCOLS:  # pragma: no cover
             tpl = "Expected {} but got {}"
             msg = tpl.format(investigation_headers.STUDY_PROTOCOLS, line)
             raise ParseIsatabException(msg)
@@ -542,7 +546,7 @@ class InvestigationReader:
                 comp_type_term_srcs,
             ),
         ) in enumerate(columns):
-            if not name:  # don't allow unnamed protocol columns
+            if not name:  # don't allow unnamed protocol columns  # pragma: no cover
                 tpl = 'Expected protocol name in line {}; found: "{}"'
                 msg = tpl.format(investigation_headers.STUDY_PROTOCOL_NAME, name)
                 raise ParseIsatabException(msg)
@@ -575,7 +579,7 @@ class InvestigationReader:
     def _read_study_contacts(self) -> Iterator[models.ContactInfo]:
         # Read STUDY CONTACTS header
         line = self._read_next_line()
-        if not line[0] == investigation_headers.STUDY_CONTACTS:
+        if not line[0] == investigation_headers.STUDY_CONTACTS:  # pragma: no cover
             tpl = "Expected {} but got {}"
             msg = tpl.format(investigation_headers.STUDY_CONTACTS, line)
             raise ParseIsatabException(msg)

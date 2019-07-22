@@ -36,12 +36,21 @@ def run(args):
 
 def run_warnings_caught(args):
     # Check if input and output directory are different
-    path_in = os.path.normpath(os.path.dirname(args.input_investigation_file.name))
-    path_out = os.path.normpath(os.path.dirname(args.output_investigation_file.name))
+    path_in = os.path.realpath(os.path.dirname(args.input_investigation_file))
+    path_out = os.path.realpath(os.path.dirname(args.output_investigation_file))
     if path_in == path_out:
         tpl = "Can't output ISA-tab files to same directory as as input: {} == {}"
         msg = tpl.format(path_in, path_out)
         raise IsaException(msg)
+
+    if args.input_investigation_file == "-":  # pragma: no cover
+        args.input_investigation_file = sys.stdin
+    else:
+        args.input_investigation_file = open(args.input_investigation_file, "rt")
+    if args.output_investigation_file == "-":  # pragma: no cover
+        args.output_investigation_file = sys.stdout
+    else:
+        args.output_investigation_file = open(args.output_investigation_file, "wt")
 
     investigation, studies, assays = run_reading(args, path_in)
     run_writing(args, path_out, investigation, studies, assays)
@@ -116,14 +125,14 @@ def main(argv=None):
         "-i",
         "--input-investigation-file",
         required=True,
-        type=argparse.FileType("rt"),
+        type=str,
         help="Path to input investigation file",
     )
     parser.add_argument(
         "-o",
         "--output-investigation-file",
         default="-",
-        type=argparse.FileType("wt"),
+        type=str,
         help=(
             'Path to output investigation file, stdout ("-") by default. '
             "Needs to be in a different directory!"
@@ -149,4 +158,4 @@ def main(argv=None):
 
 
 if __name__ == "__main__":
-    sys.exit(main())
+    sys.exit(main())  # pragma: no cover

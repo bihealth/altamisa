@@ -46,7 +46,7 @@ class AnnotatedStr(str):
 @attr.s(auto_attribs=True, frozen=True)
 class OntologyTermRef:
     """Reference to a term into an ontology.
-    
+
     Can be either initialized with
 
     - all three of a `name`, an `accession`, and an `ontology_name`
@@ -56,7 +56,7 @@ class OntologyTermRef:
 
     def __attrs_post_init__(self):
         """Ensure that the name/accession/ontology_name are initialized consistently.
-        
+
         cf. http://www.attrs.org/en/stable/init.html#post-init-hook
         """
         if not self.ontology_name and not self.accession:
@@ -429,7 +429,7 @@ class Arc:
         elif idx == 1:
             return self.head
         else:
-            raise IndexError("Invalid index: %d" % idx)
+            raise IndexError("Invalid index: %d" % idx)  # pragma: no cover
 
 
 @attr.s(auto_attribs=True, frozen=True)

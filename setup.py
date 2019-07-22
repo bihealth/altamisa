@@ -52,7 +52,7 @@ setup(
         "console_scripts": (
             "isatab2dot = altamisa.apps.isatab2dot:main",
             "isatab2isatab = altamisa.apps.isatab2isatab:main",
-            "isatab2validation = altamisa.apps.isatab2validation:main",
+            "isatab_validate = altamisa.apps.isatab_validate:main",
         )
     },
     description="Implementation of ISA-tools data model and ISA-TAB",

@@ -144,11 +144,11 @@ class InvestigationWriter:
             if header in section:
                 values = section.pop(header)
                 self._write_line(header, values)
-            else:
+            else:  # pragma: no cover
                 tpl = "No data found for header {} in section {}"
                 msg = tpl.format(header, section_name)
                 raise WriteIsatabException(msg)
-        if len(section) > 0:
+        if len(section) > 0:  # pragma: no cover
             tpl = "Leftover rows found in section {}:\n{}"
             msg = tpl.format(section_name, section)
             raise WriteIsatabException(msg)

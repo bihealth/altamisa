@@ -103,43 +103,43 @@ class _NodeBuilderBase:
             elif header.column_type == table_headers.PARAMETER_VALUE:
                 self.parameter_value_headers.append(header)
             elif header.column_type == table_headers.MATERIAL_TYPE:
-                if self.material_type_header:
+                if self.material_type_header:  # pragma: no cover
                     self._raise_seen_before("Material Type", header.col_no)
                 else:
                     self.material_type_header = header
             elif header.column_type == table_headers.ARRAY_DESIGN_REF:
-                if self.array_design_ref_header:
+                if self.array_design_ref_header:  # pragma: no cover
                     self._raise_seen_before("Array Design REF", header.col_no)
                 else:
                     self.array_design_ref_header = header
             elif header.column_type == table_headers.FIRST_DIMENSION:
-                if self.first_dimension_header:
+                if self.first_dimension_header:  # pragma: no cover
                     self._raise_seen_before("First Dimension", header.col_no)
                 else:
                     self.first_dimension_header = header
             elif header.column_type == table_headers.SECOND_DIMENSION:
-                if self.second_dimension_header:
+                if self.second_dimension_header:  # pragma: no cover
                     self._raise_seen_before("Second Dimension", header.col_no)
                 else:
                     self.second_dimension_header = header
             elif header.column_type == table_headers.LABEL:
-                if self.extract_label_header:
+                if self.extract_label_header:  # pragma: no cover
                     self._raise_seen_before("Label", header.col_no)
                 else:
                     self.extract_label_header = header
             elif header.column_type == table_headers.DATE:
-                if self.date_header:
+                if self.date_header:  # pragma: no cover
                     self._raise_seen_before("Date", header.col_no)
                 else:
                     self.date_header = header
             elif header.column_type == table_headers.PERFORMER:
-                if self.performer_header:
+                if self.performer_header:  # pragma: no cover
                     self._raise_seen_before("Performer", header.col_no)
                 else:
                     self.performer_header = header
             elif header.column_type == table_headers.TERM_SOURCE_REF:
                 # Guard against misuse / errors
-                if not prev:
+                if not prev:  # pragma: no cover
                     tpl = "No primary annotation to annotate with term in " "col {}"
                 elif prev.column_type not in (
                     # According to ISA-tab specs, Characteristics, Factor Values,
@@ -156,16 +156,16 @@ class _NodeBuilderBase:
                     table_headers.PARAMETER_VALUE,
                     table_headers.SECOND_DIMENSION,
                     table_headers.UNIT,
-                ):
+                ):  # pragma: no cover
                     tpl = (
                         "Ontologies not supported for primary annotation "
                         "'{}' (in col {}).".format(prev.column_type, "{}")
                     )
-                elif prev.term_source_ref_header:
+                elif prev.term_source_ref_header:  # pragma: no cover
                     tpl = 'Seen "Term Source REF" header for same entity ' "in col {}"
                 else:
                     tpl = None
-                if tpl:
+                if tpl:  # pragma: no cover
                     msg = tpl.format(header.col_no)
                     raise ParseIsatabException(msg)
                 else:
@@ -173,7 +173,7 @@ class _NodeBuilderBase:
                     prev.term_source_ref_header = header
                     is_secondary = True
             elif header.column_type == table_headers.UNIT:
-                if prev.unit_header or prev.column_type == table_headers.UNIT:
+                if prev.unit_header or prev.column_type == table_headers.UNIT:  # pragma: no cover
                     self._raise_seen_before("Unit", header.col_no)
                 else:
                     # The previous non-secondary header is annotated with a unit.
@@ -183,7 +183,7 @@ class _NodeBuilderBase:
                 prev = header
 
     @staticmethod
-    def _raise_seen_before(name, col_no):
+    def _raise_seen_before(name, col_no):  # pragma: no cover
         tpl = 'Seen "{}" header for same entity in col {}'
         msg = tpl.format(name, col_no)
         raise ParseIsatabException(msg)
@@ -218,7 +218,7 @@ class _NodeBuilderBase:
                         for n, a, o in zip(name, accession, ontology_name)
                     ]
                     return term_refs
-                else:
+                else:  # pragma: no cover
                     tpl = (
                         "Irregular numbers of fields in ontology term columns"
                         "(i.e. ';'-separated fields): {}"
@@ -363,8 +363,8 @@ class _ProcessBuilder(_NodeBuilderBase):
         if self.date_header and line[self.date_header.col_no]:
             try:
                 date = datetime.strptime(line[self.date_header.col_no], "%Y-%m-%d").date()
-            except ValueError as e:
-                tpl = 'Invalid ISO8601 date "{}"'
+            except ValueError as e:  # pragma: no cover
+                tpl = 'Invalid ISO8601 date  # pragma: no cover "{}"'
                 msg = tpl.format(line[self.date_header.col_no])
                 raise ParseIsatabException(msg) from e
         else:
@@ -431,7 +431,7 @@ class _ProcessBuilder(_NodeBuilderBase):
                 unique_name = "{}{}-{}-{}".format(
                     self.study_id, assay_id, name, self.name_header.col_no + 1
                 )
-            else:  # Empty!
+            else:  # Empty!  # pragma: no cover
                 name_val = "{}{}-{} {}-{}-{}".format(
                     self.study_id,
                     assay_id,
@@ -458,7 +458,7 @@ class _ProcessBuilder(_NodeBuilderBase):
                     counter_value,
                 )
                 unique_name = models.AnnotatedStr(name_val, was_empty=True)
-        if not protocol_ref:
+        if not protocol_ref:  # pragma: no cover
             tpl = "Missing protocol reference in column {}"
             msg = tpl.format(self.protocol_ref_header.col_no + 1)
             raise ParseIsatabException(msg)
@@ -641,7 +641,9 @@ class _AssayAndStudyBuilder:
             for i, entry in enumerate(row):
                 # Collect processes and materials
                 if isinstance(entry, models.Process):
-                    if entry.unique_name in processes and entry != processes[entry.unique_name]:
+                    if (
+                        entry.unique_name in processes and entry != processes[entry.unique_name]
+                    ):  # pragma: no cover
                         tpl = (
                             "Found processes with same name but different "
                             "annotation:\nprocess 1: {}\nprocess 2: {}"
@@ -651,7 +653,9 @@ class _AssayAndStudyBuilder:
                     processes[entry.unique_name] = entry
                 else:
                     assert isinstance(entry, models.Material)
-                    if entry.unique_name in materials and entry != materials[entry.unique_name]:
+                    if (
+                        entry.unique_name in materials and entry != materials[entry.unique_name]
+                    ):  # pragma: no cover
                         tpl = (
                             "Found materials with same name but different "
                             "annotation:\nmaterial 1: {}\nmaterial 2: {}"
@@ -700,7 +704,7 @@ class StudyRowReader:
         """Read first line with header"""
         try:
             line = self._read_next_line()
-        except StopIteration as e:
+        except StopIteration as e:  # pragma: no cover
             msg = "Study file has no header!"
             raise ParseIsatabException(msg) from e
         return list(StudyHeaderParser(line).run())
@@ -817,7 +821,7 @@ class AssayRowReader:
         """Read first line with header"""
         try:
             line = self._read_next_line()
-        except StopIteration as e:
+        except StopIteration as e:  # pragma: no cover
             msg = "Assay file has no header!"
             raise ParseIsatabException(msg) from e
         return list(AssayHeaderParser(line).run())
