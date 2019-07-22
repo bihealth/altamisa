@@ -26,7 +26,7 @@ def parse_requirements(path):
 with open("README.md") as readme_file:
     readme = readme_file.read()
 
-with open("HISTORY.rst") as history_file:
+with open("HISTORY.md") as history_file:
     history = history_file.read()
 
 test_requirements = parse_requirements("requirements/test.txt")

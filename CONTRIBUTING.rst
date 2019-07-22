@@ -118,15 +118,21 @@ Deploying
 ---------
 
 A reminder for the maintainers on how to deploy.
-Make sure all your changes are committed (including an entry in HISTORY.rst).
+Make sure all your changes are committed (including an entry in HISTORY.md).
 Then run::
 
 $ git tag vMAJOR.MINOR.PATCH
 $ git push
 $ git push --tags
 
-This will create a release on Github.
-Now, release to PyPI using `twine`::
+This will create a tag on Github.
+Next, build with ``sdist``::
+
+$ rm -rf dist
+$ python setup.py sdist
+
+Ensure that this builds a clean package without hash and ``-dirty``.
+Now, release to PyPI using ``twine``::
 
 $ twine upload --repository-url https://test.pypi.org/legacy/ dist/altamisa-*.tar.gz
 $ twine upload dist/altamisa-*.tar.gz

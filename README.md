@@ -7,7 +7,7 @@
 
 # AltamISA
 
-<img align="right" width="200" height="312" src="docs/images/Peruvian_Ragweed-small.png" />
+<img align="right" width="200" height="312" src="https://raw.githubusercontent.com/bihealth/altamisa/master/docs/images/Peruvian_Ragweed-small.png" />
 
 AltamISA is an alternative implementation of [ISA-tools](http://isa-tools.org/) [data model](http://isa-specs.readthedocs.io/en/latest/isamodel.html) and [ISA-Tab file format](http://isa-specs.readthedocs.io/en/latest/isatab.html).
 

@@ -11,7 +11,7 @@ particular, study and assay data (i.e. corresponding materials and processes) ar
 Note that all models are *immutable* after construction.
 Here is a common pattern for getting a *copy* with modifying select members.
 
-.. code-block:: doctest
+.. doctest::
 
     >>> import attr
     >>> from altamisa.isatab import Comment
