@@ -1,5 +1,9 @@
 # History
 
+## HEAD (unreleased)
+
+- Fixing problem with writing empty lines on Windows (#52).
+
 ## v0.2.0
 
 - Switching to `attrs` instead of using `Namedtuple`.
