@@ -135,3 +135,4 @@ filled investigation sections, material or process information, please refer to 
 
 .. literalinclude:: examples/create_isa_model.py
     :language: python
+    :pyobject: create_and_write
