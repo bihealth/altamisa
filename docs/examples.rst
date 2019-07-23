@@ -124,3 +124,14 @@ Warnings may be collected as follows, to enable joint notification or evaluation
         warnings.showwarning(
             record.message, record.category, record.filename, record.lineno, record.line
         )
+
+
+Manual ISA model creation
+-------------------------
+
+A minimal AltamISA ISA model may be created as follows. To create more comprehensive models with, for instance, more
+filled investigation sections, material or process information, please refer to the description of the
+:ref:`api_models`.
+
+.. literalinclude:: examples/create_isa_model.py
+    :language: python
