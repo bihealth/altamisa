@@ -2,6 +2,7 @@
 
 from altamisa.isatab import models, table_headers
 from altamisa.isatab import AssayValidator, InvestigationValidator, StudyValidator
+from altamisa.isatab import AssayWriter, InvestigationWriter, StudyWriter
 
 
 # Create an investigation
@@ -88,7 +89,7 @@ onto_ref_01 = models.OntologyRef(
 
 # Prepare basic investigation information
 invest_info = models.BasicInfo(
-    path=None,
+    path="i_minimal.txt",
     identifier="i_minimal",
     title="Minimal Investigation",
     description=None,
@@ -109,6 +110,10 @@ investigation = models.InvestigationInfo(
 
 # Validate investigation
 InvestigationValidator(investigation).validate()
+
+# Write the investigation as ISA-Tab txt file
+with open(investigation.info.path, "wt", newline="") as outputf:
+    InvestigationWriter.from_stream(investigation=investigation, output_file=outputf).write()
 
 
 # Create a corresponding Study graph
@@ -172,6 +177,10 @@ StudyValidator(
     investigation=investigation, study_info=investigation.studies[0], study=study_graph_01
 ).validate()
 
+# Write the study as ISA-Tab txt file
+with open(investigation.studies[0].info.path, "wt", newline="") as outputf:
+    StudyWriter.from_stream(study_or_assay=study_graph_01, output_file=outputf).write()
+
 
 # Create a corresponding Assay graph
 
@@ -180,8 +189,8 @@ StudyValidator(
 # Explicit header definition per node is currently required to enable export to ISA-Tab
 sample_01 = models.Material(
     type="Sample Name",
-    unique_name="S1-source-0815-N1",
-    name="0815.N1",
+    unique_name="S1-sample-0815-N1",
+    name="0815-N1",
     extract_label=None,
     characteristics=(),
     comments=(),
@@ -242,7 +251,7 @@ arcs = (
 )
 
 # Create the assay graph object
-study_graph_01 = models.Assay(
+assay_graph_01 = models.Assay(
     file=investigation.studies[0].assays[0].path,
     header=None,
     materials={
@@ -259,5 +268,9 @@ AssayValidator(
     investigation=investigation,
     study_info=investigation.studies[0],
     assay_info=investigation.studies[0].assays[0],
-    assay=study_graph_01,
+    assay=assay_graph_01,
 ).validate()
+
+# Write the assay as ISA-Tab txt file
+with open(investigation.studies[0].assays[0].path, "wt", newline="") as outputf:
+    AssayWriter.from_stream(study_or_assay=assay_graph_01, output_file=outputf).write()
