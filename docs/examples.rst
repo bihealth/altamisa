@@ -80,7 +80,7 @@ investigation, as files might be overwritten otherwise):
 .. code-block:: python
 
     # Write investigation
-    with open("path/to/output/investigation.txt", "wt") as output_investigation_file:
+    with open("path/to/output/investigation.txt", "wt", newline='') as output_investigation_file:
         InvestigationWriter.from_stream(
             investigation, output_investigation_file, quote=args.quotes
         ).write()
@@ -88,11 +88,11 @@ investigation, as files might be overwritten otherwise):
     # Write studies and assays
     for s, study_info in enumerate(investigation.studies):
         if study_info.info.path:
-            with open(os.path.join(path_out, study_info.info.path), "wt") as outputf:
+            with open(os.path.join(path_out, study_info.info.path), "wt", newline="") as outputf:
                 StudyWriter.from_stream(studies[s], outputf, quote=args.quotes).write()
         for a, assay_info in enumerate(study_info.assays):
             if assay_info.path:
-                with open(os.path.join(path_out, assay_info.path), "wt") as outputf:
+                with open(os.path.join(path_out, assay_info.path), "wt", newline="") as outputf:
                     AssayWriter.from_stream(assays[s][a], outputf, quote=args.quotes).write()
 
 	

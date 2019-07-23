@@ -32,7 +32,7 @@ def _parse_write_assert(investigation_file, tmp_path, quote=None):
         StudyValidator(investigation, study_info, study).validate()
         # Write study to temporary file
         path_out = tmp_path / study_info.info.path
-        with open(path_out, "wt") as file:
+        with open(path_out, "wt", newline="") as file:
             StudyWriter.from_stream(study, file, quote=quote).write()
         # Sort and compare input and output
         path_in_s = tmp_path / (study_info.info.path.name + ".in.sorted")
