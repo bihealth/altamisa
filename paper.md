@@ -11,19 +11,19 @@ tags:
 authors:
  - name: Mathias Kuhring
    orcid: 0000-0002-3287-0313
-   affiliation: "1, 2, 3"
+   affiliation: "1,2,3"
  - name: Mikko Nieminen
    orcid: 0000-0002-4180-8810
-   affiliation: "1, 3"
+   affiliation: "1,3"
  - name: Jennifer Kirwan
    orcid: 0000-0002-5423-1651
-   affiliation: "2, 3"
+   affiliation: "2,3"
  - name: Dieter Beule
    orcid: 0000-0002-3284-0632
-   affiliation: "1, 4"
+   affiliation: "1,4"
  - name: Manuel Holtgrewe
    orcid: 0000-0002-3051-1763
-   affiliation: "1, 4"
+   affiliation: "1,4"
 affiliations:
  - name: Core Unit Bioinformatics, Berlin Institute of Health (BIH), Berlin, Germany
    index: 1
@@ -40,7 +40,7 @@ bibliography: paper.bib
 # Introduction
 
 The ISA-Tools framework [@Sansone:2012] defines a data model for representing an investigation with study and assay data.
-Shortly, the experimental process from sample extraction from a source (e.g., a donor individual) through processing of the samples to creating read-outs in one more more assays can be represented through DAGs (directed acyclic graphs), consisting of extensively annotatable so called material and process nodes.
+Shortly, the experimental process from sample extraction from a source (e.g., a donor individual) through processing of the samples to creating read-outs in one or more assays can be represented through DAGs (directed acyclic graphs), consisting of extensively annotatable so called material and process nodes.
 Together with ISA-Tab, a TSV (tab separated values)--based file format, this allows for representing most conceivable experiments in life science and to store them into machine-readable files for exchanging information about such experiments.
 This greatly facilitates the development of data management applications following the FAIR (findable, accessible, interoperable, and reusable, cf. @Wilkinson:2016) guidelines.
 
@@ -76,7 +76,7 @@ Further, we implemented a small number of example applications:
 
 - `isa2dot` allows converting of ISA-Tab files into the DOT file format for visualization with GraphViz [@Gansner:1993].
   We found this useful for both trouble-shooting AltamISA itself and sample sheets.
-- `isa2isa` allows to perform the aforementioned round tripping and thus a **normalization** of ISA-Tab files.
+- `isa2isa` allows to perform the aforementioned round tripping and thus a *normalization* of ISA-Tab files.
 - `isa_validate` allows to read in an ISA-Tab file, and run the AltamISA validator suite on the input.
 
 For now, we have excluded the JSON (JavaScript Object Notation)--based file format as well as the emerging RFD (Resource Description Framework)--based file format (linkedISA [@Gonzalez:2014]) from the scope of this project.
