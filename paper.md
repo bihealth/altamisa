@@ -1,33 +1,38 @@
 ---
 title: 'AltamISA: a Python API for ISA-Tab files'
 tags:
+ - API
+ - ISA-Tab
+ - ISA tools
+ - metadata
+ - omics
+ - Python
  - scientific data management
- - django
- - framework
- - python
 authors:
  - name: Mathias Kuhring
    orcid: 0000-0002-3287-0313
-   affiliation: 1,2
+   affiliation: "1, 2, 3"
  - name: Mikko Nieminen
    orcid: 0000-0002-4180-8810
-   affiliation: 1,3
+   affiliation: "1, 3, 4"
  - name: Jennifer Kirwan
    orcid: 0000-0002-5423-1651
-   affiliation: 2
+   affiliation: "2, 3"
  - name: Dieter Beule
    orcid: 0000-0002-3284-0632
-   affiliation: 1,2
+   affiliation: "1, 3, 4"
  - name: Manuel Holtgrewe
    orcid: 0000-0002-3051-1763
-   affiliation: 1,3
+   affiliation: "1, 4"
 affiliations:
- - name: "Berlin Institute of Health, Anna-Louisa-Karsch-Straße 2, 10178 Berlin"
+ - name: Core Unit Bioinformatics, Berlin Institute of Health (BIH), Berlin, Germany
    index: 1
- - name: "Max Delbrück Center for Molecular Medicine, Robert-Rössle-Straße 10, 13125 Berlin"
+ - name: Berlin Institute of Health Metabolomics Platform, Berlin Institute of Health (BIH), Berlin, Germany
    index: 2
- - name: "Charité – Universitätsmedizin Berlin, Charitéplatz 1, 10117 Berlin"
+ - name: Max Delbrück Center (MDC) for Molecular Medicine, Berlin, Germany
    index: 3
+ - name: Charité – Universitätsmedizin Berlin, Berlin, Germany
+   index: 4
 date: 24 July 2019
 bibliography: paper.bib
 ---
