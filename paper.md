@@ -20,7 +20,7 @@ authors:
    affiliation: "2, 3"
  - name: Dieter Beule
    orcid: 0000-0002-3284-0632
-   affiliation: "1, 3, 4"
+   affiliation: "1, 4"
  - name: Manuel Holtgrewe
    orcid: 0000-0002-3051-1763
    affiliation: "1, 4"
