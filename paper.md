@@ -14,7 +14,7 @@ authors:
    affiliation: "1, 2, 3"
  - name: Mikko Nieminen
    orcid: 0000-0002-4180-8810
-   affiliation: "1, 3, 4"
+   affiliation: "1, 3"
  - name: Jennifer Kirwan
    orcid: 0000-0002-5423-1651
    affiliation: "2, 3"
