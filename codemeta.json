@@ -1,0 +1,51 @@
+{
+  "@context": "https://raw.githubusercontent.com/mbjones/codemeta/master/codemeta.jsonld",
+  "@type": "Code",
+  "author": [
+    {
+      "@id": "https://orcid.org/0000-0002-3287-0313",
+      "@type": "Person",
+      "email": "mathias.kuhring@bihealth.de",
+      "name": "Mathias Kuhring",
+      "affiliation": "Berlin Institute of Health (BIH), Berlin, German"
+    },
+    {
+      "@id": "https://orcid.org/0000-0002-4180-8810",
+      "@type": "Person",
+      "email": "mikko.nieminen@bihealth.de",
+      "name": "Mikko Nieminen",
+      "affiliation": "Berlin Institute of Health (BIH), Berlin, German"
+    },
+    {
+      "@id": "https://orcid.org/0000-0002-5423-1651",
+      "@type": "Person",
+      "email": "jennifer.kirwan@bihealth.de",
+      "name": "Jennifer Kirwan",
+      "affiliation": "Berlin Institute of Health (BIH), Berlin, German"
+    },
+    {
+      "@id": "https://orcid.org/0000-0002-3284-0632",
+      "@type": "Person",
+      "email": "dieter.beule@bihealth.de",
+      "name": "Dieter Beule",
+      "affiliation": "Berlin Institute of Health (BIH), Berlin, German"
+    },
+    {
+      "@id": "https://orcid.org/0000-0002-3051-1763",
+      "@type": "Person",
+      "email": "manuel.holtgrewe@bihealth.de",
+      "name": "Manuel Holtgrewe",
+      "affiliation": "Berlin Institute of Health (BIH), Berlin, German"
+    }
+  ],
+  "identifier": "https://zenodo.org/record/3345950",
+  "codeRepository": "https://github.com/bihealth/altamisa",
+  "datePublished": "2019-07-25",
+  "dateModified": "2019-07-25",
+  "dateCreated": "2019-07-25",
+  "description": "AltamISA: a Python API for ISA-Tab files",
+  "keywords": "ISA-Tab, Python, software library",
+  "license": "MIT",
+  "title": "AltamISA",
+  "version": "v0.2.0"
+}
