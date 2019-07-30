@@ -39,9 +39,13 @@ bibliography: paper.bib
 
 # Introduction
 
-The ISA-Tools framework [@Sansone:2012] defines a data model for representing an investigation with study and assay data.
-Shortly, the experimental process from sample extraction from a source (e.g., a donor individual) through processing of the samples to creating read-outs in one or more assays can be represented through DAGs (directed acyclic graphs) consisting of extensively annotatable so-called material and process nodes.
-Together with ISA-Tab, a TSV (tab separated values)--based file format, this allows for representing most conceivable experiments in life science and to store them into machine-readable files for exchanging information about such experiments.
+AltamISA is a Python library for reading, validating, representing, and writing the ISA-Tab file format.
+ISA-Tab is an open, TSV (tab separated values)-based file format for representing the ISA (investigation study assay) tools data model [@Sansone:2012].
+The ISA tools data model allows for representing life science experiments and annotating the modeled objects and steps with arbitrary meta data.
+The ISA tools data model and TSV format are used by various life science databases, including MetaboLights [@Haug:2013].
+
+Shortly, the experimental process from sample extraction from a source (e.g., a donor individual) through processing of the samples to creating read-outs in one or more assays can be represented through DAGs (directed acyclic graphs) consisting of extensively annotatable so-called *material* and *process* nodes.
+Together, the ISA tools data model and ISA-Tab allow for representing most conceivable experiments in life science and to store them into machine-readable files for exchanging information about such experiments.
 This greatly facilitates the development of data management applications following the FAIR (findable, accessible, interoperable, and reusable, cf. @Wilkinson:2016) guidelines.
 
 # Motivation
