@@ -5,6 +5,7 @@
 - Adding JOSS paper draft.
 - Fixing problem with writing empty lines on Windows (#52).
 - Update documentation with examples for manual model creation.
+- Fixing authorship documentation.
 
 ## v0.2.0
 
