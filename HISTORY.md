@@ -1,6 +1,6 @@
 # History
 
-## HEAD (unreleased)
+## v0.2.1
 
 - Adding JOSS paper draft.
 - Fixing problem with writing empty lines on Windows (#52).
