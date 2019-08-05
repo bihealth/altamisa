@@ -6,6 +6,7 @@
 - Fixing problem with writing empty lines on Windows (#52).
 - Update documentation with examples for manual model creation.
 - Fixing authorship documentation.
+- Fixing package (#58).
 
 ## v0.2.0
 

@@ -34,7 +34,10 @@ install_requirements = parse_requirements("requirements/base.txt")
 
 setup(
     author="Dieter Beule, Jennifer Kirwan, Mathias Kuhring, Manuel Holtgrewe, Mikko Nieminen",
-    author_email="dieter.beule@bihealth.de, jennifer.kirwan@bihalth.de, mathias.kuhring@bihealth.de, manuel.holtgrewe@bihealth.de, mikko.nieminen@bihealth.de",
+    author_email=(
+        "dieter.beule@bihealth.de, jennifer.kirwan@bihalth.de, mathias.kuhring@bihealth.de, "
+        "manuel.holtgrewe@bihealth.de, mikko.nieminen@bihealth.de"
+    ),
     classifiers=[
         "Development Status :: 4 - Beta",
         "Intended Audience :: Developers",
@@ -63,7 +66,7 @@ setup(
     include_package_data=True,
     keywords="altamisa",
     name="altamisa",
-    packages=find_packages(include=["altamisa"]),
+    packages=find_packages(include=["altamisa*"]),
     test_suite="tests",
     tests_require=test_requirements,
     url="https://github.com/bihealth/altamisa",
