@@ -50,7 +50,7 @@ This greatly facilitates the development of data management applications followi
 
 # Motivation
 
-The authors are developing an application for managing omics data [@Nieminen:2020].
+The authors are developing an application for managing omics data.
 In our research regarding existing data schemas and file formats we found the ISA-Tab data model and file format to be highly suitable.
 Further, it had already seen adoption by databases such as MetaboLights [@Haug:2013].
 
