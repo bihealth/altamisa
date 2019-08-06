@@ -39,12 +39,12 @@ bibliography: paper.bib
 
 # Introduction
 
-AltamISA is a Python library for reading, validating, representing, and writing the ISA-Tab file format.
+AltamISA is a Python library for reading, validating, representing and writing the ISA-Tab file format.
 ISA-Tab is an open, TSV (tab separated values)-based file format for representing the ISA (investigation study assay) tools data model [@Sansone:2012].
 The ISA tools data model allows for representing life science experiments and annotating the modeled objects and steps with arbitrary meta data.
 The ISA tools data model and TSV format are used by various life science databases, including MetaboLights [@Haug:2013].
 
-Shortly, the experimental process from sample extraction from a source (e.g., a donor individual) through processing of the samples to creating read-outs in one or more assays can be represented through DAGs (directed acyclic graphs) consisting of extensively annotatable so-called *material* and *process* nodes.
+Shortly, the experimental process from sample extraction from a source (e.g. a donor individual) through processing of the samples to creating read-outs in one or more assays can be represented through DAGs (directed acyclic graphs) consisting of extensively annotatable so-called *material* and *process* nodes.
 Together, the ISA tools data model and ISA-Tab allow for representing most conceivable experiments in life science and to store them into machine-readable files for exchanging information about such experiments.
 This greatly facilitates the development of data management applications following the FAIR (findable, accessible, interoperable, and reusable, cf. @Wilkinson:2016) guidelines.
 
@@ -78,13 +78,13 @@ We developed AltamISA with the aim of providing the following features:
 
 Further, we implemented a small number of example applications:
 
-- `isa2dot` allows converting of ISA-Tab files into the DOT file format for visualization with GraphViz [@Gansner:1993].
+- `isatab2dot` allows converting of ISA-Tab files into the DOT file format for visualization with GraphViz [@Gansner:1993].
   We found this useful for both trouble-shooting AltamISA itself and sample sheets.
-- `isa2isa` allows to perform the aforementioned round tripping and thus a *normalization* of ISA-Tab files.
-- `isa_validate` allows to read in an ISA-Tab file and run the AltamISA validator suite on the input.
+- `isatab2isatab` allows to perform the aforementioned round tripping and thus a *normalization* of ISA-Tab files.
+- `isatab_validate` allows to read in an ISA-Tab file and run the AltamISA validator suite on the input.
 
 For now, we have excluded the JSON (JavaScript Object Notation)--based file format as well as the emerging RFD (Resource Description Framework)--based file format (linkedISA [@Gonzalez:2014]) from the scope of this project.
-These file formats appear to be not widely adapted and require specialized editors while ISA-Tab can be created and manipulated not only by using the ISAcreator application [@Sansone:2012] but also standard spreadsheet software.
+These file formats appear to be not widely adapted and require specialized editors, while ISA-Tab can be created and manipulated not only by using the ISAcreator application [@Sansone:2012] but also standard spreadsheet software.
 
 # Summary and Conclusion
 
