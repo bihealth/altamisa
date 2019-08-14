@@ -360,13 +360,16 @@ class _ProcessBuilder(_NodeBuilderBase):
         """Build and return ``Process`` from CSV file."""
         # First, build the individual attributes of ``Process``
         protocol_ref, unique_name, name, name_type = self._build_protocol_ref_and_name(line)
-        if self.date_header and line[self.date_header.col_no]:
-            try:
-                date = datetime.strptime(line[self.date_header.col_no], "%Y-%m-%d").date()
-            except ValueError as e:  # pragma: no cover
-                tpl = 'Invalid ISO8601 date  # pragma: no cover "{}"'
-                msg = tpl.format(line[self.date_header.col_no])
-                raise ParseIsatabException(msg) from e
+        if self.date_header:
+            if line[self.date_header.col_no]:
+                try:
+                    date = datetime.strptime(line[self.date_header.col_no], "%Y-%m-%d").date()
+                except ValueError as e:  # pragma: no cover
+                    tpl = 'Invalid ISO8601 date  # pragma: no cover "{}"'
+                    msg = tpl.format(line[self.date_header.col_no])
+                    raise ParseIsatabException(msg) from e
+            else:
+                date = ""
         else:
             date = None
         if self.performer_header:

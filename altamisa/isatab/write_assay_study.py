@@ -359,9 +359,9 @@ class _WriterBase:
         attributes = {}
         if node.protocol_ref != TOKEN_UNKNOWN:
             attributes[table_headers.PROTOCOL_REF] = node.protocol_ref
-        if node.performer:
+        if node.performer is not None:
             attributes[table_headers.PERFORMER] = node.performer
-        if node.date:
+        if node.date is not None:
             attributes[table_headers.DATE] = node.date
         for parameter in node.parameter_values:
             attributes[
