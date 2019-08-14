@@ -18,15 +18,17 @@ Project Info
 Quick Example
 -------------
 
-Start parsing an ISA-Tab dataset by reading and validating the investigation file:
+Start parsing an ISA-Tab dataset by reading and validating an
+`investigation file <https://raw.githubusercontent.com/bihealth/altamisa/master/tests/data/BII-I-1/i_investigation.txt>`_
+(download it to your working directory first):
 
 .. code-block:: python
 
-    from altamisa import isatab
-	
-    with open("path/to/an/investigation.txt", "rt") as investigation_file:
+    from altamisa.isatab import *
+
+    with open("i_investigation.txt", "rt") as investigation_file:
         investigation = InvestigationReader.from_stream(investigation_file).read()
-		
+
     InvestigationValidator(investigation).validate()
 
 For more inspiration on how to use AltamISA, see :ref:`examples`.

@@ -1,6 +1,6 @@
 # Create ISA model from scratch
 
-from os.path import join
+import os
 import sys
 
 from altamisa.isatab import models, table_headers
@@ -116,7 +116,7 @@ def create_and_write(out_path):
     InvestigationValidator(investigation).validate()
 
     # Write the investigation as ISA-Tab txt file
-    with open(join(out_path, investigation.info.path), "wt", newline="") as outputf:
+    with open(os.path.join(out_path, investigation.info.path), "wt", newline="") as outputf:
         InvestigationWriter.from_stream(investigation=investigation, output_file=outputf).write()
 
     # Create a corresponding Study graph
@@ -181,7 +181,9 @@ def create_and_write(out_path):
     ).validate()
 
     # Write the study as ISA-Tab txt file
-    with open(join(out_path, investigation.studies[0].info.path), "wt", newline="") as outputf:
+    with open(
+        os.path.join(out_path, investigation.studies[0].info.path), "wt", newline=""
+    ) as outputf:
         StudyWriter.from_stream(study_or_assay=study_graph_01, output_file=outputf).write()
 
     # Create a corresponding Assay graph
@@ -274,8 +276,14 @@ def create_and_write(out_path):
         assay=assay_graph_01,
     ).validate()
 
+    # Create output path, if not existing
+    if not os.path.exists(out_path):
+        os.makedirs(out_path, exist_ok=True)
+
     # Write the assay as ISA-Tab txt file
-    with open(join(out_path, investigation.studies[0].assays[0].path), "wt", newline="") as outputf:
+    with open(
+        os.path.join(out_path, investigation.studies[0].assays[0].path), "wt", newline=""
+    ) as outputf:
         AssayWriter.from_stream(study_or_assay=assay_graph_01, output_file=outputf).write()
 
 
