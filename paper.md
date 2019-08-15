@@ -84,7 +84,7 @@ Further, we implemented a small number of example applications:
 - `isatab_validate` allows to read in an ISA-Tab file and run the AltamISA validator suite on the input.
 
 For now, we have excluded the JSON (JavaScript Object Notation)--based file format as well as the emerging RFD (Resource Description Framework)--based file format (linkedISA [@Gonzalez:2014]) from the scope of this project.
-These file formats appear to be not widely adapted and require specialized editors, while ISA-Tab can be created and manipulated not only by using the ISAcreator application [@Sansone:2012] but also standard spreadsheet software.
+These ISA file formats appear to be not widely adapted and require specialized editors, while ISA-Tab can be created and manipulated not only by using the ISAcreator application [@Sansone:2012] but also standard spreadsheet software.
 
 # Summary and Conclusion
 
@@ -97,7 +97,7 @@ It is our expectation that this library will be useful for other software develo
 
 AltamISA is distributed under the MIT license and available from GitHub at https://github.com/bihealth/altamisa.
 Each release is also stored to Zenodo.
-The current version 0.2.0 is available with the DOI 10.5281/zenodo.3345950.
+The current version 0.2.2 is available with the DOI 10.5281/zenodo.3369223.
 Examples and complete, up-to-date API documentation can be found at https://altamisa.readthedocs.org.
 We welcome contributions via GitHub as outlined in the documentation.
 
