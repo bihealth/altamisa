@@ -1,5 +1,9 @@
 # History
 
+## v0.2.2
+
+- Updating documentation for JOSS.
+
 ## v0.2.1
 
 - Adding JOSS paper draft.
