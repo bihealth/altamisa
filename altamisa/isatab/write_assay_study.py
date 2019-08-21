@@ -228,8 +228,24 @@ class _WriterBase:
     def _extract_and_write_nodes(self):
         # Extract and write all nodes in the order given by the reference table
         for row in self._ref_table:
-            line = []
+            # Number of nodes per row must match number of header groups
+            if len(row) < len(self._headers):
+                tpl = (
+                    "Fewer nodes in row than header groups available:"
+                    "\n\tHeader groups:\t{}\n\tRow nodes:\t{}"
+                )
+                msg = tpl.format(self._headers, row)
+                raise WriteIsatabException(msg)
+            elif len(row) > len(self._headers):
+                tpl = (
+                    "More nodes in row than header groups available:"
+                    "\n\tHeader groups:\t{}\n\tRow nodes:\t{}"
+                )
+                msg = tpl.format(self._headers, row)
+                raise WriteIsatabException(msg)
+
             # Iterate nodes and corresponding headers
+            line = []
             for node_name, headers in zip(row, self._headers):
                 # Extract node attributes
                 node = self._nodes[node_name]
@@ -267,7 +283,7 @@ class _WriterBase:
                 line.append(attribute)
             self._previous_attribute = attribute
         else:  # pragma: no cover
-            tpl = "Expected {} not found in node {} after/for attribute {}"
+            tpl = "Expected '{}' not found in node '{}' after/for attribute '{}'"
             msg = tpl.format(header, node.unique_name, self._previous_attribute)
             raise WriteIsatabException(msg)
 
