@@ -98,7 +98,7 @@ def test_assay_reader_minimal_assay(minimal_investigation_file, minimal_assay_fi
         InvestigationValidator(investigation).validate()
 
     # Check warnings
-    assert 1 == len(record)
+    assert 2 == len(record)
 
     # Create new row reader and check read headers
     reader = AssayReader.from_stream("S1", "A1", minimal_assay_file)
@@ -439,7 +439,7 @@ def test_assay_reader_small_assay(small_investigation_file, small_assay_file):
         InvestigationValidator(investigation).validate()
 
     # Check warnings
-    assert 1 == len(record)
+    assert 2 == len(record)
 
     # Create new row reader and check read headers
     reader = AssayReader.from_stream("S1", "A1", small_assay_file)
@@ -644,7 +644,11 @@ def test_assay_reader_small2_assay(small2_investigation_file, small2_assay_file)
     """Use ``AssayReader`` to read in small assay file."""
     # Load investigation (tested elsewhere)
     investigation = InvestigationReader.from_stream(small2_investigation_file).read()
-    InvestigationValidator(investigation).validate()
+    with pytest.warns(IsaWarning) as record:
+        InvestigationValidator(investigation).validate()
+
+    # Check warnings
+    assert 1 == len(record)
 
     # Create new row reader and check read headers
     reader = AssayReader.from_stream("S1", "A1", small2_assay_file)
@@ -767,7 +771,7 @@ def test_assay_reader_gelelect(gelelect_investigation_file, gelelect_assay_file)
         ).validate()
 
     # Check warnings
-    assert 4 == len(record)
+    assert 5 == len(record)
 
     # Check results
     assert os.path.normpath(str(assay.file)).endswith(

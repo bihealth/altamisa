@@ -24,7 +24,7 @@ def test_parse_minimal_investigation(minimal_investigation_file):
         InvestigationValidator(investigation).validate()
 
     # Check warnings
-    assert 1 == len(record)
+    assert 2 == len(record)
 
     # Check results
     # Investigation
@@ -69,7 +69,7 @@ def test_parse_small_investigation(small_investigation_file):
         InvestigationValidator(investigation).validate()
 
     # Check warnings
-    assert 1 == len(record)
+    assert 2 == len(record)
 
     # Check results
     # Investigation
@@ -946,7 +946,7 @@ def test_parse_warnings_investigation(warnings_investigation_file):
     # Check warnings
     messages = [str(x.message) for x in record]
     print(messages)
-    assert 11 == len(record)
+    assert 12 == len(record)
     assert "Invalid mail address: invalid_mail" in messages
     assert "Invalid phone/fax number: CALL-ME" in messages
     assert "Invalid phone/fax number: FAX-ME" in messages

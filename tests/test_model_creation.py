@@ -14,4 +14,4 @@ def test_minimal_model_creation(tmp_path):
     assert (tmp_path / "s_minimal.txt").exists()
     assert (tmp_path / "a_minimal.txt").exists()
 
-    assert 12 == len(records)
+    assert 13 == len(records)

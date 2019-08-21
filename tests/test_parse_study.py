@@ -79,7 +79,7 @@ def test_study_reader_minimal_study(minimal_investigation_file, minimal_study_fi
         InvestigationValidator(investigation).validate()
 
     # Check warnings
-    assert 1 == len(record)
+    assert 2 == len(record)
 
     # Create new row reader and check read headers
     reader = StudyReader.from_stream("S1", minimal_study_file)
@@ -324,7 +324,7 @@ def test_study_reader_small_study(small_investigation_file, small_study_file):
         InvestigationValidator(investigation).validate()
 
     # Check warnings
-    assert 1 == len(record)
+    assert 2 == len(record)
 
     # Create new row reader and check read headers
     reader = StudyReader.from_stream("S1", small_study_file)

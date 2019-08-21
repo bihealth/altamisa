@@ -101,9 +101,43 @@ class InvestigationValidator:
                 warnings.warn(msg, CriticalIsaValidationWarning)
 
     def _validate_sections(self):
+        self._validate_investigation_info()
         self._validate_publications(self._investigation.publications)
         self._validate_contacts(self._investigation.contacts)
         self._validate_studies()
+
+    def _validate_investigation_info(self):
+        info = self._investigation.info
+        # If only one study is available, metadata should be recorded in the study section
+        # (https://isa-specs.readthedocs.io/en/latest/isatab.html#investigation-section)
+        if len(self._investigation.studies) == 1:
+            if any((info.title, info.description, info.submission_date, info.public_release_date)):
+                tpl = (
+                    "Investigation with only one study contains metadata:\n\tID:\t{}\n\tTitle:\t"
+                    "{}\n\tPath:\t{}\n\tSubmission Date:\t{}\n\tPublic Release Date:\t{"
+                    "}\n\tPrefer recording metadata in the study section."
+                )
+                msg = tpl.format(
+                    info.identifier,
+                    info.title,
+                    info.path or "",
+                    info.description,
+                    info.submission_date,
+                    info.public_release_date,
+                )
+                warnings.warn(msg, ModerateIsaValidationWarning)
+        # If more than one study is available, investigation should at least contain an id and title
+        else:
+            # Validate availability of investigation identifier
+            if not info.identifier:
+                tpl = "Investigation without identifier:\nTitle:\t{}\nPath:\t{}"
+                msg = tpl.format(info.title, info.path or "")
+                warnings.warn(msg, ModerateIsaValidationWarning)
+            # Validate availability of investigation title
+            if not info.title:
+                tpl = "Investigation without title:\nID:\t{}\nPath:\t{}"
+                msg = tpl.format(info.identifier, info.path or "")
+                warnings.warn(msg, ModerateIsaValidationWarning)
 
     def _validate_studies(self):
         # Check if any study exists
@@ -113,7 +147,7 @@ class InvestigationValidator:
             warnings.warn(msg, CriticalIsaValidationWarning)
             return
         for study in self._investigation.studies:
-            # Validate availability of minimal study information (ids, paths, titles) and
+            # Validate availability of minimal study information (ids, paths, titles)
             if not (study.info.identifier and study.info.path):
                 tpl = (
                     "Study with incomplete minimal information (ID and path):"

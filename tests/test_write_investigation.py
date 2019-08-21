@@ -24,7 +24,7 @@ def test_write_minimal_investigation(minimal_investigation_file, tmp_path):
         investigation = InvestigationReader.from_stream(minimal_investigation_file).read()
         InvestigationValidator(investigation).validate()
     # Check warnings
-    assert 1 == len(record)
+    assert 2 == len(record)
     # Write Investigation to temporary file
     path = tmp_path / "i_minimal.txt"
     with pytest.warns(IsaWarning) as record:
@@ -45,7 +45,7 @@ def test_write_small_investigation(small_investigation_file, tmp_path):
         investigation = InvestigationReader.from_stream(small_investigation_file).read()
         InvestigationValidator(investigation).validate()
     # Check warnings
-    assert 1 == len(record)
+    assert 2 == len(record)
     # Write Investigation to temporary file
     path = tmp_path / "i_small.txt"
     with pytest.warns(IsaWarning) as record:
