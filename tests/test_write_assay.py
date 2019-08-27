@@ -8,6 +8,7 @@ import pytest
 
 from altamisa.exceptions import (
     AdvisoryIsaValidationWarning,
+    CriticalIsaValidationWarning,
     IsaWarning,
     ModerateIsaValidationWarning,
     ParseIsatabWarning,
@@ -117,12 +118,14 @@ def test_assay_writer_BII_I_1(BII_I_1_investigation_file, tmp_path):
     # investigation
     records_skip_ontology = 1
     # a_metabolome + a_microarray + a_transcriptome
+    records_assay_sample_meta = 92 + 0 + 0
     records_ms_assay_name = 111 + 0 + 0
     records_scan_name = 0 + 14 + 48
     records_normalization_name = 0 + 0 + 1
     records_data_transformation_name = 0 + 1 + 0
     assert (
         records_skip_ontology
+        + records_assay_sample_meta
         + records_ms_assay_name
         + records_scan_name
         + records_normalization_name
@@ -135,32 +138,43 @@ def test_assay_writer_BII_I_1(BII_I_1_investigation_file, tmp_path):
     assert str(record[0].message) == msg
 
     msg = (
+        "Found annotated Sample in assay (should be annotated in studies only): Material("
+        "type='Sample Name', unique_name='S1-sample-C-0.1-aliquot1', name='C-0.1-aliquot1', "
+        "extract_label=None, characteristics=(), comments=(), factor_values=(), "
+        "material_type=OntologyTermRef(name='intracellular', "
+        "accession='http://purl.obolibrary.org/obo/GO_0005622', ontology_name='CL'), headers=["
+        "'Sample Name', 'Material Type', 'Term Source REF', 'Term Accession Number'])"
+    )
+    assert record[1].category == CriticalIsaValidationWarning
+    assert str(record[1].message) == msg
+
+    msg = (
         "Can't validate parameter values and names for process with undeclared protocol "
         '"Unknown" and name type "MS Assay Name"'
     )
-    assert record[1].category == ModerateIsaValidationWarning
-    assert str(record[1].message) == msg
+    assert record[93].category == ModerateIsaValidationWarning
+    assert str(record[93].message) == msg
 
     msg = (
         "Can't validate parameter values and names for process with undeclared protocol "
         '"Unknown" and name type "Scan Name"'
     )
-    assert record[112].category == ModerateIsaValidationWarning
-    assert str(record[112].message) == msg
+    assert record[204].category == ModerateIsaValidationWarning
+    assert str(record[204].message) == msg
 
     msg = (
         "Can't validate parameter values and names for process with undeclared protocol "
         '"Unknown" and name type "Normalization Name"'
     )
-    assert record[113].category == ModerateIsaValidationWarning
-    assert str(record[113].message) == msg
+    assert record[205].category == ModerateIsaValidationWarning
+    assert str(record[205].message) == msg
 
     msg = (
         "Can't validate parameter values and names for process with undeclared protocol "
         '"Unknown" and name type "Data Transformation Name"'
     )
-    assert record[162].category == ModerateIsaValidationWarning
-    assert str(record[162].message) == msg
+    assert record[254].category == ModerateIsaValidationWarning
+    assert str(record[254].message) == msg
 
 
 def test_assay_writer_gelelect(gelelect_investigation_file, tmp_path):

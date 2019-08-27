@@ -78,15 +78,14 @@ class _MaterialValidator:
 
     def validate(self, material: models.Material):
         """Run Material validations"""
-        self._validate_material_naming_annotations(material)
+        self._validate_material_annotations(material)
         self._validate_material_naming_start_node(material)
         self._validate_annotation_restrictions(material)
         self._validate_assay_restrictions(material.type)
         self._validate_ontology_term_refs(material)
         self._validate_factor_values(material.factor_values)
 
-    @staticmethod
-    def _validate_material_naming_annotations(material: models.Material):
+    def _validate_material_annotations(self, material: models.Material):
         # Warn about unnamed materials/data files if there are annotations
         def has_content(value):
             if is_ontology_term_ref(value):
@@ -102,16 +101,18 @@ class _MaterialValidator:
         if not material.name and any(
             (any_char, any_comm, any_fact, material.extract_label, material.material_type)
         ):
-            tpl = "Found annotated material/file without name: " "{}, {}, {}, {}, {}, {}, {}"
-            msg = tpl.format(
-                material.type,
-                material.unique_name,
-                material.extract_label,
-                material.characteristics,
-                material.comments,
-                material.factor_values,
-                material.material_type,
-            )
+            tpl = "Found annotated material/file without name: {}"
+            msg = tpl.format(material)
+            warnings.warn(msg, CriticalIsaValidationWarning)
+
+        # Warn about assay samples containing annotations, as they should be recorded in studies
+        if (
+            self._model_type == MODEL_TYPE_ASSAY
+            and material.type == table_headers.SAMPLE_NAME
+            and any((any_char, any_comm, any_fact, material.extract_label, material.material_type))
+        ):
+            tpl = "Found annotated Sample in assay (should be annotated in studies only): {}"
+            msg = tpl.format(material)
             warnings.warn(msg, CriticalIsaValidationWarning)
 
     def _validate_material_naming_start_node(self, material: models.Material):
@@ -151,7 +152,7 @@ class _MaterialValidator:
 
     def _validate_assay_restrictions(self, type_):
         # Restrict certain materials or file types to corresponding assay measurement and technology
-        if type_ in {
+        if self._model_type == MODEL_TYPE_ASSAY and type_ in {
             **table_restrictions.RESTRICTED_MATERIALS_AMEAS,
             **table_restrictions.RESTRICTED_MATERIALS_ATECH,
             **table_restrictions.RESTRICTED_FILES_AMEAS,
