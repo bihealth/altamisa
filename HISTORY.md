@@ -1,5 +1,9 @@
 # History
 
+## v0.2.3
+
+- Minor fixes and additions with focus on improving the export.
+
 ## v0.2.2
 
 - Updating documentation for JOSS.
