@@ -14,7 +14,6 @@ from altamisa.isatab import (
     StudyValidator,
     StudyWriter,
 )
-from .conftest import sort_file
 
 
 # Helper to load, write and compare studies
@@ -34,12 +33,7 @@ def _parse_write_assert(investigation_file, tmp_path, quote=None):
         path_out = tmp_path / study_info.info.path
         with open(path_out, "wt", newline="") as file:
             StudyWriter.from_stream(study, file, quote=quote).write()
-        # Sort and compare input and output
-        path_in_s = tmp_path / (study_info.info.path.name + ".in.sorted")
-        path_out_s = tmp_path / (study_info.info.path.name + ".out.sorted")
-        assert filecmp.cmp(
-            sort_file(path_in, path_in_s), sort_file(path_out, path_out_s), shallow=False
-        )
+        assert filecmp.cmp(path_in, path_out, shallow=False)
 
 
 def test_study_writer_minimal(minimal_investigation_file, tmp_path):

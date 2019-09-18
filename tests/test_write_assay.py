@@ -20,7 +20,6 @@ from altamisa.isatab import (
     AssayValidator,
     AssayWriter,
 )
-from .conftest import sort_file
 
 
 # Helper to load, write and compare assays
@@ -56,12 +55,7 @@ def _parse_write_assert_assay(investigation_file, tmp_path, quote=None, normaliz
                 path_out = tmp_path / (assay_info.path.name + "_b")
                 with open(path_out, "wt", newline="") as file:
                     AssayWriter.from_stream(assay, file, quote=quote).write()
-            # Sort and compare input and output
-            path_in_s = tmp_path / (assay_info.path.name + ".in.sorted")
-            path_out_s = tmp_path / (assay_info.path.name + ".out.sorted")
-            assert filecmp.cmp(
-                sort_file(path_in, path_in_s), sort_file(path_out, path_out_s), shallow=False
-            )
+            assert filecmp.cmp(path_in, path_out, shallow=False)
 
 
 def test_assay_writer_minimal_assay(minimal_investigation_file, tmp_path):
