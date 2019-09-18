@@ -6,15 +6,6 @@ import os.path
 import pytest
 
 
-# Helper function to sort rows in a file
-def sort_file(input_file, output_file):
-    with open(input_file, "rt") as f:
-        sorted_file = sorted(f)
-    with open(output_file, "wt") as f:
-        f.writelines(sorted_file)
-    return output_file
-
-
 @pytest.fixture
 def minimal_investigation_file():
     path = os.path.join(os.path.dirname(__file__), "data/i_minimal/i_minimal.txt")

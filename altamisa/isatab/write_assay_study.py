@@ -36,7 +36,7 @@ class _Digraph:
         #: Name to node mapping
         self.v_by_name = {v.unique_name: v for v in self.vertices}
         #: Arcs as tuple of tail and head
-        self.a_by_name = {(a[0], a[1]) for a in self.arcs}
+        self.a_by_name = {(a[0], a[1]): None for a in self.arcs}
         #: Names of starting nodes
         self.source_names = [
             v.unique_name for v in self.vertices if (hasattr(v, "type") and v.type == starting_type)
@@ -44,7 +44,7 @@ class _Digraph:
         #: Outgoing vertices/nodes
         self.outgoing = {}
 
-        for s_name, t_name in self.a_by_name:
+        for s_name, t_name in self.a_by_name.keys():
             self.outgoing.setdefault(s_name, []).append(t_name)
 
 
@@ -136,7 +136,16 @@ class _RefTableBuilder:
             self._dump_row(path)
 
     def _process_component(self, v_names):
-        sources = list(sorted(set(v_names) & set(self.digraph.source_names)))
+        # NB: The algorithm below looks a bit involved but it's the simplest way without an
+        # external library to get the intersection of two lists of strings in the same order as
+        # in the input file and still using hashing for lookup.
+        intersection = set(v_names) & set(self.digraph.source_names)
+        sources_set = set()
+        sources = []
+        for name in self.digraph.source_names:
+            if name in intersection and name not in sources_set:
+                sources_set.add(name)
+                sources.append(name)
 
         for source in sources:
             self._dfs(source, [source])

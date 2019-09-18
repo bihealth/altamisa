@@ -1,5 +1,12 @@
 # History
 
+## HEAD (unreleased)
+
+- Ensuring that input order is output order.
+  This is true except for the corner case where materials are not located in "blocks".
+  Such corner cases would require storing the tabular representation (and keeping it in sync) at all times and does not yield to a robustly usable implementation.
+  NB: the input is also not sorted the test adjusted with this patch shows.
+
 ## v0.2.3
 
 - Minor fixes and additions with focus on improving the export.
