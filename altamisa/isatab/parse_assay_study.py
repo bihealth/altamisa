@@ -762,14 +762,16 @@ class StudyReader:
     """
 
     @classmethod
-    def from_stream(klass, study_id: str, input_file: TextIO):
+    def from_stream(klass, study_id: str, input_file: TextIO, filename=None):
         """Construct from file-like object"""
-        return StudyReader(study_id, input_file)
+        return StudyReader(study_id, input_file, filename)
 
-    def __init__(self, study_id: str, input_file: TextIO):
+    def __init__(self, study_id: str, input_file: TextIO, filename=None):
         self.row_reader = StudyRowReader.from_stream(study_id, input_file)
         # The file used for reading from
         self.input_file = input_file
+        # A file name override
+        self._filename = filename or getattr(input_file, "name", "<no file>")
         # The header of the ISA study file
         self.header = self.row_reader.header
 
@@ -780,7 +782,7 @@ class StudyReader:
         :rtype: models.Study
         :returns: Study model including graph of material and process nodes
         """
-        study_data = _AssayAndStudyBuilder(self.input_file.name, self.header, models.Study).build(
+        study_data = _AssayAndStudyBuilder(self._filename, self.header, models.Study).build(
             list(self.row_reader.read())
         )
         return study_data
@@ -881,14 +883,15 @@ class AssayReader:
     """
 
     @classmethod
-    def from_stream(klass, study_id: str, assay_id: str, input_file: TextIO):
+    def from_stream(klass, study_id: str, assay_id: str, input_file: TextIO, filename=None):
         """Construct from file-like object"""
-        return AssayReader(study_id, assay_id, input_file)
+        return AssayReader(study_id, assay_id, input_file, filename)
 
-    def __init__(self, study_id: str, assay_id: str, input_file: TextIO):
+    def __init__(self, study_id: str, assay_id: str, input_file: TextIO, filename=None):
         self.row_reader = AssayRowReader.from_stream(study_id, assay_id, input_file)
         # The file used for reading from
         self.input_file = input_file
+        self._filename = filename or getattr(input_file, "name", None)
         # The header of the ISA assay file
         self.header = self.row_reader.header
 
@@ -899,7 +902,7 @@ class AssayReader:
         :rtype: models.Assay
         :returns: Assay model including graph of material and process nodes
         """
-        assay_data = _AssayAndStudyBuilder(self.input_file.name, self.header, models.Assay).build(
+        assay_data = _AssayAndStudyBuilder(self._filename, self.header, models.Assay).build(
             list(self.row_reader.read())
         )
         return assay_data

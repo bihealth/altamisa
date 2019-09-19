@@ -6,7 +6,8 @@
   This is true except for the corner case where materials are not located in "blocks".
   Such corner cases would require storing the tabular representation (and keeping it in sync) at all times and does not yield to a robustly usable implementation.
   NB: the input is also not sorted the test adjusted with this patch shows.
-- Exposing ``RefTableBuilder`` class with slightly changed interface.
+- Adding optional parameter `filename` to the various readers.
+- Exposing `RefTableBuilder` class with slightly changed interface.
 
 ## v0.2.3
 
