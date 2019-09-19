@@ -5,6 +5,7 @@
 
 from __future__ import generator_stop
 import csv
+import functools
 import os
 from typing import NamedTuple, TextIO
 
@@ -13,7 +14,7 @@ from ..constants.table_tokens import TOKEN_UNKNOWN
 from ..exceptions import WriteIsatabException
 from .headers import AssayHeaderParser, StudyHeaderParser
 from .helpers import is_ontology_term_ref
-from .models import Arc, Material, OntologyTermRef, Process
+from .models import Material, OntologyTermRef, Process
 
 
 __author__ = (
@@ -28,7 +29,7 @@ __author__ = (
 class _Digraph:
     """Simple class encapsulating directed graph with vertices and arcs"""
 
-    def __init__(self, vertices, arcs: Arc, starting_type: str):
+    def __init__(self, vertices, arcs, predicate_is_starting):
         #: Graph vertices/nodes (models.Material and models.Process)
         self.vertices = vertices
         #: Graph arcs/edges (models.Arc)
@@ -38,9 +39,7 @@ class _Digraph:
         #: Arcs as tuple of tail and head
         self.a_by_name = {(a[0], a[1]): None for a in self.arcs}
         #: Names of starting nodes
-        self.source_names = [
-            v.unique_name for v in self.vertices if (hasattr(v, "type") and v.type == starting_type)
-        ]
+        self.source_names = [v.unique_name for v in self.vertices if predicate_is_starting(v)]
         #: Outgoing vertices/nodes
         self.outgoing = {}
 
@@ -95,12 +94,17 @@ class _UnionFind:
         self._sz[i] += self._sz[j]
 
 
-class _RefTableBuilder:
+def _is_of_starting_type(starting_type, v):
+    """Predicate to select vertices based on starting type."""
+    return getattr(v, "type", None) == starting_type
+
+
+class RefTableBuilder:
     """Class for building reference table from a graph"""
 
-    def __init__(self, nodes, arcs, starting_type: str):
+    def __init__(self, nodes, arcs, predicate_is_starting):
         # Input directed graph
-        self.digraph = _Digraph(nodes, arcs, starting_type)
+        self.digraph = _Digraph(nodes, arcs, predicate_is_starting)
         #: Output table rows
         self._rows = []
 
@@ -409,8 +413,10 @@ class _WriterBase:
 
     def write(self):
         """Write study or assay file"""
-        self._ref_table = _RefTableBuilder(
-            self._nodes.values(), self._model.arcs, self._starting_type
+        self._ref_table = RefTableBuilder(
+            self._nodes.values(),
+            self._model.arcs,
+            functools.partial(_is_of_starting_type, self._starting_type),
         ).run()
         self._extract_headers()
         self._write_headers()
