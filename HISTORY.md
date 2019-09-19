@@ -1,6 +1,6 @@
 # History
 
-## HEAD (unreleased)
+## v0.2.4
 
 - Ensuring that input order is output order.
   This is true except for the corner case where materials are not located in "blocks".
