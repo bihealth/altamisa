@@ -111,12 +111,13 @@ class InvestigationReader:
     """
 
     @classmethod
-    def from_stream(self, input_file: TextIO):
+    def from_stream(self, input_file: TextIO, filename=None):
         """Construct from file-like object"""
-        return InvestigationReader(input_file)
+        return InvestigationReader(input_file, filename)
 
-    def __init__(self, input_file: TextIO):
+    def __init__(self, input_file: TextIO, filename=None):
         self._input_file = input_file
+        self._filename = filename or getattr(input_file, "name", "<no file>")
         self._reader = csv.reader(input_file, delimiter="\t", quotechar='"')
         self._line = None
         self._read_next_line()
@@ -271,7 +272,7 @@ class InvestigationReader:
         # TODO: do we really need the name of the investigation file?
         comments = _parse_comments(section, comment_keys)
         return models.BasicInfo(
-            Path(os.path.basename(self._input_file.name)),
+            Path(os.path.basename(getattr(self._input_file, "name", "<no file>"))),
             section[investigation_headers.INVESTIGATION_IDENTIFIER],
             section[investigation_headers.INVESTIGATION_TITLE],
             section[investigation_headers.INVESTIGATION_DESCRIPTION],
