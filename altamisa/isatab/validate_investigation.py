@@ -218,11 +218,11 @@ class InvestigationValidator:
                 self._ontology_validator.validate(factor.type)
 
     def _validate_assays(self, assays: Tuple[models.AssayInfo], study_id: str):
-        # Check if any assays exists
+        # Check if any assays exists (according to specs, having an assays is not mandatory)
         if not assays:
             tpl = "No assays declared in study '{}' of investigation '{}'"
             msg = tpl.format(study_id, self._investigation.info.path)
-            warnings.warn(msg, CriticalIsaValidationWarning)
+            warnings.warn(msg, AdvisoryIsaValidationWarning)
             return
         for assay in assays:
             # Validate availability of minimal assay information
