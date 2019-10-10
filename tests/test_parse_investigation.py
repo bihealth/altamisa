@@ -8,8 +8,9 @@ import pytest
 
 from altamisa.constants import investigation_headers
 from altamisa.exceptions import (
-    IsaWarning,
+    AdvisoryIsaValidationWarning,
     CriticalIsaValidationWarning,
+    IsaWarning,
     ModerateIsaValidationWarning,
 )
 from altamisa.isatab import models
@@ -898,7 +899,7 @@ def test_parse_assays_investigation(assays_investigation_file):
     # Check warnings
     assert 5 == len(record)
     msg = "No assays declared in study 's_assays' of investigation 'i_assays.txt'"
-    assert record[0].category == CriticalIsaValidationWarning
+    assert record[0].category == AdvisoryIsaValidationWarning
     assert str(record[0].message) == msg
     msg = "Study identifier used more than once: s_assays"
     assert record[1].category == CriticalIsaValidationWarning
