@@ -780,9 +780,9 @@ def test_assay_reader_gelelect(gelelect_investigation_file, gelelect_assay_file)
         )
     )
     assert 22 == len(assay.header)
-    assert 9 == len(assay.materials)
-    assert 10 == len(assay.processes)
-    assert 18 == len(assay.arcs)
+    assert 10 == len(assay.materials)
+    assert 11 == len(assay.processes)
+    assert 20 == len(assay.arcs)
 
     expected = models.Material(
         "Image File",

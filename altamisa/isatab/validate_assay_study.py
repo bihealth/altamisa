@@ -99,7 +99,13 @@ class _MaterialValidator:
         any_comm = any([comm.value for comm in material.comments])
         any_fact = any([fact.value for fact in material.factor_values])
         if not material.name and any(
-            (any_char, any_comm, any_fact, material.extract_label, material.material_type)
+            (
+                any_char,
+                any_comm,
+                any_fact,
+                has_content(material.extract_label),
+                has_content(material.material_type),
+            )
         ):
             tpl = "Found annotated material/file without name: {}"
             msg = tpl.format(material)
