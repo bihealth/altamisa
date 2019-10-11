@@ -1,5 +1,10 @@
 # History
 
+## v0.2.5
+
+- Minor fixes of validation and warnings.
+- Fixes optional parameter `filename` of `AssayReader`.
+
 ## v0.2.4
 
 - Ensuring that input order is output order.
