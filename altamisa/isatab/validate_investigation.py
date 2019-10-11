@@ -91,14 +91,21 @@ class InvestigationValidator:
         self._validate_sections()
 
     def _validate_ontology_sources(self):
-        # Check that ontology sources are complete
         for source in self._investigation.ontology_source_refs.values():
+            # Check that ontology sources are complete
             if not all((source.name, source.file, source.version, source.description)):
                 tpl = "Incomplete ontology source; found: {}, {}, {}, {}, {}"
                 msg = tpl.format(
                     source.name, source.file, source.version, source.description, source.comments
                 )
                 warnings.warn(msg, CriticalIsaValidationWarning)
+            # Check that ontology source names contain no whitespaces
+            if re.search("\\s", source.name):
+                tpl = "Ontology source name including whitespace(s); found: {}, {}, {}, {}, {}"
+                msg = tpl.format(
+                    source.name, source.file, source.version, source.description, source.comments
+                )
+                warnings.warn(msg, AdvisoryIsaValidationWarning)
 
     def _validate_sections(self):
         self._validate_investigation_info()

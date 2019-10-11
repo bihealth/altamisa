@@ -947,7 +947,7 @@ def test_parse_warnings_investigation(warnings_investigation_file):
     # Check warnings
     messages = [str(x.message) for x in record]
     print(messages)
-    assert 12 == len(record)
+    assert 15 == len(record)
     assert "Invalid mail address: invalid_mail" in messages
     assert "Invalid phone/fax number: CALL-ME" in messages
     assert "Invalid phone/fax number: FAX-ME" in messages
