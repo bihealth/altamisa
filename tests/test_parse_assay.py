@@ -2,8 +2,9 @@
 """Tests for parsing ISA assay files"""
 
 
-import pytest
+import io
 import os
+import pytest
 
 from altamisa.constants import table_headers
 from altamisa.exceptions import IsaWarning
@@ -855,3 +856,64 @@ def test_assay_reader_gelelect(gelelect_investigation_file, gelelect_assay_file)
         header_electrophoresis,
     )
     assert expected == assay.processes["S1-A1-electrophoresis-9-2"]
+
+
+def test_assay_reader_minimal_assay_iostring(minimal_investigation_file, minimal_assay_file):
+    # Load investigation (tested elsewhere)
+    stringio = io.StringIO(minimal_investigation_file.read())
+    investigation = InvestigationReader.from_stream(stringio).read()
+    with pytest.warns(IsaWarning) as record:
+        InvestigationValidator(investigation).validate()
+
+    # Check warnings
+    assert 2 == len(record)
+
+    stringio = io.StringIO(minimal_assay_file.read())
+
+    # Create new assay reader and read from StringIO with original filename indicated
+    reader = AssayReader.from_stream("S1", "A1", stringio, filename="data/i_minimal/a_minimal.txt")
+    assert 5 == len(reader.header)
+
+    # Read and validate assay
+    assay = reader.read()
+    AssayValidator(
+        investigation, investigation.studies[0], investigation.studies[0].assays[0], assay
+    ).validate()
+
+    # Check results
+    assert os.path.normpath(str(assay.file)).endswith(
+        os.path.normpath("data/i_minimal/a_minimal.txt")
+    )
+    assert 5 == len(assay.header)
+    assert 3 == len(assay.materials)
+    assert 1 == len(assay.processes)
+    assert 3 == len(assay.arcs)
+
+
+def test_assay_reader_minimal_assay_iostring2(minimal_investigation_file, minimal_assay_file):
+    # Load investigation (tested elsewhere)
+    stringio = io.StringIO(minimal_investigation_file.read())
+    investigation = InvestigationReader.from_stream(stringio).read()
+    with pytest.warns(IsaWarning) as record:
+        InvestigationValidator(investigation).validate()
+
+    # Check warnings
+    assert 2 == len(record)
+
+    # Create new assay reader and read from StringIO with no filename indicated
+    stringio = io.StringIO(minimal_assay_file.read())
+    reader = AssayReader.from_stream("S1", "A1", stringio)
+    assert 5 == len(reader.header)
+
+    # Read and validate assay
+    assay = reader.read()
+    AssayValidator(
+        investigation, investigation.studies[0], investigation.studies[0].assays[0], assay
+    ).validate()
+
+    # Check results
+    assert str(assay.file) == os.path.normpath("<no file>")
+    assert 5 == len(assay.header)
+    assert 3 == len(assay.materials)
+    assert 1 == len(assay.processes)
+    assert 3 == len(assay.arcs)

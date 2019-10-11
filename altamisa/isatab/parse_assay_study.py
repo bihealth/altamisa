@@ -891,7 +891,7 @@ class AssayReader:
         self.row_reader = AssayRowReader.from_stream(study_id, assay_id, input_file)
         # The file used for reading from
         self.input_file = input_file
-        self._filename = filename or getattr(input_file, "name", None)
+        self._filename = filename or getattr(input_file, "name", "<no file>")
         # The header of the ISA assay file
         self.header = self.row_reader.header
 

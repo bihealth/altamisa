@@ -3,6 +3,7 @@
 
 
 from datetime import date
+import io
 import os
 import pytest
 
@@ -538,3 +539,59 @@ def test_study_reader_small_study(small_investigation_file, small_study_file):
         models.Arc("S1-sample collection-9-5", "S1-Empty Sample Name-13-5"),
     )
     assert expected == study.arcs
+
+
+def test_study_reader_minimal_study_iostring(minimal_investigation_file, minimal_study_file):
+    # Load investigation (tested elsewhere)
+    stringio = io.StringIO(minimal_investigation_file.read())
+    investigation = InvestigationReader.from_stream(stringio).read()
+    with pytest.warns(IsaWarning) as record:
+        InvestigationValidator(investigation).validate()
+
+    # Check warnings
+    assert 2 == len(record)
+
+    # Create new study reader and read from StringIO with original filename indicated
+    stringio = io.StringIO(minimal_study_file.read())
+    reader = StudyReader.from_stream("S1", stringio, "data/i_minimal/s_minimal.txt")
+    assert 3 == len(reader.header)
+
+    # Read study
+    study = reader.read()
+    StudyValidator(investigation, investigation.studies[0], study).validate()
+
+    # Check results
+    assert os.path.normpath(str(study.file)).endswith(
+        os.path.normpath("data/i_minimal/s_minimal.txt")
+    )
+    assert 3 == len(study.header)
+    assert 2 == len(study.materials)
+    assert 1 == len(study.processes)
+    assert 2 == len(study.arcs)
+
+
+def test_study_reader_minimal_study_iostring2(minimal_investigation_file, minimal_study_file):
+    # Load investigation (tested elsewhere)
+    stringio = io.StringIO(minimal_investigation_file.read())
+    investigation = InvestigationReader.from_stream(stringio).read()
+    with pytest.warns(IsaWarning) as record:
+        InvestigationValidator(investigation).validate()
+
+    # Check warnings
+    assert 2 == len(record)
+
+    # Create new study reader and read from StringIO with no filename indicated
+    stringio = io.StringIO(minimal_study_file.read())
+    reader = StudyReader.from_stream("S1", stringio)
+    assert 3 == len(reader.header)
+
+    # Read study
+    study = reader.read()
+    StudyValidator(investigation, investigation.studies[0], study).validate()
+
+    # Check results
+    assert str(study.file) == "<no file>"
+    assert 3 == len(study.header)
+    assert 2 == len(study.materials)
+    assert 1 == len(study.processes)
+    assert 2 == len(study.arcs)
