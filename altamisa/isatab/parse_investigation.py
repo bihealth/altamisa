@@ -116,7 +116,6 @@ class InvestigationReader:
         return InvestigationReader(input_file, filename)
 
     def __init__(self, input_file: TextIO, filename=None):
-        self._input_file = input_file
         self._filename = filename or getattr(input_file, "name", "<no file>")
         self._reader = csv.reader(input_file, delimiter="\t", quotechar='"')
         self._line = None
@@ -272,7 +271,7 @@ class InvestigationReader:
         # TODO: do we really need the name of the investigation file?
         comments = _parse_comments(section, comment_keys)
         return models.BasicInfo(
-            Path(os.path.basename(getattr(self._input_file, "name", "<no file>"))),
+            Path(os.path.basename(self._filename)),
             section[investigation_headers.INVESTIGATION_IDENTIFIER],
             section[investigation_headers.INVESTIGATION_TITLE],
             section[investigation_headers.INVESTIGATION_DESCRIPTION],
