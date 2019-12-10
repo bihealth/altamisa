@@ -1,5 +1,9 @@
 # History
 
+## v0.2.6
+
+- Minor fixes regarding investigation file names and comments.
+
 ## v0.2.5
 
 - Minor fixes of validation and warnings.
