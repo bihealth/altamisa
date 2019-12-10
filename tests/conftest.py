@@ -239,6 +239,15 @@ def only_investigation_file():
         yield file
 
 
+@pytest.fixture
+def investigation_file_exception_comment_format():
+    path = os.path.join(
+        os.path.dirname(__file__), "data/test_exceptions/i_invest_comment_format.txt"
+    )
+    with open(path, "rt") as file:
+        yield file
+
+
 # File fixtures for testing warnings ---------------------------------------------------------------
 
 

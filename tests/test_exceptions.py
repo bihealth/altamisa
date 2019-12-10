@@ -5,7 +5,7 @@
 import pytest
 
 from altamisa.exceptions import ParseIsatabException
-from altamisa.isatab import AssayReader
+from altamisa.isatab import AssayReader, InvestigationReader
 
 
 # Test header exceptions ---------------------------------------------------------------------------
@@ -56,6 +56,13 @@ def test_header_exception_labeled_header_format(assay_file_exception_labeled_hea
     with pytest.raises(ParseIsatabException) as excinfo:
         AssayReader.from_stream("S1", "A1", assay_file_exception_labeled_header_format)
     msg = "Problem parsing labeled header CharacteristicsWithoutBrackets"
+    assert msg == str(excinfo.value)
+
+
+def test_header_exception_investigation_comment_format(investigation_file_exception_comment_format):
+    with pytest.raises(ParseIsatabException) as excinfo:
+        InvestigationReader.from_stream(investigation_file_exception_comment_format).read()
+    msg = 'Problem parsing comment header "Comment [Test]"'
     assert msg == str(excinfo.value)
 
 

@@ -1,0 +1,7 @@
+ONTOLOGY SOURCE REFERENCE
+Term Source Name	NCBITAXON
+Term Source File	http://data.bioontology.org/ontologies/NCBITAXON
+Term Source Version	2
+Term Source Description	National Center for Biotechnology Information (NCBI)
+Comment [Test]	1
+
