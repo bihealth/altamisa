@@ -22,10 +22,10 @@ __author__ = "Manuel Holtgrewe <manuel.holtgrewe@bihealth.de>"
 # Helper function to extract comment headers and values from a section dict
 def _parse_comments(section, comment_keys, i=None):
     def _parse_comment_header(val):
-        # key might start with "Comment[" or "Comment ["
-        tok = val[len("Comment") :].strip()
+        # key might start with "Comment[" but NOT "Comment ["
+        tok = val[len("Comment") :]
         if not tok or tok[0] != "[" or tok[-1] != "]":  # pragma: no cover
-            tpl = "Problem parsing comment header {}"
+            tpl = 'Problem parsing comment header "{}"'
             msg = tpl.format(val)
             raise ParseIsatabException(msg)
         return tok[1:-1]
@@ -36,6 +36,7 @@ def _parse_comments(section, comment_keys, i=None):
         )
     else:
         comments = tuple(models.Comment(_parse_comment_header(k), section[k]) for k in comment_keys)
+
     return comments
 
 
