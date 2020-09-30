@@ -66,6 +66,13 @@ def test_header_exception_investigation_comment_format(investigation_file_except
     assert msg == str(excinfo.value)
 
 
+def test_header_exception_duplicated_header(assay_file_exception_duplicated_header):
+    with pytest.raises(ParseIsatabException) as excinfo:
+        AssayReader.from_stream("S1", "A1", assay_file_exception_duplicated_header).read()
+    msg = "Found duplicated column types in header of study S1 assay A1: Characteristics[Organism]"
+    assert msg == str(excinfo.value)
+
+
 # Test assay and study parsing exceptions ----------------------------------------------------------
 
 

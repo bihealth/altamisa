@@ -13,7 +13,7 @@ from typing import List, TextIO
 from ..constants import table_tokens
 from ..constants import table_headers
 from ..exceptions import ParseIsatabException
-from .headers import ColumnHeader, StudyHeaderParser, AssayHeaderParser
+from .headers import ColumnHeader, StudyHeaderParser, AssayHeaderParser, LabeledColumnHeader
 from . import models
 
 
@@ -484,8 +484,41 @@ class _RowBuilderBase:
         """Construct the builder objects for the objects"""
         breaks = list(self._make_breaks())
         for start, end in zip(breaks, breaks[1:]):
+            self._intercept_duplicates(start, end)
             klass = self.node_builders[self.header[start].column_type]
             yield klass(self.header[start:end], self.study_id, self.assay_id)
+
+    def _intercept_duplicates(self, start, end):
+        """Check for duplicate primary annotations per node/builder
+
+        I.e. for duplicated Characteristics, Parameter Values, Comments, Factor Values, ...
+        """
+        column_types_to_check = [
+            table_headers.CHARACTERISTICS,
+            table_headers.COMMENT,
+            table_headers.FACTOR_VALUE,
+            table_headers.PARAMETER_VALUE,
+            table_headers.DATE,
+            table_headers.LABEL,
+            table_headers.MATERIAL_TYPE,
+            table_headers.PERFORMER,
+            table_headers.ARRAY_DESIGN_REF,
+            table_headers.FIRST_DIMENSION,
+            table_headers.SECOND_DIMENSION,
+        ]
+        header = [h for h in self.header[start:end] if h.column_type in column_types_to_check]
+        names = [
+            "{}[{}]".format(h.column_type, h.label)
+            if isinstance(h, LabeledColumnHeader)
+            else h.column_type
+            for h in header
+        ]
+        duplicates = set([c for c in names if names.count(c) > 1])
+        if duplicates:
+            assay = " assay {}".format(self.assay_id) if self.assay_id else ""
+            tpl = "Found duplicated column types in header of study {}{}: {}"
+            msg = tpl.format(self.study_id, assay, ", ".join(duplicates))
+            raise ParseIsatabException(msg)
 
     def _make_breaks(self):
         """Build indices to break the columns at
