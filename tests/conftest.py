@@ -186,6 +186,15 @@ def assay_file_exception_labeled_header_not_allowed():
 
 
 @pytest.fixture
+def assay_file_exception_duplicated_header():
+    path = os.path.join(
+        os.path.dirname(__file__), "data/test_exceptions/a_exception_duplicated_header.txt"
+    )
+    with open(path, "rt") as file:
+        yield file
+
+
+@pytest.fixture
 def assay_file_exception_simple_header_not_allowed():
     path = os.path.join(
         os.path.dirname(__file__), "data/test_exceptions/a_exception_simple_header_not_allowed.txt"
