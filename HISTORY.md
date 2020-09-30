@@ -1,5 +1,9 @@
 # History
 
+## v0.2.7
+
+- Adding exception for duplicate node annotations
+
 ## v0.2.6
 
 - Minor fixes regarding investigation file names and comments.
