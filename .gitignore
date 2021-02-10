@@ -1,6 +1,9 @@
 # Vim
 .*.sw?
 
+# Emacs
+*~
+
 # VS Code
 .vscode/
 
