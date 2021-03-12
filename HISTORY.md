@@ -1,5 +1,9 @@
 # History
 
+## v0.2.8
+
+- Mostly meta adjustments.
+
 ## v0.2.7
 
 - Adding exception for duplicate node annotations
