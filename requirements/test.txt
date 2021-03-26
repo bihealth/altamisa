@@ -7,10 +7,10 @@ tox ==2.9.1
 pytest >=3.6.0
 pytest-runner >=2.11.1
 pytest-cache >=1.0
-pytest-cov >=2.4.0
+pytest-cov
 
 # Coverage report
-coverage==4.5.1
+coverage
 codacy-coverage >=1.3.6
 
 # Flake8 for lintoing
