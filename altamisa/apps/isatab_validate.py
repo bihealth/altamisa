@@ -64,7 +64,9 @@ def run_warnings_caught(args):
             StudyValidator(investigation, study_info, studies[s]).validate()
         for a, assay_info in enumerate(study_info.assays):
             if assay_info.path:
-                AssayValidator(investigation, study_info, assay_info, assays[s][a]).validate()
+                AssayValidator(
+                    investigation, study_info, assay_info, assays[s][a], studies[s]
+                ).validate()
 
 
 def main(argv=None):

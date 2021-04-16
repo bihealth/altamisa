@@ -476,7 +476,6 @@ class StudyValidator(_AssayAndStudyValidator):
         study_info: models.StudyInfo,
         study: models.Study,
     ):
-
         self._study_info = study_info
         self._assay_info = None
         self._model = study
@@ -495,6 +494,8 @@ class AssayValidator(_AssayAndStudyValidator):
     :param assay_info: The corresponding assay information
     :type assay: models.Assay
     :param assay: The Assay model to validate
+    :type parent_study: models.Study
+    :param parent_study: Optional: The parent Study of the current Assay (for extended validation)
     """
 
     _model_type = MODEL_TYPE_ASSAY
@@ -505,8 +506,42 @@ class AssayValidator(_AssayAndStudyValidator):
         study_info: models.StudyInfo,
         assay_info: models.AssayInfo,
         assay: models.Assay,
+        parent_study: models.Study = None,
     ):
         self._study_info = study_info
         self._assay_info = assay_info
         self._model = assay
+        self._parent_study = parent_study
         super().__init__(investigation)
+
+    def validate(self):
+        """Validate the assay"""
+        # Independent validations
+        super().validate()
+        # Study-dependent validations
+        if self._parent_study:
+            self._validate_dependency()
+
+    def _validate_dependency(self):
+        """Validate if assay complies with parent study"""
+
+        # Check if all samples in the assays are declared in the parent study
+        # Collect materials of type "Sample Name"
+        study_samples = [
+            m.name
+            for m in self._parent_study.materials.values()
+            if m.type == table_headers.SAMPLE_NAME
+        ]
+        assay_samples = [
+            m.name for m in self._model.materials.values() if m.type == table_headers.SAMPLE_NAME
+        ]
+        # Collect and list assay samples missing in study
+        samples_not_in_study = [s for s in assay_samples if s not in study_samples]
+        if samples_not_in_study:
+            tpl = "Found samples in assay '{}' but not in parent study '{}':\\n{}"
+            msg = tpl.format(
+                self._assay_info.path.name,
+                self._study_info.info.path.name,
+                ", ".join(samples_not_in_study),
+            )
+            warnings.warn(msg, CriticalIsaValidationWarning)
