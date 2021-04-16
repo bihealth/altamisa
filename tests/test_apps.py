@@ -16,7 +16,7 @@ def test_isatab_validate():
     with pytest.warns(IsaWarning) as record:
         assert not isatab_validate.main(argv)
 
-    assert 15 == len(record)
+    assert 17 == len(record)
 
 
 def test_isatab2isatab(tmpdir):
