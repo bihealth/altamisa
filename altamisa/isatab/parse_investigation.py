@@ -132,6 +132,10 @@ class InvestigationReader:
                 self._line = list_strip(next(self._reader))
         except StopIteration:
             self._line = None
+        except UnicodeDecodeError as e:  # pragma: no cover
+            tpl = "Invalid encoding after line {} of investigation file '{}' (use Unicode/UTF-8)."
+            msg = tpl.format(self._reader.line_num, self._filename)
+            raise ParseIsatabException(msg) from e
         return prev_line
 
     def _next_line_startswith_comment(self):
