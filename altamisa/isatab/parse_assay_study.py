@@ -768,6 +768,10 @@ class StudyRowReader:
                 self.unique_rows.add("\t".join(self._line))
         except StopIteration:
             self._line = None
+        except UnicodeDecodeError as e:  # pragma: no cover
+            tpl = "Invalid encoding after line {} of study file '{}' (use Unicode/UTF-8)."
+            msg = tpl.format(self._reader.line_num, self.filename)
+            raise ParseIsatabException(msg) from e
         return prev_line
 
     def read(self):
@@ -888,6 +892,10 @@ class AssayRowReader:
                 self.unique_rows.add("\t".join(self._line))
         except StopIteration:
             self._line = None
+        except UnicodeDecodeError as e:  # pragma: no cover
+            tpl = "Invalid encoding after line {} of assay file '{}' (use Unicode/UTF-8)."
+            msg = tpl.format(self._reader.line_num, self.filename)
+            raise ParseIsatabException(msg) from e
         return prev_line
 
     def read(self):
