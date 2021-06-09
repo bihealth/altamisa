@@ -1,6 +1,6 @@
 -r test_black.txt
 
-pip==9.0.1
+pip==19.2
 wheel==0.30.0
 watchdog==0.8.3
 
