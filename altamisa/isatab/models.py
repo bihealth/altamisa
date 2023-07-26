@@ -318,7 +318,7 @@ class FactorValue:
     #: Factor name
     name: str
     #: Factor value
-    value: FreeTextOrTermRef
+    value: List[FreeTextOrTermRef]
     #: Factor value unit
     unit: FreeTextOrTermRef
 
