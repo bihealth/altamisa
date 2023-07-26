@@ -97,9 +97,7 @@ class _MaterialValidator:
             [any(has_content(v) for v in char.value) for char in material.characteristics]
         )
         any_comm = any([comm.value for comm in material.comments])
-        any_fact = any(
-            [any(has_content(v) for v in fact.value) for fact in material.factor_values]
-            )
+        any_fact = any([any(has_content(v) for v in fact.value) for fact in material.factor_values])
         if not material.name and any(
             (
                 any_char,

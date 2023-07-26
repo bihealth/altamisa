@@ -322,7 +322,8 @@ class _MaterialBuilder(_NodeBuilderBase):
             models.Comment(hdr.label, line[hdr.col_no]) for hdr in self.comment_headers
         )
         factor_values = tuple(
-            self._build_complex(hdr, line, models.FactorValue, allow_list=True) for hdr in self.factor_value_headers
+            self._build_complex(hdr, line, models.FactorValue, allow_list=True)
+            for hdr in self.factor_value_headers
         )
         material_type = self._build_freetext_or_term_ref(self.material_type_header, line)
         # Then, constructing ``Material`` is easy
