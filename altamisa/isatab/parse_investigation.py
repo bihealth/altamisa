@@ -56,7 +56,7 @@ def _split_study_protocols_parameters(
         tpl = "Repeated protocol parameter; found: {}"
         msg = tpl.format(names)
         raise ParseIsatabException(msg)
-    for (name, acc, src) in zip(names, name_term_accs, name_term_srcs):
+    for name, acc, src in zip(names, name_term_accs, name_term_srcs):
         if any((name, acc, src)):  # skips empty parameters
             yield models.OntologyTermRef(name, acc, src)
 
@@ -79,7 +79,7 @@ def _split_study_protocols_components(
         tpl = "Repeated protocol components; found: {}"
         msg = tpl.format(names)
         raise ParseIsatabException(msg)
-    for (name, ctype, acc, src) in zip(
+    for name, ctype, acc, src in zip(
         names, types, type_term_accs, type_term_srcs
     ):  # pragma: no cover
         if not name and any((ctype, acc, src)):

@@ -19,7 +19,7 @@ def test_header_exception_simple_header_not_allowed(assay_file_exception_simple_
 
 
 def test_header_exception_labeled_header_not_allowed(
-    assay_file_exception_labeled_header_not_allowed
+    assay_file_exception_labeled_header_not_allowed,
 ):
     with pytest.raises(ParseIsatabException) as excinfo:
         AssayReader.from_stream("S1", "A1", assay_file_exception_labeled_header_not_allowed)
@@ -35,7 +35,7 @@ def test_header_exception_unknown_header(assay_file_exception_unknown_header):
 
 
 def test_header_exception_term_source_ref_next_column(
-    assay_file_exception_term_source_ref_next_column
+    assay_file_exception_term_source_ref_next_column,
 ):
     with pytest.raises(ParseIsatabException) as excinfo:
         AssayReader.from_stream("S1", "A1", assay_file_exception_term_source_ref_next_column)
@@ -44,7 +44,7 @@ def test_header_exception_term_source_ref_next_column(
 
 
 def test_header_exception_term_source_ref_stop_iteration(
-    assay_file_exception_term_source_ref_stop_iteration
+    assay_file_exception_term_source_ref_stop_iteration,
 ):
     with pytest.raises(ParseIsatabException) as excinfo:
         AssayReader.from_stream("S1", "A1", assay_file_exception_term_source_ref_stop_iteration)

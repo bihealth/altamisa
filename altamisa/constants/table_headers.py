@@ -36,8 +36,8 @@ IMAGE_FILE = "Image File"  #:
 METABOLITE_ASSIGNMENT_FILE = "Metabolite Assignment File"  #:
 PEPTIDE_ASSIGNMENT_FILE = "Peptide Assignment File"  #:
 POST_TRANSLATIONAL_MODIFICATION_ASSIGNMENT_FILE = (
-    "Post Translational Modification Assignment File"
-)  #:
+    "Post Translational Modification Assignment File"  #:
+)
 PROTEIN_ASSIGNMENT_FILE = "Protein Assignment File"  #:
 RAW_DATA_FILE = "Raw Data File"  #:
 RAW_SPECTRAL_DATA_FILE = "Raw Spectral Data File"  #:
