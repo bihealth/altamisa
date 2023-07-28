@@ -423,7 +423,7 @@ def test_study_reader_small_study(small_investigation_file, small_study_file):
                     accession="http://purl.obolibrary.org/obo/VO_0000001",
                     ontology_name="OBI",
                 ),
-                models.OntologyTermRef("yes", None, None)
+                models.OntologyTermRef("yes", None, None),
             ],
             unit=None,
         ),
