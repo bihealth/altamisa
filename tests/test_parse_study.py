@@ -144,7 +144,7 @@ def test_study_row_reader_small_study(small_investigation_file, small_study_file
 
     # Create new row reader and check read headers (+ string representation)
     row_reader = StudyRowReader.from_stream("S1", small_study_file)
-    assert 13 == len(row_reader.header)
+    assert 14 == len(row_reader.header)
     rep0 = "ColumnHeader(column_type='Source Name', col_no=0, span=1)"
     rep1 = "LabeledColumnHeader(column_type='Characteristics', col_no=1, span=1, label='organism')"
     assert rep0 == repr(row_reader.header[0])
@@ -181,6 +181,8 @@ def test_study_row_reader_small_study(small_investigation_file, small_study_file
         table_headers.SAMPLE_NAME,
         table_headers.CHARACTERISTICS + "[status]",
         table_headers.FACTOR_VALUE + "[treatment]",
+        table_headers.TERM_SOURCE_REF,
+        table_headers.TERM_ACCESSION_NUMBER,
     ]
 
     unit = models.OntologyTermRef(
@@ -262,6 +264,22 @@ def test_study_row_reader_small_study(small_investigation_file, small_study_file
         headers_collection,
     )
     assert expected == second_row[1]
+
+    factor_treatment2 = (
+        models.FactorValue(
+            name="treatment",
+            value=[models.OntologyTermRef("yes", None, None)],
+            unit=None,
+        ),
+    )
+    factor_treatment3 = (
+        models.FactorValue(
+            name="treatment",
+            value=[models.OntologyTermRef(None, None, None)],
+            unit=None,
+        ),
+    )
+
     expected = models.Material(
         "Sample Name",
         "S1-sample-0815-N1",
@@ -269,7 +287,7 @@ def test_study_row_reader_small_study(small_investigation_file, small_study_file
         None,
         (models.Characteristics("status", ["0"], None),),
         (),
-        (models.FactorValue("treatment", ["yes"], None),),
+        factor_treatment2,
         None,
         headers_sample,
     )
@@ -310,7 +328,7 @@ def test_study_row_reader_small_study(small_investigation_file, small_study_file
         None,
         (models.Characteristics("status", ["2"], None),),
         (),
-        (models.FactorValue("treatment", [""], None),),
+        factor_treatment3,
         None,
         headers_sample,
     )
@@ -329,7 +347,7 @@ def test_study_reader_small_study(small_investigation_file, small_study_file):
 
     # Create new row reader and check read headers
     reader = StudyReader.from_stream("S1", small_study_file)
-    assert 13 == len(reader.header)
+    assert 14 == len(reader.header)
 
     # Read study
     study = reader.read()
@@ -337,7 +355,7 @@ def test_study_reader_small_study(small_investigation_file, small_study_file):
 
     # Check results
     assert os.path.normpath(str(study.file)).endswith(os.path.normpath("data/i_small/s_small.txt"))
-    assert 13 == len(study.header)
+    assert 14 == len(study.header)
     assert 9 == len(study.materials)
     assert 5 == len(study.processes)
     assert 10 == len(study.arcs)
@@ -362,6 +380,8 @@ def test_study_reader_small_study(small_investigation_file, small_study_file):
         table_headers.SAMPLE_NAME,
         table_headers.CHARACTERISTICS + "[status]",
         table_headers.FACTOR_VALUE + "[treatment]",
+        table_headers.TERM_SOURCE_REF,
+        table_headers.TERM_ACCESSION_NUMBER,
     ]
 
     unit = models.OntologyTermRef(
@@ -393,6 +413,34 @@ def test_study_reader_small_study(small_investigation_file, small_study_file):
             name="organism", value=[models.OntologyTermRef(None, None, None)], unit=None
         ),
         models.Characteristics(name="age", value=["150"], unit=unit),
+    )
+    factor_treatment1 = (
+        models.FactorValue(
+            name="treatment",
+            value=[
+                models.OntologyTermRef(
+                    name="vaccine",
+                    accession="http://purl.obolibrary.org/obo/VO_0000001",
+                    ontology_name="OBI",
+                ),
+                models.OntologyTermRef("yes", None, None)
+            ],
+            unit=None,
+        ),
+    )
+    factor_treatment2 = (
+        models.FactorValue(
+            name="treatment",
+            value=[models.OntologyTermRef("yes", None, None)],
+            unit=None,
+        ),
+    )
+    factor_treatment3 = (
+        models.FactorValue(
+            name="treatment",
+            value=[models.OntologyTermRef(None, None, None)],
+            unit=None,
+        ),
     )
 
     expected = models.Material(
@@ -433,12 +481,24 @@ def test_study_reader_small_study(small_investigation_file, small_study_file):
     assert expected == study.materials["S1-source-0817"]
     expected = models.Material(
         "Sample Name",
+        "S1-sample-0814-N1",
+        "0814-N1",
+        None,
+        (models.Characteristics("status", ["0"], None),),
+        (),
+        factor_treatment1,
+        None,
+        headers_sample,
+    )
+    assert expected == study.materials["S1-sample-0814-N1"]
+    expected = models.Material(
+        "Sample Name",
         "S1-sample-0815-N1",
         "0815-N1",
         None,
         (models.Characteristics("status", ["0"], None),),
         (),
-        (models.FactorValue("treatment", ["yes"], None),),
+        factor_treatment2,
         None,
         headers_sample,
     )
@@ -450,7 +510,7 @@ def test_study_reader_small_study(small_investigation_file, small_study_file):
         None,
         (models.Characteristics("status", ["2"], None),),
         (),
-        (models.FactorValue("treatment", [""], None),),
+        factor_treatment3,
         None,
         headers_sample,
     )
@@ -462,7 +522,7 @@ def test_study_reader_small_study(small_investigation_file, small_study_file):
         None,
         (models.Characteristics("status", ["1"], None),),
         (),
-        (models.FactorValue("treatment", ["yes"], None),),
+        factor_treatment2,
         None,
         headers_sample,
     )
@@ -474,7 +534,7 @@ def test_study_reader_small_study(small_investigation_file, small_study_file):
         None,
         (models.Characteristics("status", [""], None),),
         (),
-        (models.FactorValue("treatment", [""], None),),
+        factor_treatment3,
         None,
         headers_sample,
     )
