@@ -19,7 +19,6 @@ def print_dot(
     proc_shape="ellipse",
     proc_color="blue",
 ):
-
     print(indent + "/* materials */", file=outf)
     for name, mat in obj.materials.items():
         label = json.dumps("{}:\n{}\n({})".format(mat.type, mat.name if mat.name else "-", name))

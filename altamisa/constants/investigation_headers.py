@@ -68,11 +68,11 @@ INVESTIGATION_PUBLICATION_AUTHOR_LIST = "Investigation Publication Author List" 
 INVESTIGATION_PUBLICATION_TITLE = "Investigation Publication Title"  #:
 INVESTIGATION_PUBLICATION_STATUS = "Investigation Publication Status"  #:
 INVESTIGATION_PUBLICATION_STATUS_TERM_ACCESSION_NUMBER = (
-    "Investigation Publication Status Term Accession Number"
-)  #:
+    "Investigation Publication Status Term Accession Number"  #:
+)
 INVESTIGATION_PUBLICATION_STATUS_TERM_SOURCE_REF = (
-    "Investigation Publication Status Term Source REF"
-)  #:
+    "Investigation Publication Status Term Source REF"  #:
+)
 #: Collected header keys of INVESTIGATION PUBLICATIONS
 INVESTIGATION_PUBLICATIONS_KEYS = (
     INVESTIGATION_PUBMED_ID,
@@ -96,8 +96,8 @@ INVESTIGATION_PERSON_ADDRESS = "Investigation Person Address"  #:
 INVESTIGATION_PERSON_AFFILIATION = "Investigation Person Affiliation"  #:
 INVESTIGATION_PERSON_ROLES = "Investigation Person Roles"  #:
 INVESTIGATION_PERSON_ROLES_TERM_ACCESSION_NUMBER = (
-    "Investigation Person Roles Term Accession Number"
-)  #:
+    "Investigation Person Roles Term Accession Number"  #:
+)
 INVESTIGATION_PERSON_ROLES_TERM_SOURCE_REF = "Investigation Person Roles Term Source REF"  #:
 #: Collected header keys of INVESTIGATION CONTACTS section
 INVESTIGATION_CONTACTS_KEYS = (
@@ -152,8 +152,8 @@ STUDY_PUBLICATION_AUTHOR_LIST = "Study Publication Author List"  #:
 STUDY_PUBLICATION_TITLE = "Study Publication Title"  #:
 STUDY_PUBLICATION_STATUS = "Study Publication Status"  #:
 STUDY_PUBLICATION_STATUS_TERM_ACCESSION_NUMBER = (
-    "Study Publication Status Term Accession Number"
-)  #:
+    "Study Publication Status Term Accession Number"  #:
+)
 STUDY_PUBLICATION_STATUS_TERM_SOURCE_REF = "Study Publication Status Term Source REF"  #:
 #: Collected header keys of STUDY PUBLICATIONS section
 STUDY_PUBLICATIONS_KEYS = (
@@ -185,13 +185,13 @@ STUDY_FACTORS_KEYS = (
 STUDY_ASSAY_FILE_NAME = "Study Assay File Name"  #:
 STUDY_ASSAY_MEASUREMENT_TYPE = "Study Assay Measurement Type"  #:
 STUDY_ASSAY_MEASUREMENT_TYPE_TERM_ACCESSION_NUMBER = (
-    "Study Assay Measurement Type Term Accession Number"
-)  #:
+    "Study Assay Measurement Type Term Accession Number"  #:
+)
 STUDY_ASSAY_MEASUREMENT_TYPE_TERM_SOURCE_REF = "Study Assay Measurement Type Term Source REF"  #:
 STUDY_ASSAY_TECHNOLOGY_TYPE = "Study Assay Technology Type"  #:
 STUDY_ASSAY_TECHNOLOGY_TYPE_TERM_ACCESSION_NUMBER = (
-    "Study Assay Technology Type Term Accession Number"
-)  #:
+    "Study Assay Technology Type Term Accession Number"  #:
+)
 STUDY_ASSAY_TECHNOLOGY_TYPE_TERM_SOURCE_REF = "Study Assay Technology Type Term Source REF"  #:
 STUDY_ASSAY_TECHNOLOGY_PLATFORM = "Study Assay Technology Platform"  #:
 #: Collected header keys of STUDY ASSAYS section
@@ -217,19 +217,19 @@ STUDY_PROTOCOL_URI = "Study Protocol URI"  #:
 STUDY_PROTOCOL_VERSION = "Study Protocol Version"  #:
 STUDY_PROTOCOL_PARAMETERS_NAME = "Study Protocol Parameters Name"  #:
 STUDY_PROTOCOL_PARAMETERS_NAME_TERM_ACCESSION_NUMBER = (
-    "Study Protocol Parameters Name Term Accession Number"
-)  #:
+    "Study Protocol Parameters Name Term Accession Number"  #:
+)
 STUDY_PROTOCOL_PARAMETERS_NAME_TERM_SOURCE_REF = (
-    "Study Protocol Parameters Name Term Source REF"
-)  #:
+    "Study Protocol Parameters Name Term Source REF"  #:
+)
 STUDY_PROTOCOL_COMPONENTS_NAME = "Study Protocol Components Name"  #:
 STUDY_PROTOCOL_COMPONENTS_TYPE = "Study Protocol Components Type"  #:
 STUDY_PROTOCOL_COMPONENTS_TYPE_TERM_ACCESSION_NUMBER = (
-    "Study Protocol Components Type Term Accession Number"
-)  #:
+    "Study Protocol Components Type Term Accession Number"  #:
+)
 STUDY_PROTOCOL_COMPONENTS_TYPE_TERM_SOURCE_REF = (
-    "Study Protocol Components Type Term Source REF"
-)  #:
+    "Study Protocol Components Type Term Source REF"  #:
+)
 #: Collected header keys of STUDY PROTOCOLS section
 STUDY_PROTOCOLS_KEYS = (
     STUDY_PROTOCOL_NAME,
