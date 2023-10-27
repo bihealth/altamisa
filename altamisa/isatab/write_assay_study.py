@@ -167,8 +167,7 @@ class RefTableBuilder:
 
 
 class _WriterBase:
-    """Base class that writes a file from an ``Study`` or ``Assay`` object.
-    """
+    """Base class that writes a file from an ``Study`` or ``Assay`` object."""
 
     #: Note type starting a graph
     _starting_type = None
