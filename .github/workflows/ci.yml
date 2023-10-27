@@ -43,7 +43,6 @@ jobs:
           coverage-reports: coverage.xml
         if: ${{ matrix.python-version == '3.7' }}
       - name: Check style with black
-        run: black --check --line-length 100 .
-        if: ${{ matrix.python-version < '3.9' }}
+        run: make black-check
       - name: Check style with flake8
         run: flake8 .
