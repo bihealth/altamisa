@@ -63,8 +63,7 @@ def small_assay_file():
 
 @pytest.fixture
 def full_investigation_file():
-    """This file contains values for each normal investigation section and key.
-    """
+    """This file contains values for each normal investigation section and key."""
     path = os.path.join(os.path.dirname(__file__), "data/i_fullinvest/i_fullinvest.txt")
     with open(path, "rt") as file:
         yield file
@@ -72,8 +71,7 @@ def full_investigation_file():
 
 @pytest.fixture
 def full2_investigation_file():
-    """This file contains values for each normal investigation section and key.
-    """
+    """This file contains values for each normal investigation section and key."""
     path = os.path.join(os.path.dirname(__file__), "data/i_fullinvest2/i_fullinvest2.txt")
     with open(path, "rt") as file:
         yield file
@@ -81,8 +79,7 @@ def full2_investigation_file():
 
 @pytest.fixture
 def comment_investigation_file():
-    """This file contains comments for each investigation section.
-    """
+    """This file contains comments for each investigation section."""
     path = os.path.join(os.path.dirname(__file__), "data/i_comments/i_comments.txt")
     with open(path, "rt") as file:
         yield file
@@ -124,8 +121,7 @@ def small2_study_file():
 
 @pytest.fixture
 def small2_assay_file():
-    """This file contains splitting and pooling examples.
-    """
+    """This file contains splitting and pooling examples."""
     path = os.path.join(os.path.dirname(__file__), "data/i_small2/a_small2.txt")
     with open(path, "rt") as file:
         yield file
@@ -140,8 +136,7 @@ def gelelect_investigation_file():
 
 @pytest.fixture
 def gelelect_assay_file():
-    """This file contains special cases for gel electrophoresis assays.
-    """
+    """This file contains special cases for gel electrophoresis assays."""
     path = os.path.join(
         os.path.dirname(__file__),
         "data/test_gelelect/a_study01_protein_expression_profiling_gel_electrophoresis.txt",

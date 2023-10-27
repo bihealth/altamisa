@@ -93,8 +93,7 @@ class Comment:
 
 @attr.s(auto_attribs=True, frozen=True)
 class OntologyRef:
-    """Description of an ontology term source, as used for investigation file.
-    """
+    """Description of an ontology term source, as used for investigation file."""
 
     #: The name of the ontology (e.g., ``CEBI``)
     name: str
@@ -112,8 +111,7 @@ class OntologyRef:
 
 @attr.s(auto_attribs=True, frozen=True)
 class BasicInfo:
-    """Basic metadata for an investigation or study (``INVESTIGATION`` or ``STUDY``).
-    """
+    """Basic metadata for an investigation or study (``INVESTIGATION`` or ``STUDY``)."""
 
     #: Path to the investigation or study file
     path: Path
@@ -135,8 +133,7 @@ class BasicInfo:
 
 @attr.s(auto_attribs=True, frozen=True)
 class PublicationInfo:
-    """Information regarding an investigation publication (``INVESTIGATION PUBLICATIONS``).
-    """
+    """Information regarding an investigation publication (``INVESTIGATION PUBLICATIONS``)."""
 
     #: Publication PubMed ID
     pubmed_id: str
