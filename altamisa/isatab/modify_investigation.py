@@ -44,7 +44,7 @@ class InvestigationForge(InvestigationReader):
                             )
         return x
 
-    def add_assay(self, input_path: str) -> models.InvestigationInfo:
+    def add_assay(self, input_path: str):
         """
         Add assay to investigation file.
 
@@ -72,8 +72,6 @@ class InvestigationForge(InvestigationReader):
         assays = self.investigation.studies[0].assays
         assays += investigation2.studies[0].assays
 
-        new_study = attr.evolve(
-            self.investigation.studies[0], protocols=protocols, assays=assays
-        )
+        new_study = attr.evolve(self.investigation.studies[0], protocols=protocols, assays=assays)
         modified_inv = attr.evolve(self.investigation, studies=(new_study,))
         return modified_inv
