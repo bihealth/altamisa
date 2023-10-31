@@ -113,6 +113,14 @@ def small2_investigation_file():
 
 
 @pytest.fixture
+def small2o_investigation_file():
+    """This file contains an ontology reference for one of the protocol parameters."""
+    path = os.path.join(os.path.dirname(__file__), "data/i_small2/i_small2_o.txt")
+    with open(path, "rt") as file:
+        yield file
+
+
+@pytest.fixture
 def small2_study_file():
     path = os.path.join(os.path.dirname(__file__), "data/i_small2/s_small2.txt")
     with open(path, "rt") as file:

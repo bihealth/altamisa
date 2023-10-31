@@ -9,7 +9,12 @@ def test_forge(assays_investigation_file):
         InvestigationForge(assays_investigation_file.name)
 
 
-def test_add_assay(small_investigation_file, small2_investigation_file, assays_investigation_file):
+def test_add_assay(
+    small_investigation_file,
+    small2_investigation_file,
+    assays_investigation_file,
+    small2o_investigation_file,
+):
     forge = InvestigationForge(small_investigation_file.name)
     forge.add_assay(small2_investigation_file.name)
     output = forge.investigation
@@ -19,3 +24,7 @@ def test_add_assay(small_investigation_file, small2_investigation_file, assays_i
     # multiple studies
     with pytest.raises(IndexError):
         forge.add_assay(assays_investigation_file.name)
+
+    # ontology reference mismatch
+    with pytest.raises(ValueError):
+        forge.add_assay(small2o_investigation_file.name)
