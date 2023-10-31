@@ -9,11 +9,11 @@ class InvestigationForge:
     """
     Provides methods to add assays to an existing investigation.
 
-    :type input_path: str
+    :type input_path: str | Path
     :param input_path: Location of investigation to modify.
     """
 
-    def __init__(self, input_path: str):
+    def __init__(self, input_path: str | Path):
         i_file = Path(input_path).expanduser().resolve()
 
         with i_file.open("rt") as f:
@@ -49,11 +49,11 @@ class InvestigationForge:
                             )
         return x
 
-    def add_assay(self, input_path: str):
+    def add_assay(self, input_path: str | Path):
         """
         Add assay to investigation file.
 
-        :type input_path: str
+        :type input_path: str | Path
         :param input_path: Location of investigation to modify.
         :rtype: models.InvestigationInfo
         :returns: Investigation model including all information from the investigation file.
