@@ -16,3 +16,4 @@ from .validate_assay_study import AssayValidator, StudyValidator  # noqa: F401
 from .validate_investigation import InvestigationValidator  # noqa: F401
 from .write_assay_study import AssayWriter, StudyWriter, RefTableBuilder  # noqa: F401
 from .write_investigation import InvestigationWriter  # noqa: F401
+from .modify_investigation import InvestigationForge  # noqa: F401

@@ -5,7 +5,7 @@ import attr
 from altamisa.isatab import InvestigationReader
 
 
-class InvestigationForge(InvestigationReader):
+class InvestigationForge():
     """
     Provides methods to add assays to an existing investigation.
 
@@ -15,6 +15,7 @@ class InvestigationForge(InvestigationReader):
 
     def __init__(self, input_path: str):
         i_file = Path(input_path).expanduser().resolve()
+
         with i_file.open("rt") as f:
             self.investigation = InvestigationReader.from_stream(f).read()
 
@@ -73,5 +74,4 @@ class InvestigationForge(InvestigationReader):
         assays += investigation2.studies[0].assays
 
         new_study = attr.evolve(self.investigation.studies[0], protocols=protocols, assays=assays)
-        modified_inv = attr.evolve(self.investigation, studies=(new_study,))
-        return modified_inv
+        self.investigation = attr.evolve(self.investigation, studies=(new_study,))
