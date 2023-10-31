@@ -5,7 +5,7 @@ import attr
 from altamisa.isatab import InvestigationReader
 
 
-class InvestigationForge():
+class InvestigationForge:
     """
     Provides methods to add assays to an existing investigation.
 
