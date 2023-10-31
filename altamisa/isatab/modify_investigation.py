@@ -19,6 +19,10 @@ class InvestigationForge():
         with i_file.open("rt") as f:
             self.investigation = InvestigationReader.from_stream(f).read()
 
+        if len(self.investigation.studies) != 1:
+            # TODO: add support for multiple studies
+            raise IndexError("Only single study investigations are supported.")
+
     @staticmethod
     def _join_protocols(x: dict, y: dict) -> dict:
         """
@@ -58,7 +62,7 @@ class InvestigationForge():
         with i_file.open("rt") as f:
             investigation2 = InvestigationReader.from_stream(f).read()
 
-        if len(self.investigation.studies) != 1 or len(investigation2.studies) != 1:
+        if len(investigation2.studies) != 1:
             # TODO: add support for multiple studies
             raise IndexError("Only single study investigations are supported.")
 
