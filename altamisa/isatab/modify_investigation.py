@@ -1,4 +1,5 @@
 from pathlib import Path
+from typing import Union
 
 import attr
 
@@ -13,7 +14,7 @@ class InvestigationForge:
     :param input_path: Location of investigation to modify.
     """
 
-    def __init__(self, input_path: str | Path):
+    def __init__(self, input_path: Union[str, Path]):
         i_file = Path(input_path).expanduser().resolve()
 
         with i_file.open("rt") as f:
@@ -49,7 +50,7 @@ class InvestigationForge:
                             )
         return x
 
-    def add_assay(self, input_path: str | Path):
+    def add_assay(self, input_path: Union[str, Path]):
         """
         Add assay to investigation file.
 
