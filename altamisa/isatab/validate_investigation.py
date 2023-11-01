@@ -21,7 +21,7 @@ from . import models
 from .validate_assay_study import _OntologyTermRefValidator
 
 
-__author__ = "Mathias Kuhring <mathias.kuhring@bihealth.de>"
+__author__ = "Mathias Kuhring <mathias.kuhring@bih-charite.de>"
 
 
 # Pattern and helper functions for validation ------------------------------------------------------

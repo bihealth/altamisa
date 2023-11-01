@@ -10,7 +10,7 @@ import warnings
 from ..exceptions import ParseIsatabWarning
 
 
-__author__ = "Mathias Kuhring <mathias.kuhring@bihealth.de>"
+__author__ = "Mathias Kuhring <mathias.kuhring@bih-charite.de>"
 
 
 def is_ontology_term_ref(v):

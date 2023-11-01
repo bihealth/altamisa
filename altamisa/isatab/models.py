@@ -13,7 +13,7 @@ from typing import Dict, List, Tuple, Union
 import attr
 
 
-__author__ = "Manuel Holtgrewe <manuel.holtgrewe@bihealth.de>"
+__author__ = "Manuel Holtgrewe <manuel.holtgrewe@bih-charite.de>"
 
 
 # Base types, used throughout -------------------------------------------------

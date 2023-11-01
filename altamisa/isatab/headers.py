@@ -10,7 +10,7 @@ from ..constants import table_headers
 from ..exceptions import ParseIsatabException
 
 
-__author__ = "Manuel Holtgrewe <manuel.holtgrewe@bihealth.de>"
+__author__ = "Manuel Holtgrewe <manuel.holtgrewe@bih-charite.de>"
 
 
 class ColumnHeader:

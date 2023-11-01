@@ -35,8 +35,8 @@ install_requirements = parse_requirements("requirements/base.txt")
 setup(
     author="Dieter Beule, Jennifer Kirwan, Mathias Kuhring, Manuel Holtgrewe, Mikko Nieminen",
     author_email=(
-        "dieter.beule@bihealth.de, jennifer.kirwan@bihalth.de, mathias.kuhring@bihealth.de, "
-        "manuel.holtgrewe@bihealth.de, mikko.nieminen@bihealth.de"
+        "dieter.beule@bih-charite.de, jennifer.kirwan@bihalth.de, mathias.kuhring@bih-charite.de, "
+        "manuel.holtgrewe@bih-charite.de, mikko.nieminen@bih-charite.de"
     ),
     classifiers=[
         "Development Status :: 4 - Beta",

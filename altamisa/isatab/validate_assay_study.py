@@ -16,7 +16,7 @@ from .helpers import is_ontology_term_ref
 from . import models
 
 
-__author__ = "Mathias Kuhring <mathias.kuhring@bihealth.de>"
+__author__ = "Mathias Kuhring <mathias.kuhring@bih-charite.de>"
 
 
 # Constants to differentiate models when validating materials, processes or arcs

@@ -3,8 +3,8 @@
 
 
 __author__ = (
-    "Manuel Holtgrewe <manuel.holtgrewe@bihealth.de>, "
-    "Mathias Kuhring <mathias.kuhring@bihealth.de>"
+    "Manuel Holtgrewe <manuel.holtgrewe@bih-charite.de>, "
+    "Mathias Kuhring <mathias.kuhring@bih-charite.de>"
 )
 
 
