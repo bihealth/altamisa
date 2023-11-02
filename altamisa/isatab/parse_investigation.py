@@ -233,7 +233,9 @@ class InvestigationReader:
     def _read_ontology_source_reference(self) -> Iterator[models.OntologyRef]:
         # Read ONTOLOGY SOURCE REFERENCE header
         line = self._read_next_line()
-        if not line[0] == investigation_headers.ONTOLOGY_SOURCE_REFERENCE:  # pragma: no cover
+        if (
+            line is None or not line[0] == investigation_headers.ONTOLOGY_SOURCE_REFERENCE
+        ):  # pragma: no cover
             tpl = "Expected {} but got {}"
             msg = tpl.format(investigation_headers.ONTOLOGY_SOURCE_REFERENCE, line)
             raise ParseIsatabException(msg)
@@ -259,7 +261,7 @@ class InvestigationReader:
     def _read_basic_info(self) -> models.BasicInfo:
         # Read INVESTIGATION header
         line = self._read_next_line()
-        if not line[0] == investigation_headers.INVESTIGATION:  # pragma: no cover
+        if line is None or not line[0] == investigation_headers.INVESTIGATION:  # pragma: no cover
             tpl = "Expected {} but got {}"
             msg = tpl.format(investigation_headers.INVESTIGATION, line)
             raise ParseIsatabException(msg)
@@ -286,7 +288,9 @@ class InvestigationReader:
     def _read_publications(self) -> Iterator[models.PublicationInfo]:
         # Read INVESTIGATION PUBLICATIONS header
         line = self._read_next_line()
-        if not line[0] == investigation_headers.INVESTIGATION_PUBLICATIONS:  # pragma: no cover
+        if (
+            line is None or not line[0] == investigation_headers.INVESTIGATION_PUBLICATIONS
+        ):  # pragma: no cover
             tpl = "Expected {} but got {}"
             msg = tpl.format(investigation_headers.INVESTIGATION_PUBLICATIONS, line)
             raise ParseIsatabException(msg)
@@ -311,7 +315,9 @@ class InvestigationReader:
     def _read_contacts(self) -> Iterator[models.ContactInfo]:
         # Read INVESTIGATION CONTACTS header
         line = self._read_next_line()
-        if not line[0] == investigation_headers.INVESTIGATION_CONTACTS:  # pragma: no cover
+        if (
+            line is None or not line[0] == investigation_headers.INVESTIGATION_CONTACTS
+        ):  # pragma: no cover
             tpl = "Expected {} but got {}"
             msg = tpl.format(investigation_headers.INVESTIGATION_CONTACTS, line)
             raise ParseIsatabException(msg)
@@ -359,7 +365,7 @@ class InvestigationReader:
         while self._line:
             # Read STUDY header
             line = self._read_next_line()
-            if not line[0] == investigation_headers.STUDY:  # pragma: no cover
+            if line is None or not line[0] == investigation_headers.STUDY:  # pragma: no cover
                 tpl = "Expected {} but got {}"
                 msg = tpl.format(investigation_headers.INVESTIGATION, line)
                 raise ParseIsatabException(msg)
@@ -399,7 +405,9 @@ class InvestigationReader:
     def _read_study_design_descriptors(self) -> Iterator[models.FreeTextOrTermRef]:
         # Read STUDY DESIGN DESCRIPTORS header
         line = self._read_next_line()
-        if not line[0] == investigation_headers.STUDY_DESIGN_DESCRIPTORS:  # pragma: no cover
+        if (
+            line is None or not line[0] == investigation_headers.STUDY_DESIGN_DESCRIPTORS
+        ):  # pragma: no cover
             tpl = "Expected {} but got {}"
             msg = tpl.format(investigation_headers.STUDY_DESIGN_DESCRIPTORS, line)
             raise ParseIsatabException(msg)
@@ -419,7 +427,9 @@ class InvestigationReader:
     def _read_study_publications(self) -> Iterator[models.PublicationInfo]:
         # Read STUDY PUBLICATIONS header
         line = self._read_next_line()
-        if not line[0] == investigation_headers.STUDY_PUBLICATIONS:  # pragma: no cover
+        if (
+            line is None or not line[0] == investigation_headers.STUDY_PUBLICATIONS
+        ):  # pragma: no cover
             tpl = "Expected {} but got {}"
             msg = tpl.format(investigation_headers.STUDY_PUBLICATIONS, line)
             raise ParseIsatabException(msg)
@@ -444,7 +454,7 @@ class InvestigationReader:
     def _read_study_factors(self) -> Iterator[models.FactorInfo]:
         # Read STUDY FACTORS header
         line = self._read_next_line()
-        if not line[0] == investigation_headers.STUDY_FACTORS:  # pragma: no cover
+        if line is None or not line[0] == investigation_headers.STUDY_FACTORS:  # pragma: no cover
             tpl = "Expected {} but got {}"
             msg = tpl.format(investigation_headers.STUDY_FACTORS, line)
             raise ParseIsatabException(msg)
@@ -464,7 +474,7 @@ class InvestigationReader:
     def _read_study_assays(self) -> Iterator[models.AssayInfo]:
         # Read STUDY ASSAYS header
         line = self._read_next_line()
-        if not line[0] == investigation_headers.STUDY_ASSAYS:  # pragma: no cover
+        if line is None or not line[0] == investigation_headers.STUDY_ASSAYS:  # pragma: no cover
             tpl = "Expected {} but got {}"
             msg = tpl.format(investigation_headers.STUDY_ASSAYS, line)
             raise ParseIsatabException(msg)
@@ -517,7 +527,7 @@ class InvestigationReader:
     def _read_study_protocols(self) -> Iterator[models.ProtocolInfo]:
         # Read STUDY PROTOCOLS header
         line = self._read_next_line()
-        if not line[0] == investigation_headers.STUDY_PROTOCOLS:  # pragma: no cover
+        if line is None or not line[0] == investigation_headers.STUDY_PROTOCOLS:  # pragma: no cover
             tpl = "Expected {} but got {}"
             msg = tpl.format(investigation_headers.STUDY_PROTOCOLS, line)
             raise ParseIsatabException(msg)
@@ -581,7 +591,7 @@ class InvestigationReader:
     def _read_study_contacts(self) -> Iterator[models.ContactInfo]:
         # Read STUDY CONTACTS header
         line = self._read_next_line()
-        if not line[0] == investigation_headers.STUDY_CONTACTS:  # pragma: no cover
+        if line is None or not line[0] == investigation_headers.STUDY_CONTACTS:  # pragma: no cover
             tpl = "Expected {} but got {}"
             msg = tpl.format(investigation_headers.STUDY_CONTACTS, line)
             raise ParseIsatabException(msg)
