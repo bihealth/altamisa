@@ -133,8 +133,7 @@ class InvestigationReader:
         except StopIteration:
             self._line = None
         except UnicodeDecodeError as e:  # pragma: no cover
-            tpl = "Invalid encoding after line {} of investigation file '{}' (use Unicode/UTF-8)."
-            msg = tpl.format(self._reader.line_num, self._filename)
+            msg = f"Invalid encoding of investigation file '{self._filename}' (use Unicode/UTF-8)."
             raise ParseIsatabException(msg) from e
         return prev_line
 
