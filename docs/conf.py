@@ -54,9 +54,9 @@ source_suffix = ".rst"
 master_doc = "index"
 
 # General information about the project.
-project = u"AltamISA"
-copyright = u"2018-2019, Berlin Institute of Health"
-author = u"Mathias Kuhring, Manuel Holtgrewe"
+project = "AltamISA"
+copyright = "2018-2019, Berlin Institute of Health"
+author = "Mathias Kuhring, Manuel Holtgrewe"
 
 # The version info for the project you're documenting, acts as replacement
 # for |version| and |release|, also used in various other places throughout
@@ -132,7 +132,7 @@ latex_elements = {
 # (source start file, target name, title, author, documentclass
 # [howto, manual, or own class]).
 latex_documents = [
-    (master_doc, "altamisa.tex", u"AltamISA Documentation", u"Core Unit Bioinformatics", "manual")
+    (master_doc, "altamisa.tex", "AltamISA Documentation", "Core Unit Bioinformatics", "manual")
 ]
 
 
@@ -140,7 +140,7 @@ latex_documents = [
 
 # One entry per manual page. List of tuples
 # (source start file, name, description, authors, manual section).
-man_pages = [(master_doc, "altamisa", u"AltamISA Documentation", [author], 1)]
+man_pages = [(master_doc, "altamisa", "AltamISA Documentation", [author], 1)]
 
 
 # -- Options for Texinfo output ----------------------------------------
@@ -152,7 +152,7 @@ texinfo_documents = [
     (
         master_doc,
         "altamisa",
-        u"AltamISA Documentation",
+        "AltamISA Documentation",
         author,
         "altamisa",
         "One line description of project.",

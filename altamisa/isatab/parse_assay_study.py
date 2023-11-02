@@ -370,7 +370,7 @@ class _ProcessBuilder(_NodeBuilderBase):
                 try:
                     date = datetime.strptime(line[self.date_header.col_no], "%Y-%m-%d").date()
                 except ValueError as e:  # pragma: no cover
-                    tpl = 'Invalid ISO8601 date  # pragma: no cover "{}"'
+                    tpl = 'Invalid ISO8601 date "{}"'  # pragma: no cover
                     msg = tpl.format(line[self.date_header.col_no])
                     raise ParseIsatabException(msg) from e
             else:
