@@ -193,8 +193,8 @@ class InvestigationReader:
             msg = tpl.format(section_name, list(sorted(section)))
             raise ParseIsatabException(msg)  # TODO: should be warning?
         if not len(set([len(v) for v in section.values()])) == 1:  # pragma: no cover
-            tpl = "Inconsistent entry lengths in section {}"
-            msg = tpl.format(section_name)
+            lengths = "\n".join(map(str, [f"{key}: {len(value)}" for key, value in section.items()]))
+            msg = f"Inconsistent entry lengths in section {section_name}:\n{lengths}"
             raise ParseIsatabException(msg)
         return section, comment_keys
 
