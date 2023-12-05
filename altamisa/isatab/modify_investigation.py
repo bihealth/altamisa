@@ -5,9 +5,8 @@ import attr
 
 from altamisa.isatab import InvestigationReader
 
-__author__ = (
-    "Thomas Sell <thomas.sell@charite.de>"
-)
+__author__ = "Thomas Sell <thomas.sell@charite.de>"
+
 
 class InvestigationForge:
     """
@@ -77,7 +76,9 @@ class InvestigationForge:
         assays = self.investigation.studies[0].assays
         assays += new_assays
 
-        updated_study = attr.evolve(self.investigation.studies[0], protocols=joined_protocols, assays=assays)
+        updated_study = attr.evolve(
+            self.investigation.studies[0], protocols=joined_protocols, assays=assays
+        )
         self.investigation = attr.evolve(self.investigation, studies=(updated_study,))
 
     def add_protocol(self):
