@@ -5,6 +5,9 @@ import attr
 
 from altamisa.isatab import InvestigationReader
 
+__author__ = (
+    "Thomas Sell <thomas.sell@charite.de>"
+)
 
 class InvestigationForge:
     """
@@ -55,28 +58,30 @@ class InvestigationForge:
         Add assay to investigation file.
 
         :type input_path: str | Path
-        :param input_path: Location of investigation to modify.
+        :param input_path: Location of bare assay definition to add.
         :rtype: models.InvestigationInfo
         :returns: Investigation model including all information from the investigation file.
         """
-        i_file = Path(input_path).expanduser().resolve()
-        with i_file.open("rt") as f:
-            investigation2 = InvestigationReader.from_stream(f).read()
+        new_assay = Path(input_path).expanduser().resolve()
+        with new_assay.open("rt") as f:
+            reader = InvestigationReader(f)
+            new_assays = tuple(a for a in reader._read_study_assays())
+            new_protocols = {p.name: p for p in reader._read_study_protocols()}
 
-        if len(investigation2.studies) != 1:
-            # TODO: add support for multiple studies
-            raise IndexError("Only single study investigations are supported.")
-
-        protocols = self.investigation.studies[0].protocols
-        # the following will also update the investigation object
-        protocols = self._join_protocols(
-            protocols,
-            investigation2.studies[0].protocols,
+        old_protocols = self.investigation.studies[0].protocols
+        joined_protocols = self._join_protocols(
+            old_protocols,
+            new_protocols,
         )
 
-        # the following will NOT update the investigation object (?)
         assays = self.investigation.studies[0].assays
-        assays += investigation2.studies[0].assays
+        assays += new_assays
 
-        new_study = attr.evolve(self.investigation.studies[0], protocols=protocols, assays=assays)
-        self.investigation = attr.evolve(self.investigation, studies=(new_study,))
+        updated_study = attr.evolve(self.investigation.studies[0], protocols=joined_protocols, assays=assays)
+        self.investigation = attr.evolve(self.investigation, studies=(updated_study,))
+
+    def add_protocol(self):
+        raise NotImplementedError
+
+    def remove_protocol(self):
+        raise NotImplementedError
