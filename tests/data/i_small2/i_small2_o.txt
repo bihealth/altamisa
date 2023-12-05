@@ -73,8 +73,8 @@ Study Protocol Description
 Study Protocol URI						
 Study Protocol Version						
 Study Protocol Parameters Name	method;instrument					
-Study Protocol Parameters Name Term Accession Number	;					
-Study Protocol Parameters Name Term Source REF	;					
+Study Protocol Parameters Name Term Accession Number	;123					
+Study Protocol Parameters Name Term Source REF	;OBI					
 Study Protocol Components Name						
 Study Protocol Components Type						
 Study Protocol Components Type Term Accession Number						
