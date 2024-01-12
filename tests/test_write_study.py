@@ -3,10 +3,15 @@
 
 
 import filecmp
-import pytest
 import os
 
-from altamisa.exceptions import ModerateIsaValidationWarning, IsaWarning, ParseIsatabWarning
+import pytest
+
+from altamisa.exceptions import (
+    IsaWarning,
+    ModerateIsaValidationWarning,
+    ParseIsatabWarning,
+)
 from altamisa.isatab import (
     InvestigationReader,
     InvestigationValidator,
@@ -25,6 +30,8 @@ def _parse_write_assert(investigation_file, tmp_path, quote=None):
     # Iterate studies
     for s, study_info in enumerate(investigation.studies):
         # Load study
+        if not study_info.info.path:
+            raise ValueError("Study {} has no path".format(study_info))
         path_in = os.path.join(directory, study_info.info.path)
         with open(path_in, "rt") as inputf:
             study = StudyReader.from_stream("S{}".format(s + 1), inputf).read()

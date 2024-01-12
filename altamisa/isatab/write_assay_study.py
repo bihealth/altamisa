@@ -4,22 +4,27 @@
 
 
 from __future__ import generator_stop
+
 import csv
 import functools
 import os
-from typing import NamedTuple, TextIO
+from typing import Callable, Dict, List, Optional, Sequence, TextIO, Tuple, Type, Union
 
 from ..constants import table_headers
 from ..constants.table_tokens import TOKEN_UNKNOWN
 from ..exceptions import WriteIsatabException
-from .headers import AssayHeaderParser, StudyHeaderParser
+from .headers import (
+    AssayHeaderParser,
+    ColumnHeader,
+    HeaderParserBase,
+    StudyHeaderParser,
+)
 from .helpers import is_ontology_term_ref
-from .models import Material, OntologyTermRef, Process
-
+from .models import Arc, Assay, Material, OntologyTermRef, Process, Study
 
 __author__ = (
-    "Manuel Holtgrewe <manuel.holtgrewe@bihealth.de>, "
-    "Mathias Kuhring <mathias.kuhring@bihealth.de>"
+    "Manuel Holtgrewe <manuel.holtgrewe@bih-charite.de>, "
+    "Mathias Kuhring <mathias.kuhring@bih-charite.de>"
 )
 
 
@@ -29,19 +34,28 @@ __author__ = (
 class _Digraph:
     """Simple class encapsulating directed graph with vertices and arcs"""
 
-    def __init__(self, vertices, arcs, predicate_is_starting):
+    def __init__(
+        self,
+        vertices: List[Union[Material, Process]],
+        arcs: List[Arc],
+        predicate_is_starting: Callable[[Union[Material, Process]], bool],
+    ):
         #: Graph vertices/nodes (models.Material and models.Process)
-        self.vertices = vertices
+        self.vertices: List[Union[Material, Process]] = vertices
         #: Graph arcs/edges (models.Arc)
-        self.arcs = arcs
+        self.arcs: List[Arc] = arcs
         #: Name to node mapping
-        self.v_by_name = {v.unique_name: v for v in self.vertices}
+        self.v_by_name: Dict[str, Union[Material, Process]] = {
+            v.unique_name: v for v in self.vertices
+        }
         #: Arcs as tuple of tail and head
-        self.a_by_name = {(a[0], a[1]): None for a in self.arcs}
+        self.a_by_name: Dict[Tuple[str, str], Optional[Arc]] = {
+            (a[0], a[1]): None for a in self.arcs
+        }
         #: Names of starting nodes
         self.source_names = [v.unique_name for v in self.vertices if predicate_is_starting(v)]
         #: Outgoing vertices/nodes
-        self.outgoing = {}
+        self.outgoing: Dict[str, List[str]] = {}
 
         for s_name, t_name in self.a_by_name.keys():
             self.outgoing.setdefault(s_name, []).append(t_name)
@@ -51,15 +65,15 @@ class _UnionFind:
     """Union-Find (disjoint set) data structure allowing to address by vertex
     name"""
 
-    def __init__(self, vertex_names):
+    def __init__(self, vertex_names: List[str]):
         #: Node name to id mapping
-        self._name_to_id = {v: i for i, v in enumerate(vertex_names)}
+        self._name_to_id: Dict[str, int] = {v: i for i, v in enumerate(vertex_names)}
         #: Pointer to the containing sets
-        self._id = list(range(len(vertex_names)))
+        self._id: List[int] = list(range(len(vertex_names)))
         #: Size of the set (_sz[_id[v]] is the size of the set that contains v)
-        self._sz = [1] * len(vertex_names)
+        self._sz: List[int] = [1] * len(vertex_names)
 
-    def find(self, v):
+    def find(self, v: int) -> int:
         assert type(v) is int
         j = v
 
@@ -69,13 +83,13 @@ class _UnionFind:
 
         return j
 
-    def find_by_name(self, v_name):
+    def find_by_name(self, v_name: str) -> int:
         return self.find(self._name_to_id[v_name])
 
-    def union_by_name(self, v_name, w_name):
+    def union_by_name(self, v_name: str, w_name: str):
         self.union(self.find_by_name(v_name), self.find_by_name(w_name))
 
-    def union(self, v, w):
+    def union(self, v: int, w: int):
         assert type(v) is int
         assert type(w) is int
         i = self.find(v)
@@ -94,7 +108,7 @@ class _UnionFind:
         self._sz[i] += self._sz[j]
 
 
-def _is_of_starting_type(starting_type, v):
+def _is_of_starting_type(starting_type: str, v: Union[Material, Process]) -> bool:
     """Predicate to select vertices based on starting type."""
     return getattr(v, "type", None) == starting_type
 
@@ -104,12 +118,12 @@ class RefTableBuilder:
 
     def __init__(self, nodes, arcs, predicate_is_starting):
         # Input directed graph
-        self.digraph = _Digraph(nodes, arcs, predicate_is_starting)
+        self.digraph: _Digraph = _Digraph(nodes, arcs, predicate_is_starting)
         #: Output table rows
-        self._rows = []
+        self._rows: List[List[str]] = []
 
-    def _partition(self):
-        uf = _UnionFind(self.digraph.v_by_name.keys())
+    def _partition(self) -> List[List[str]]:
+        uf = _UnionFind(list(self.digraph.v_by_name.keys()))
 
         for arc in self.digraph.arcs:
             uf.union_by_name(arc[0], arc[1])
@@ -121,10 +135,10 @@ class RefTableBuilder:
 
         return list(result.values())
 
-    def _dump_row(self, v_names):
+    def _dump_row(self, v_names: Sequence[str]):
         self._rows.append(list(v_names))
 
-    def _dfs(self, source, path):
+    def _dfs(self, source: str, path: List[str]):
         next_v_names = None
 
         if source in self.digraph.outgoing:
@@ -139,13 +153,13 @@ class RefTableBuilder:
         else:
             self._dump_row(path)
 
-    def _process_component(self, v_names):
+    def _process_component(self, v_names: List[str]):
         # NB: The algorithm below looks a bit involved but it's the simplest way without an
         # external library to get the intersection of two lists of strings in the same order as
         # in the input file and still using hashing for lookup.
         intersection = set(v_names) & set(self.digraph.source_names)
         sources_set = set()
-        sources = []
+        sources: List[str] = []
         for name in self.digraph.source_names:
             if name in intersection and name not in sources_set:
                 sources_set.add(name)
@@ -154,7 +168,7 @@ class RefTableBuilder:
         for source in sources:
             self._dfs(source, [source])
 
-    def run(self):
+    def run(self) -> List[List[str]]:
         components = self._partition()
 
         for component in components:
@@ -170,20 +184,33 @@ class _WriterBase:
     """Base class that writes a file from an ``Study`` or ``Assay`` object."""
 
     #: Note type starting a graph
-    _starting_type = None
+    _starting_type: str
 
     #: Parser for study or assay headers
-    _header_parser = None
+    _header_parser: Type[HeaderParserBase]
+
+    # Reference table for output
+    _ref_table: List[List[str]]
+    # Headers for output
+    _headers: List[List[ColumnHeader]]
 
     @classmethod
     def from_stream(
-        cls, study_or_assay: NamedTuple, output_file: TextIO, quote=None, lineterminator=None
+        cls,
+        study_or_assay: Union[Study, Assay],
+        output_file: TextIO,
+        quote=None,
+        lineterminator=None,
     ):
         """Construct from file-like object"""
         return cls(study_or_assay, output_file, quote, lineterminator)
 
     def __init__(
-        self, study_or_assay: NamedTuple, output_file: TextIO, quote=None, lineterminator=None
+        self,
+        study_or_assay: Union[Study, Assay],
+        output_file: TextIO,
+        quote=None,
+        lineterminator=None,
     ):
         # Study or Assay model
         self._model = study_or_assay
@@ -203,12 +230,8 @@ class _WriterBase:
             escapechar="\\",
             quotechar=self.quote if self.quote else "|",
         )
-        # Reference table for output
-        self._ref_table = None
-        # Headers for output
-        self._headers = None
 
-    def _write_next_line(self, line: [str]):
+    def _write_next_line(self, line: List[str]):
         """Write next line."""
         self._writer.writerow(line)
 

@@ -11,17 +11,15 @@ import re
 from typing import Dict, Tuple
 import warnings
 
+from . import models
 from ..exceptions import (
     AdvisoryIsaValidationWarning,
     CriticalIsaValidationWarning,
     ModerateIsaValidationWarning,
 )
-from .helpers import is_ontology_term_ref
-from . import models
 from .validate_assay_study import _OntologyTermRefValidator
 
-
-__author__ = "Mathias Kuhring <mathias.kuhring@bihealth.de>"
+__author__ = "Mathias Kuhring <mathias.kuhring@bih-charite.de>"
 
 
 # Pattern and helper functions for validation ------------------------------------------------------
@@ -34,7 +32,7 @@ DOI_PATTERN = re.compile("^(?:(?:DOI|doi):)?10[.][0-9]{4,}(?:[.][0-9]+)*/\\S+$")
 PMID_PATTERN = re.compile("^\\d+$")
 
 
-def _validate_mail_address(mail_address) -> str:
+def _validate_mail_address(mail_address: str) -> None:
     """Helper function to validate mail strings"""
     if mail_address and not MAIL_PATTERN.match(mail_address):
         tpl = "Invalid mail address: {}"
@@ -42,7 +40,7 @@ def _validate_mail_address(mail_address) -> str:
         warnings.warn(msg, AdvisoryIsaValidationWarning)
 
 
-def _validate_phone_number(phone_number) -> str:
+def _validate_phone_number(phone_number: str) -> None:
     """Helper function to validate phone/fax number strings"""
     if phone_number and not PHONE_PATTERN.match(phone_number):
         tpl = "Invalid phone/fax number: {}"
@@ -50,7 +48,7 @@ def _validate_phone_number(phone_number) -> str:
         warnings.warn(msg, AdvisoryIsaValidationWarning)
 
 
-def _validate_doi(doi) -> str:
+def _validate_doi(doi: str) -> None:
     """Helper function to validate doi strings"""
     if doi and not DOI_PATTERN.match(doi):
         tpl = "Invalid doi string: {}"
@@ -58,7 +56,7 @@ def _validate_doi(doi) -> str:
         warnings.warn(msg, AdvisoryIsaValidationWarning)
 
 
-def _validate_pubmed_id(pubmed_id) -> str:
+def _validate_pubmed_id(pubmed_id: str) -> None:
     """Helper function to validate pubmed id strings"""
     if pubmed_id and not PMID_PATTERN.match(pubmed_id):
         tpl = "Invalid pubmed_id string: {}"
@@ -195,36 +193,36 @@ class InvestigationValidator:
             self._validate_assays(study.assays, study.info.identifier)
             self._validate_protocols(study.protocols)
 
-    def _validate_publications(self, publications: Tuple[models.PublicationInfo]):
+    def _validate_publications(self, publications: Tuple[models.PublicationInfo, ...]):
         # Validate format of specific fields in publications
         for publication in publications:
             _validate_pubmed_id(publication.pubmed_id)
             _validate_doi(publication.doi)
-            if is_ontology_term_ref(publication.status):
+            if isinstance(publication.status, models.OntologyTermRef):
                 self._ontology_validator.validate(publication.status)
 
-    def _validate_contacts(self, contacts: Tuple[models.ContactInfo]):
+    def _validate_contacts(self, contacts: Tuple[models.ContactInfo, ...]):
         # Validate format of specific fields in contacts
         for contact in contacts:
             _validate_mail_address(contact.email)
             _validate_phone_number(contact.phone)
             _validate_phone_number(contact.fax)
-            if is_ontology_term_ref(contact.role):
+            if isinstance(contact.role, models.OntologyTermRef):
                 self._ontology_validator.validate(contact.role)
 
-    def _validate_designs(self, designs: Tuple[models.DesignDescriptorsInfo]):
+    def _validate_designs(self, designs: Tuple[models.DesignDescriptorsInfo, ...]):
         # Validate format of specific fields in designs
         for design in designs:
-            if is_ontology_term_ref(design.type):
+            if isinstance(design.type, models.OntologyTermRef):
                 self._ontology_validator.validate(design.type)
 
     def _validate_factors(self, factors: Dict[str, models.FactorInfo]):
         # Validate format of specific fields in factors
         for factor in factors.values():
-            if is_ontology_term_ref(factor.type):
+            if isinstance(factor.type, models.OntologyTermRef):
                 self._ontology_validator.validate(factor.type)
 
-    def _validate_assays(self, assays: Tuple[models.AssayInfo], study_id: str):
+    def _validate_assays(self, assays: Tuple[models.AssayInfo, ...], study_id: str):
         # Check if any assays exists (according to specs, having an assays is not mandatory)
         if not assays:
             tpl = "No assays declared in study '{}' of investigation '{}'"
@@ -236,12 +234,12 @@ class InvestigationValidator:
             # (path, measurement type, technology type and technology platform)
             meas_type = (
                 assay.measurement_type.name
-                if is_ontology_term_ref(assay.measurement_type)
+                if isinstance(assay.measurement_type, models.OntologyTermRef)
                 else assay.measurement_type
             )
             tech_type = (
                 assay.technology_type.name
-                if is_ontology_term_ref(assay.technology_type)
+                if isinstance(assay.technology_type, models.OntologyTermRef)
                 else assay.technology_type
             )
             if not (assay.path and meas_type and tech_type):
@@ -268,19 +266,19 @@ class InvestigationValidator:
                 else:
                     self._assay_paths.add(assay.path)
             # Validate format of specific fields in assays
-            if is_ontology_term_ref(assay.measurement_type):
+            if isinstance(assay.measurement_type, models.OntologyTermRef):
                 self._ontology_validator.validate(assay.measurement_type)
-            if is_ontology_term_ref(assay.technology_type):
+            if isinstance(assay.technology_type, models.OntologyTermRef):
                 self._ontology_validator.validate(assay.technology_type)
 
     def _validate_protocols(self, protocols: Dict[str, models.ProtocolInfo]):
         # Validate format of specific fields in protocols
         for protocol in protocols.values():
-            if is_ontology_term_ref(protocol.type):
+            if isinstance(protocol.type, models.OntologyTermRef):
                 self._ontology_validator.validate(protocol.type)
             for parameter in protocol.parameters.values():
-                if is_ontology_term_ref(parameter):
+                if isinstance(parameter, models.OntologyTermRef):
                     self._ontology_validator.validate(parameter)
             for component in protocol.components.values():
-                if is_ontology_term_ref(component.type):
+                if isinstance(component.type, models.OntologyTermRef):
                     self._ontology_validator.validate(component.type)

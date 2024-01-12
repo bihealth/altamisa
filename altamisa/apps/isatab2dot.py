@@ -2,12 +2,12 @@
 """Conversion of ISA-Tab to dot.
 """
 
-import json
-import sys
-import os
 import argparse
+import json
+import os
+import sys
 
-from altamisa.isatab import InvestigationReader, StudyReader, AssayReader
+from altamisa.isatab import AssayReader, InvestigationReader, StudyReader
 
 
 def print_dot(
@@ -59,6 +59,9 @@ def run(args):
     print('  rankdir = "LR";', file=args.output_file)
 
     for s, study_info in enumerate(investigation.studies):
+        if not study_info.info.path:
+            print("  /* no file for study {} */".format(s + 1), file=args.output_file)
+            continue
         with open(os.path.join(path, study_info.info.path), "rt") as inputf:
             study = StudyReader.from_stream("S{}".format(s + 1), inputf).read()
         print("  /* study {} */".format(study_info.info.path), file=args.output_file)
@@ -68,6 +71,9 @@ def run(args):
         print("  }", file=args.output_file)
 
         for a, assay_info in enumerate(study_info.assays):
+            if not assay_info.path:
+                print("  /* no file for assay {} */".format(a + 1), file=args.output_file)
+                continue
             with open(os.path.join(path, assay_info.path), "rt") as inputf:
                 assay = AssayReader.from_stream(
                     "S{}".format(s + 1), "A{}".format(a + 1), inputf

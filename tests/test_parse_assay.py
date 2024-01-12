@@ -4,21 +4,25 @@
 
 import io
 import os
+from typing import TextIO
+
 import pytest
 
 from altamisa.constants import table_headers
 from altamisa.exceptions import IsaWarning
-from altamisa.isatab import models
 from altamisa.isatab import (
+    AssayReader,
+    AssayRowReader,
+    AssayValidator,
     InvestigationReader,
     InvestigationValidator,
-    AssayRowReader,
-    AssayReader,
-    AssayValidator,
+    models,
 )
 
 
-def test_assay_row_reader_minimal_assay(minimal_investigation_file, minimal_assay_file):
+def test_assay_row_reader_minimal_assay(
+    minimal_investigation_file: TextIO, minimal_assay_file: TextIO
+):
     """Use ``AssayRowReader`` to read in minimal assay file."""
 
     # Create new row reader and check read headers
@@ -87,7 +91,7 @@ def test_assay_row_reader_minimal_assay(minimal_investigation_file, minimal_assa
     assert expected == first_row[3]
 
 
-def test_assay_reader_minimal_assay(minimal_investigation_file, minimal_assay_file):
+def test_assay_reader_minimal_assay(minimal_investigation_file: TextIO, minimal_assay_file: TextIO):
     """Use ``AssayReader`` to read in minimal assay file.
 
     Using the ``AssayReader`` instead of the ``AssayRowReader`` gives us
@@ -186,7 +190,7 @@ def test_assay_reader_minimal_assay(minimal_investigation_file, minimal_assay_fi
     assert expected == assay.arcs
 
 
-def test_assay_row_reader_small_assay(small_investigation_file, small_assay_file):
+def test_assay_row_reader_small_assay(small_investigation_file: TextIO, small_assay_file: TextIO):
     """Use ``AssayRowReader`` to read in small assay file."""
 
     # Create new row reader and check read headers
@@ -432,7 +436,7 @@ def test_assay_row_reader_small_assay(small_investigation_file, small_assay_file
     assert expected == second_row[7]
 
 
-def test_assay_reader_small_assay(small_investigation_file, small_assay_file):
+def test_assay_reader_small_assay(small_investigation_file: TextIO, small_assay_file: TextIO):
     """Use ``AssayReader`` to read in small assay file."""
     # Load investigation (tested elsewhere)
     investigation = InvestigationReader.from_stream(small_investigation_file).read()
@@ -641,7 +645,7 @@ def test_assay_reader_small_assay(small_investigation_file, small_assay_file):
     assert expected == assay.arcs
 
 
-def test_assay_reader_small2_assay(small2_investigation_file, small2_assay_file):
+def test_assay_reader_small2_assay(small2_investigation_file: TextIO, small2_assay_file: TextIO):
     """Use ``AssayReader`` to read in small assay file."""
     # Load investigation (tested elsewhere)
     investigation = InvestigationReader.from_stream(small2_investigation_file).read()
@@ -754,7 +758,7 @@ def test_assay_reader_small2_assay(small2_investigation_file, small2_assay_file)
     assert sorted(expected) == sorted(assay.arcs)
 
 
-def test_assay_reader_gelelect(gelelect_investigation_file, gelelect_assay_file):
+def test_assay_reader_gelelect(gelelect_investigation_file: TextIO, gelelect_assay_file: TextIO):
     """Use ``AssayReader`` to read in small assay file."""
     with pytest.warns(IsaWarning) as record:
         # Load investigation
@@ -858,7 +862,9 @@ def test_assay_reader_gelelect(gelelect_investigation_file, gelelect_assay_file)
     assert expected == assay.processes["S1-A1-electrophoresis-9-2"]
 
 
-def test_assay_reader_minimal_assay_iostring(minimal_investigation_file, minimal_assay_file):
+def test_assay_reader_minimal_assay_iostring(
+    minimal_investigation_file: TextIO, minimal_assay_file: TextIO
+):
     # Load investigation (tested elsewhere)
     stringio = io.StringIO(minimal_investigation_file.read())
     investigation = InvestigationReader.from_stream(stringio).read()
@@ -890,7 +896,9 @@ def test_assay_reader_minimal_assay_iostring(minimal_investigation_file, minimal
     assert 3 == len(assay.arcs)
 
 
-def test_assay_reader_minimal_assay_iostring2(minimal_investigation_file, minimal_assay_file):
+def test_assay_reader_minimal_assay_iostring2(
+    minimal_investigation_file: TextIO, minimal_assay_file: TextIO
+):
     # Load investigation (tested elsewhere)
     stringio = io.StringIO(minimal_investigation_file.read())
     investigation = InvestigationReader.from_stream(stringio).read()

@@ -7,6 +7,7 @@ import os
 import sys
 import warnings
 
+from altamisa.exceptions import IsaException
 from altamisa.isatab import (
     AssayReader,
     AssayValidator,
@@ -18,7 +19,6 @@ from altamisa.isatab import (
     StudyValidator,
     StudyWriter,
 )
-from altamisa.exceptions import IsaException
 
 
 def run(args):
@@ -30,7 +30,11 @@ def run(args):
     if not args.no_warnings:
         for record in records:
             warnings.showwarning(
-                record.message, record.category, record.filename, record.lineno, record.line
+                record.message,
+                record.category,
+                record.filename,
+                lineno=record.lineno,
+                line=record.line,
             )
 
 
