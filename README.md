@@ -2,7 +2,6 @@
 [![codecov](https://codecov.io/gh/bihealth/altamisa/graph/badge.svg?token=R5GXUKCUYJ)](https://codecov.io/gh/bihealth/altamisa)
 [![Install with Bioconda](https://img.shields.io/badge/install%20with-bioconda-brightgreen.svg?style=flat)](http://bioconda.github.io)
 ![Continuous Integration Status](https://github.com/bihealth/altamisa/workflows/CI/badge.svg)
-[![codecov](https://codecov.io/gh/bihealth/altamisa/graph/badge.svg?token=R5GXUKCUYJ)](https://codecov.io/gh/bihealth/altamisa)
 [![Documentation Status](https://readthedocs.org/projects/altamisa/badge/?version=latest)](https://altamisa.readthedocs.io/en/latest/?badge=latest)
 [![DOI](https://joss.theoj.org/papers/10.21105/joss.01610/status.svg)](https://doi.org/10.21105/joss.01610)
 [![MIT License](https://img.shields.io/badge/License-MIT-green.svg)](https://opensource.org/licenses/MIT)
