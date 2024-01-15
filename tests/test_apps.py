@@ -4,6 +4,7 @@
 import os.path
 
 import pytest
+from syrupy.assertion import SnapshotAssertion
 from typer.testing import CliRunner
 
 from altamisa.apps import isatab2dot, isatab2isatab, isatab_validate
@@ -12,7 +13,7 @@ from altamisa.exceptions import IsaWarning
 runner = CliRunner()
 
 
-def test_isatab_validate():
+def test_isatab_validate(snapshot: SnapshotAssertion):
     i_file = os.path.join(os.path.dirname(__file__), "data", "i_warnings", "i_warnings.txt")
     argv = ["--input-investigation-file", i_file, "--show-duplicate-warnings"]
 
@@ -20,10 +21,10 @@ def test_isatab_validate():
         result = runner.invoke(isatab_validate.app, argv)
         assert result.exit_code == 0
 
-    assert 17 == len(record)
+    assert snapshot == [str(r.message) for r in record]
 
 
-def test_isatab2isatab(tmpdir):
+def test_isatab2isatab(tmpdir, snapshot: SnapshotAssertion):
     i_file = os.path.join(os.path.dirname(__file__), "data", "i_minimal", "i_minimal.txt")
     argv = [
         "--input-investigation-file",
@@ -38,10 +39,10 @@ def test_isatab2isatab(tmpdir):
         result = runner.invoke(isatab2isatab.app, argv)
         assert result.exit_code == 0
 
-    assert 8 == len(record)
+    assert snapshot == [str(r.message) for r in record]
 
 
-def test_isatab2isatab_input_is_output(tmpdir):
+def test_isatab2isatab_input_is_output(tmpdir, snapshot: SnapshotAssertion):
     i_file = os.path.join(os.path.dirname(__file__), "data", "i_minimal", "i_minimal.txt")
     argv = [
         "--input-investigation-file",
@@ -54,7 +55,7 @@ def test_isatab2isatab_input_is_output(tmpdir):
 
     result = runner.invoke(isatab2isatab.app, argv)
     assert result.exit_code == 1
-    assert "Can't output ISA-tab files to same directory as as input" in str(result)
+    assert snapshot == str(result)
 
 
 def test_isatab2dot(tmpdir):

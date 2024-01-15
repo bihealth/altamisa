@@ -1,0 +1,65 @@
+# serializer version: 1
+# name: test_isatab2isatab
+  list([
+    '''
+      Investigation with only one study contains metadata:
+      	ID:	i_minimal
+      	Title:	Minimal Investigation
+      	Path:	i_minimal.txt
+      	Submission Date:	
+      	Public Release Date:	None
+      	Prefer recording metadata in the study section.
+    ''',
+    '''
+      Assay without platform:
+      Path:	a_minimal.txt
+      Measurement Type:	exome sequencing assay
+      Technology Type:	nucleotide sequencing
+      Technology Platform:	
+    ''',
+    'No reference headers available for section INVESTIGATION PUBLICATIONS. Applying default order.',
+    'No reference headers available for section INVESTIGATION CONTACTS. Applying default order.',
+    'No reference headers available for section STUDY DESIGN DESCRIPTORS. Applying default order.',
+    'No reference headers available for section STUDY PUBLICATIONS. Applying default order.',
+    'No reference headers available for section STUDY FACTORS. Applying default order.',
+    'No reference headers available for section STUDY CONTACTS. Applying default order.',
+  ])
+# ---
+# name: test_isatab2isatab_input_is_output
+  '<Result IsaException("Can\'t output ISA-tab files to same directory as as input: /home/sellts_c/Code/altamisa/tests/data/i_minimal == /home/sellts_c/Code/altamisa/tests/data/i_minimal")>'
+# ---
+# name: test_isatab_validate
+  list([
+    'Incomplete ontology source; found: , Incomplete 1, 1, Incomplete 1, ()',
+    'Incomplete ontology source; found: Incomplete 2, , 2, Incomplete 2, ()',
+    'Ontology source name including whitespace(s); found: Incomplete 2, , 2, Incomplete 2, ()',
+    'Incomplete ontology source; found: Incomplete 3, Incomplete 3, , Incomplete 3, ()',
+    'Ontology source name including whitespace(s); found: Incomplete 3, Incomplete 3, , Incomplete 3, ()',
+    'Incomplete ontology source; found: Incomplete 4, Incomplete 4, 4, , ()',
+    'Ontology source name including whitespace(s); found: Incomplete 4, Incomplete 4, 4, , ()',
+    '''
+      Investigation with only one study contains metadata:
+      	ID:	i_warnings
+      	Title:	Investigation with Warnings
+      	Path:	i_warnings.txt
+      	Submission Date:	
+      	Public Release Date:	None
+      	Prefer recording metadata in the study section.
+    ''',
+    'Invalid mail address: invalid_mail',
+    'Invalid phone/fax number: CALL-ME',
+    'Invalid phone/fax number: FAX-ME',
+    'Invalid pubmed_id string: not-pubmed',
+    'Invalid doi string: not-a-doi',
+    '''
+      Assay without platform:
+      Path:	a_warnings.txt
+      Measurement Type:	exome sequencing assay
+      Technology Type:	nucleotide sequencing
+      Technology Platform:	
+    ''',
+    'Assay path used more than once: a_warnings.txt',
+    "Found samples in assay 'a_warnings.txt' but not in parent study 's_warnings.txt':\\n0815-N2",
+    "Found samples in assay 'a_warnings.txt' but not in parent study 's_warnings.txt':\\n0815-N2",
+  ])
+# ---
