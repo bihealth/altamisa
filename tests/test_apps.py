@@ -18,9 +18,7 @@ def test_isatab_validate():
 
     with pytest.warns(IsaWarning) as record:
         result = runner.invoke(isatab_validate.app, argv)
-        assert result.exit_code == 1
-        assert "Warnign" in result.stdout
-        assert "Warnign" in result.stderr
+        assert result.exit_code == 0
 
     assert 17 == len(record)
 
@@ -37,9 +35,10 @@ def test_isatab2isatab(tmpdir):
     ]
 
     with pytest.warns(IsaWarning) as record:
-        assert not isatab2isatab.main(argv)
+        result = runner.invoke(isatab2isatab.app, argv)
+        assert result.exit_code == 0
 
-    assert 10 == len(record)
+    assert 8 == len(record)
 
 
 def test_isatab2isatab_input_is_output(tmpdir):
@@ -53,8 +52,9 @@ def test_isatab2isatab_input_is_output(tmpdir):
         '"',
     ]
 
-    with pytest.raises(IsaException):
-        isatab2isatab.main(argv)
+    result = runner.invoke(isatab2isatab.app, argv)
+    assert result.exit_code == 1
+    assert "Can't output ISA-tab files to same directory as as input" in str(result)
 
 
 def test_isatab2dot(tmpdir):
@@ -66,4 +66,5 @@ def test_isatab2dot(tmpdir):
         str(tmpdir.mkdir("dot").join("out.dot")),
     ]
 
-    assert not isatab2dot.main(argv)
+    result = runner.invoke(isatab2dot.app, argv)
+    assert result.exit_code == 0

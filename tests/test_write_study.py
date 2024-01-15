@@ -61,7 +61,7 @@ def test_study_writer_small(small_investigation_file, tmp_path):
     with pytest.warns(IsaWarning) as record:
         _parse_write_assert(small_investigation_file, tmp_path)
     # Check warnings
-    assert 2 == len(record)
+    assert 3 == len(record)
 
 
 def test_study_writer_small2(small2_investigation_file, tmp_path):

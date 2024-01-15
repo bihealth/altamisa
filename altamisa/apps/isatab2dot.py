@@ -2,12 +2,25 @@
 """Conversion of ISA-Tab to dot.
 """
 
-import argparse
+from contextlib import ExitStack
 import json
 import os
 import sys
 
+import attrs
+import typer
+from typing_extensions import Annotated
+
 from altamisa.isatab import AssayReader, InvestigationReader, StudyReader
+
+#: Typer application instance.
+app = typer.Typer()
+
+
+@attrs.define
+class Arguments:
+    investigation_file: str
+    output_file: str
 
 
 def print_dot(
@@ -49,61 +62,78 @@ def print_dot(
         print("{}{} -> {};".format(indent, json.dumps(arc.tail), json.dumps(arc.head)), file=outf)
 
 
-def run(args):
+def run(args: Arguments):
     with open(args.investigation_file, "rt") as inputf:
         investigation = InvestigationReader.from_stream(inputf).read()
 
     path = os.path.dirname(args.investigation_file)
 
-    print("digraph investigation {", file=args.output_file)
-    print('  rankdir = "LR";', file=args.output_file)
+    with ExitStack() as stack:
+        if args.output_file == "-":
+            output_file = sys.stdout
+        else:
+            output_file = stack.enter_context(open(args.output_file, "wt"))
 
-    for s, study_info in enumerate(investigation.studies):
-        if not study_info.info.path:
-            print("  /* no file for study {} */".format(s + 1), file=args.output_file)
-            continue
-        with open(os.path.join(path, study_info.info.path), "rt") as inputf:
-            study = StudyReader.from_stream("S{}".format(s + 1), inputf).read()
-        print("  /* study {} */".format(study_info.info.path), file=args.output_file)
-        print("  subgraph clusterStudy{} {{".format(s), file=args.output_file)
-        print('    label = "Study: {}"'.format(study_info.info.path), file=args.output_file)
-        print_dot(study, args.output_file)
-        print("  }", file=args.output_file)
+        print("digraph investigation {", file=output_file)
+        print('  rankdir = "LR";', file=output_file)
 
-        for a, assay_info in enumerate(study_info.assays):
-            if not assay_info.path:
-                print("  /* no file for assay {} */".format(a + 1), file=args.output_file)
+        for s, study_info in enumerate(investigation.studies):
+            if not study_info.info.path:
+                print("  /* no file for study {} */".format(s + 1), file=output_file)
                 continue
-            with open(os.path.join(path, assay_info.path), "rt") as inputf:
-                assay = AssayReader.from_stream(
-                    "S{}".format(s + 1), "A{}".format(a + 1), inputf
-                ).read()
-            print("  /* assay {} */".format(assay_info.path), file=args.output_file)
-            print("  subgraph clusterAssayS{}A{} {{".format(s, a), file=args.output_file)
-            print('    label = "Assay: {}"'.format(assay_info.path), file=args.output_file)
-            print_dot(assay, args.output_file)
-            print("  }", file=args.output_file)
+            with open(os.path.join(path, study_info.info.path), "rt") as inputf:
+                study = StudyReader.from_stream("S{}".format(s + 1), inputf).read()
+            print("  /* study {} */".format(study_info.info.path), file=output_file)
+            print("  subgraph clusterStudy{} {{".format(s), file=output_file)
+            print('    label = "Study: {}"'.format(study_info.info.path), file=output_file)
+            print_dot(study, output_file)
+            print("  }", file=output_file)
 
-    print("}", file=args.output_file)
+            for a, assay_info in enumerate(study_info.assays):
+                if not assay_info.path:
+                    print("  /* no file for assay {} */".format(a + 1), file=output_file)
+                    continue
+                with open(os.path.join(path, assay_info.path), "rt") as inputf:
+                    assay = AssayReader.from_stream(
+                        "S{}".format(s + 1), "A{}".format(a + 1), inputf
+                    ).read()
+                print("  /* assay {} */".format(assay_info.path), file=output_file)
+                print("  subgraph clusterAssayS{}A{} {{".format(s, a), file=output_file)
+                print('    label = "Assay: {}"'.format(assay_info.path), file=output_file)
+                print_dot(assay, output_file)
+                print("  }", file=output_file)
+
+        print("}", file=output_file)
 
 
-def main(argv=None):
-    parser = argparse.ArgumentParser()
-
-    parser.add_argument(
-        "-i", "--investigation-file", required=True, help="Path to investigation file"
+@app.command()
+def main(
+    investigation_file: Annotated[
+        str,
+        typer.Option(
+            "--investigation-file",
+            "-i",
+            help="Path to input investigation file",
+        ),
+    ],
+    output_file: Annotated[
+        str,
+        typer.Option(
+            "--output-file",
+            "-o",
+            help="Path to output file, stdout ('-') by default",
+        ),
+    ] = "-",
+):
+    """Main entry point."""
+    # Convert to `Arguments` object.
+    args = Arguments(
+        investigation_file=investigation_file,
+        output_file=output_file,
     )
-    parser.add_argument(
-        "-o",
-        "--output-file",
-        default="-",
-        type=argparse.FileType("wt"),
-        help='Path to output file, stdout ("-") by default',
-    )
-
-    args = parser.parse_args(argv)
-    return run(args)
+    # Actually run.
+    run(args)
 
 
-if __name__ == "__main__":
-    sys.exit(main())  # pragma: no cover
+if __name__ == "__main__":  # pragma: no cover
+    typer.run(main)

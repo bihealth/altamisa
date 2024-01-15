@@ -435,8 +435,7 @@ class HeaderParserBase:
             return self._parse_term_source_ref()
         elif val in self.simple_headers:
             if self.allowed_headers and val not in self.allowed_headers:
-                tpl = 'Header "{}" not allowed in {}.'
-                msg = tpl.format(val, self)
+                msg = f'Header "{val}" not allowed in assay.'
                 raise ParseIsatabException(msg)
             return self._parse_simple_column_header(self.simple_headers[val])
         else:

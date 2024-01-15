@@ -334,7 +334,10 @@ def test_study_reader_small_study(small_investigation_file, small_study_file):
 
     # Read study
     study = reader.read()
-    StudyValidator(investigation, investigation.studies[0], study).validate()
+    with pytest.warns(IsaWarning) as record:
+        StudyValidator(investigation, investigation.studies[0], study).validate()
+    # Check warnings
+    assert 1 == len(record)
 
     # Check results
     assert os.path.normpath(str(study.file)).endswith(os.path.normpath("data/i_small/s_small.txt"))

@@ -284,9 +284,6 @@ class _NodeBuilderBase(Generic[TNode]):
                     ]
                     return term_refs
                 else:  # pragma: no cover
-                    import pdb
-
-                    pdb.set_trace()
                     tpl = (
                         "Irregular numbers of fields in ontology term columns"
                         "(i.e. ';'-separated fields): {}"
@@ -481,7 +478,7 @@ class _ProcessBuilder(_NodeBuilderBase[models.Process]):
         self, line: List[str]
     ) -> Tuple[str, Union[models.AnnotatedStr, str], Optional[str], Optional[str]]:
         # At least one of these headers has to be specified
-        if not self.protocol_ref_header:  # pragma: no cover
+        if not self.name_header and not self.protocol_ref_header:  # pragma: no cover
             raise ParseIsatabException(
                 "No protocol reference header found for process found for file {}".format(
                     self.filename
@@ -492,7 +489,8 @@ class _ProcessBuilder(_NodeBuilderBase[models.Process]):
         assay_id = "-{}".format(self.assay_id) if self.assay_id else ""
         name = None
         name_type = None
-        if not self.name_header:
+        if not self.name_header:  # and self.protocol_ref_header:
+            assert self.protocol_ref_header, "invariant: checked above"
             # Name header is not given, will use auto-generated unique name
             # based on protocol ref.
             protocol_ref = line[self.protocol_ref_header.col_no]
@@ -505,6 +503,7 @@ class _ProcessBuilder(_NodeBuilderBase[models.Process]):
             )
             unique_name = models.AnnotatedStr(name_val, was_empty=True)
         elif not self.protocol_ref_header:
+            assert self.name_header, "invariant: checked above"
             # Name header is given, but protocol ref header is not
             protocol_ref = table_tokens.TOKEN_UNKNOWN
             name = line[self.name_header.col_no]
@@ -541,8 +540,11 @@ class _ProcessBuilder(_NodeBuilderBase[models.Process]):
                 )
                 unique_name = models.AnnotatedStr(name_val, was_empty=True)
         if not protocol_ref:  # pragma: no cover
-            tpl = "Missing protocol reference in column {} of file {} "
-            msg = tpl.format(self.protocol_ref_header.col_no + 1, self.filename)
+            if self.protocol_ref_header:
+                tpl = "Missing protocol reference in column {} of file {} "
+                msg = tpl.format(self.protocol_ref_header.col_no + 1, self.filename)
+            else:
+                msg = "Missing protocol reference in file {}".format(self.filename)
             raise ParseIsatabException(msg)
         return protocol_ref, unique_name, name, name_type
 
