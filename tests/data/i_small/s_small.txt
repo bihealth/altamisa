@@ -1,6 +1,6 @@
-Source Name	Characteristics[organism]	Term Source REF	Term Accession Number	Characteristics[age]	Unit	Term Source REF	Term Accession Number	Protocol REF	Parameter Value[instrument]	Performer	Date	Sample Name	Characteristics[status]	Factor Value[treatment]	Term Source REF	Term Accession Number
-0814	Mus musculus;Homo sapiens	NCBITAXON;NCBITAXON	http://purl.bioontology.org/ontology/NCBITAXON/10090;http://purl.bioontology.org/ontology/NCBITAXON/9606	90	day	UO	http://purl.obolibrary.org/obo/UO_0000033	sample collection	scalpel	John Doe	2018-02-02	0814-N1	0	vaccine;yes	OBI;	http://purl.obolibrary.org/obo/VO_0000001;
-0815	Mus musculus	NCBITAXON	http://purl.bioontology.org/ontology/NCBITAXON/10090	90	day	UO	http://purl.obolibrary.org/obo/UO_0000033	sample collection	scalpel	John Doe	2018-02-02	0815-N1	0	yes		
-0815	Mus musculus	NCBITAXON	http://purl.bioontology.org/ontology/NCBITAXON/10090	90	day	UO	http://purl.obolibrary.org/obo/UO_0000033	sample collection	scalpel type A;scalpel type B	John Doe	2018-02-02	0815-T1	2			
-0816	Mus musculus				day	UO	http://purl.obolibrary.org/obo/UO_0000033	sample collection	scalpel	John Doe	2018-02-02	0816-T1	1	yes		
-0817				150	day	UO	http://purl.obolibrary.org/obo/UO_0000033	sample collection	scalpel	John Doe	2018-02-02					
+Source Name	Characteristics[organism]	Term Source REF	Term Accession Number	Characteristics[age]	Unit	Term Source REF	Term Accession Number	Protocol REF	Parameter Value[instrument]	Performer	Date	Sample Name	Characteristics[status]	Factor Value[treatment]
+0814	Mus musculus;Homo sapiens	NCBITAXON;NCBITAXON	http://purl.bioontology.org/ontology/NCBITAXON/10090;http://purl.bioontology.org/ontology/NCBITAXON/9606	90	day	UO	http://purl.obolibrary.org/obo/UO_0000033	sample collection	scalpel	John Doe	2018-02-02	0814-N1	0	yes
+0815	Mus musculus	NCBITAXON	http://purl.bioontology.org/ontology/NCBITAXON/10090	90	day	UO	http://purl.obolibrary.org/obo/UO_0000033	sample collection	scalpel	John Doe	2018-02-02	0815-N1	0	yes
+0815	Mus musculus	NCBITAXON	http://purl.bioontology.org/ontology/NCBITAXON/10090	90	day	UO	http://purl.obolibrary.org/obo/UO_0000033	sample collection	scalpel type A;scalpel type B	John Doe	2018-02-02	0815-T1	2	
+0816	Mus musculus				day	UO	http://purl.obolibrary.org/obo/UO_0000033	sample collection	scalpel	John Doe	2018-02-02	0816-T1	1	yes
+0817				150	day	UO	http://purl.obolibrary.org/obo/UO_0000033	sample collection	scalpel	John Doe	2018-02-02			
