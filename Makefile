@@ -32,11 +32,11 @@ format-isort:
 
 .PHONY: lint-black
 lint-black:
-	black -l 100 --exclude "versioneer.py|_version.py" --check .
+	black -l 100 --check .
 
 .PHONY: format-black
 format-black:
-	black -l 100 --exclude "versioneer.py|_version.py" .
+	black -l 100 .
 
 .PHONY: lint-flake8
 lint-flake8:

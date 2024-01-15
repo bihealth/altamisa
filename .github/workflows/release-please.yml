@@ -1,0 +1,36 @@
+on:
+  push:
+    branches:
+      - master
+
+name: release-please
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+
+      - name: Create GitHub release
+        uses: GoogleCloudPlatform/release-please-action@v3
+        id: release
+        with:
+          release-type: python
+          package-name: altamisa
+          token: ${{ secrets.BOT_TOKEN }}
+
+  build-publish:
+    runs-on: ubuntu-latest
+    needs: release
+    steps:
+
+      - name: Checkout repository
+        uses: actions/checkout@v3
+        if: ${{ steps.release.outputs.release_created }}
+
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@v2
+        if: ${{ steps.release.outputs.release_created }}
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}

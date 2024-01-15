@@ -849,7 +849,7 @@ class StudyRowReader:
         except StopIteration:
             self._line = None
         except UnicodeDecodeError as e:  # pragma: no cover
-            msg = f"Invalid encoding of study file '{self._filename}' (use Unicode/UTF-8)."
+            msg = f"Invalid encoding of study file '{self.input_file.name}' (use Unicode/UTF-8)."
             raise ParseIsatabException(msg) from e
         return prev_line
 
@@ -974,7 +974,7 @@ class AssayRowReader:
         except StopIteration:
             self._line = None
         except UnicodeDecodeError as e:  # pragma: no cover
-            msg = f"Invalid encoding of assay file '{self._filename}' (use Unicode/UTF-8)."
+            msg = f"Invalid encoding of assay file '{self.input_file.name}' (use Unicode/UTF-8)."
             raise ParseIsatabException(msg) from e
         return prev_line
 

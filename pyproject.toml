@@ -6,8 +6,6 @@ include = [
 exclude = [
     "**/node_modules",
     "**/__pycache__",
-    "altamisa/versioneer.py",
-    "altamisa/_version.py"
 ]
 defineConstant = { DEBUG = true }
 stubPath = "stubs"

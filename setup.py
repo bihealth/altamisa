@@ -5,8 +5,6 @@ import os.path
 
 from setuptools import find_packages, setup
 
-import versioneer
-
 
 def parse_requirements(path):
     """Parse ``requirements.txt`` at ``path``."""
@@ -31,6 +29,12 @@ with open("HISTORY.md") as history_file:
 
 test_requirements = parse_requirements("requirements/test.txt")
 install_requirements = parse_requirements("requirements/base.txt")
+
+package_root = os.path.abspath(os.path.dirname(__file__))
+version = {}
+with open(os.path.join(package_root, "altamisa/_version.py")) as fp:
+    exec(fp.read(), version)
+version = version["__version__"]
 
 setup(
     author="Dieter Beule, Jennifer Kirwan, Mathias Kuhring, Manuel Holtgrewe, Mikko Nieminen",
@@ -69,7 +73,6 @@ setup(
     test_suite="tests",
     tests_require=test_requirements,
     url="https://github.com/bihealth/altamisa",
-    version=versioneer.get_version(),
-    cmdclass=versioneer.get_cmdclass(),
+    version=version,
     zip_safe=False,
 )
