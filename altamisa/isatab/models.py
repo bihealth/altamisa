@@ -544,3 +544,40 @@ class Assay:
     processes: Dict[str, Process]
     #: The processing arcs
     arcs: Tuple[Arc, ...]
+
+
+@attr.s(auto_attribs=True, frozen=True)
+class IsaContainer:
+    """Container for a single investigation with all assays and studies."""
+
+    investigation: InvestigationInfo
+    studies: Dict[str, Study]
+    assays: Dict[str, Assay]
+
+
+# primitives.py
+
+
+def rename_study(
+    isa: IsaContainer,
+    name_from: str,
+    name_to: str,
+) -> IsaContainer:
+    new_studies = []
+    for study in isa.investigation.studies:
+        if study.info.identifier == name_from:
+            new_studies.append(
+                attr.evolve(study, info=attr.evolve(study.info, identifier=name_to))
+            )
+        else:
+            new_studies.append(study)
+    new_investigation = attr.evolve(isa.investigation, studies=tuple(new_studies))
+    new_isa_studies: Dict[str, Study] = {
+        (name_to if key == name_from else key): obj for key, obj in isa.studies.items()
+    }
+    # for name, obj in isa.studies.items():
+    #     if name == name_from:
+    #         new_studies[name_to] = obj
+    #     else:
+    #         new_studies[name] = obj
+    return attr.evolve(isa, investigation=new_investigation, studies=new_isa_studies)
