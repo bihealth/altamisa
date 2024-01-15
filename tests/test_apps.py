@@ -7,7 +7,7 @@ import pytest
 from typer.testing import CliRunner
 
 from altamisa.apps import isatab2dot, isatab2isatab, isatab_validate
-from altamisa.exceptions import IsaException, IsaWarning
+from altamisa.exceptions import IsaWarning
 
 runner = CliRunner()
 
