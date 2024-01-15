@@ -1,3 +1,4 @@
 # Base requirements
 
 attrs
+typer[all]

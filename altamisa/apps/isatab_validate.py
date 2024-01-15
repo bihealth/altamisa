@@ -2,10 +2,12 @@
 """Read from ISA-Tab and print validation warnings, if any.
 """
 
-import argparse
 import os
-import sys
 import warnings
+
+import attrs
+import typer
+from typing_extensions import Annotated
 
 from altamisa.isatab import (
     AssayReader,
@@ -16,8 +18,40 @@ from altamisa.isatab import (
     StudyValidator,
 )
 
+#: Typer application instance.
+app = typer.Typer()
 
-def run(args):
+
+@attrs.define
+class Arguments:
+    input_investigation_file: str
+    show_duplicate_warnings: bool
+
+
+@app.command()
+def main(
+    input_investigation_file: Annotated[
+        str,
+        typer.Option(
+            "--input-investigation-file",
+            "-i",
+            help="Path to input investigation file",
+        ),
+    ],
+    show_duplicate_warnings: Annotated[
+        bool,
+        typer.Option(
+            "--show-duplicate-warnings/--no-show-duplicate_warnings",
+            help="Show duplicated warnings, i.e. with same message and same category (False by default)",
+        ),
+    ] = False,
+):
+    """Main entry point."""
+    # Convert to `Arguments` object.
+    args = Arguments(
+        input_investigation_file=input_investigation_file,
+        show_duplicate_warnings=show_duplicate_warnings,
+    )
     # Show all warnings of same type and content
     if args.show_duplicate_warnings:
         warnings.simplefilter("always")
@@ -29,20 +63,20 @@ def run(args):
     # Print warnings
     for record in records:
         warnings.showwarning(
-            record.message, record.category, record.filename, record.lineno, record.line
+            record.message, record.category, record.filename, lineno=record.lineno, line=record.line
         )
 
 
-def run_warnings_caught(args):
+def run_warnings_caught(args: Arguments):
     # Read investigation
-    investigation = InvestigationReader.from_stream(args.input_investigation_file).read()
-    args.input_investigation_file.close()
+    with open(args.input_investigation_file, "rt") as inputf:
+        investigation = InvestigationReader.from_stream(inputf).read()
 
     # Validate investigation
     InvestigationValidator(investigation).validate()
 
     # Read studies and assays
-    path_in = os.path.normpath(os.path.dirname(args.input_investigation_file.name))
+    path_in = os.path.normpath(os.path.dirname(args.input_investigation_file))
     studies = {}
     assays = {}
     for s, study_info in enumerate(investigation.studies):
@@ -69,29 +103,5 @@ def run_warnings_caught(args):
                 ).validate()
 
 
-def main(argv=None):
-    parser = argparse.ArgumentParser()
-
-    parser.add_argument(
-        "-i",
-        "--input-investigation-file",
-        required=True,
-        type=argparse.FileType("rt"),
-        help="Path to input investigation file",
-    )
-    parser.add_argument(
-        "--show-duplicate-warnings",
-        dest="show_duplicate_warnings",
-        action="store_true",
-        help=(
-            "Show duplicated warnings, i.e. with same message and same category (False by default)"
-        ),
-    )
-    parser.set_defaults(no_warnings=False)
-
-    args = parser.parse_args(argv)
-    return run(args)
-
-
 if __name__ == "__main__":  # pragma: no cover
-    sys.exit(main())
+    typer.run(main)

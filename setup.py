@@ -3,7 +3,7 @@
 
 import os.path
 
-from setuptools import setup, find_packages
+from setuptools import find_packages, setup
 
 import versioneer
 
@@ -35,8 +35,8 @@ install_requirements = parse_requirements("requirements/base.txt")
 setup(
     author="Dieter Beule, Jennifer Kirwan, Mathias Kuhring, Manuel Holtgrewe, Mikko Nieminen",
     author_email=(
-        "dieter.beule@bihealth.de, jennifer.kirwan@bihalth.de, mathias.kuhring@bihealth.de, "
-        "manuel.holtgrewe@bihealth.de, mikko.nieminen@bihealth.de"
+        "dieter.beule@bih-charite.de, jennifer.kirwan@bihalth.de, mathias.kuhring@bih-charite.de, "
+        "manuel.holtgrewe@bih-charite.de, mikko.nieminen@bih-charite.de"
     ),
     classifiers=[
         "Development Status :: 4 - Beta",
@@ -52,9 +52,9 @@ setup(
     ],
     entry_points={
         "console_scripts": (
-            "isatab2dot = altamisa.apps.isatab2dot:main",
-            "isatab2isatab = altamisa.apps.isatab2isatab:main",
-            "isatab_validate = altamisa.apps.isatab_validate:main",
+            "isatab2dot = altamisa.apps.isatab2dot:app",
+            "isatab2isatab = altamisa.apps.isatab2isatab:app",
+            "isatab_validate = altamisa.apps.isatab_validate:app",
         )
     },
     description="Implementation of ISA-tools data model and ISA-TAB",

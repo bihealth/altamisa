@@ -4,29 +4,30 @@ assay files and parsing thereof.
 """
 
 from __future__ import generator_stop
-from typing import Iterator, List
+
+from typing import Iterator, List, Optional, Tuple
+import warnings
 
 from ..constants import table_headers
-from ..exceptions import ParseIsatabException
+from ..exceptions import ParseIsatabException, ParseIsatabWarning
 
-
-__author__ = "Manuel Holtgrewe <manuel.holtgrewe@bihealth.de>"
+__author__ = "Manuel Holtgrewe <manuel.holtgrewe@bih-charite.de>"
 
 
 class ColumnHeader:
     """Column header in a study or assay file"""
 
-    def __init__(self, column_type, col_no, span):
+    def __init__(self, column_type: str, col_no: int, span: int):
         #: The type of this header
-        self.column_type = column_type
+        self.column_type: str = column_type
         #: The column number this header refers to
-        self.col_no = col_no
+        self.col_no: int = col_no
         #: Number of columns this header spans
-        self.span = span
+        self.span: int = span
         #: Link to the TermSourceRefHeader to use
-        self.term_source_ref_header = None
+        self.term_source_ref_header: Optional[ColumnHeader] = None
         #: Link to the UnitHeader to use
-        self.unit_header = None
+        self.unit_header: Optional[ColumnHeader] = None
 
     def __str__(self):
         tpl = "ColumnHeader(column_type={}, col_no={}, span={})"
@@ -44,9 +45,9 @@ class SimpleColumnHeader(ColumnHeader):
     """Base class for simple column headers."""
 
     #: The value to use for the ``type`` argument.
-    column_type = None
+    column_type: str
 
-    def __init__(self, col_no):
+    def __init__(self, col_no: int):
         super().__init__(self.column_type, col_no, 1)
 
 
@@ -295,10 +296,10 @@ class UnitHeader(SimpleColumnHeader):
 class LabeledColumnHeader(ColumnHeader):
     """Base class for labeled column headers."""
 
-    #: The value to use for the ``type`` argument.
-    column_type = None
+    #: The label of the header
+    label: str
 
-    def __init__(self, col_no, label):
+    def __init__(self, col_no: int, label: str):
         super().__init__(self.column_type, col_no, 1)
         self.label = label
 
@@ -311,7 +312,7 @@ class LabeledColumnHeader(ColumnHeader):
 
     def get_simple_string(self):
         """Return a list of simple string representations of the column types"""
-        return ["".join((self.column_type, "[", self.label, "]"))]
+        return ["".join((self.column_type or "MISSING", "[", self.label, "]"))]
 
 
 class CharacteristicsHeader(LabeledColumnHeader):
@@ -349,8 +350,11 @@ class HeaderParserBase:
     :param tokens: List of strings, e.g. a split line read from a tsv/cvs file.
     """
 
+    #: The file type configured for.
+    file_type: str
+
     #: Names of the allowed headers
-    allowed_headers = None
+    allowed_headers: Tuple[str, ...]
 
     #: Headers that are mapped to ``SimpleColumnHeader``
     simple_headers = {
@@ -419,6 +423,10 @@ class HeaderParserBase:
                 break
 
     def _parse_next(self):
+        # Only warn if not allowed headers configured.
+        if self.allowed_headers is None:
+            msg = f"Allowed headers not configured for {self.file_type} file."
+            warnings.warn(msg, ParseIsatabWarning)
         # Get next value from header
         val = next(self.it)  # StopIteration is OK here
         # Process either by exact match to "Term Source REF", or other exact
@@ -426,17 +434,15 @@ class HeaderParserBase:
         if val == table_headers.TERM_SOURCE_REF:
             return self._parse_term_source_ref()
         elif val in self.simple_headers:
-            if val not in self.allowed_headers:
-                tpl = 'Header "{}" not allowed in {}.'
-                msg = tpl.format(val, self.file_type)
+            if self.allowed_headers and val not in self.allowed_headers:
+                msg = f'Header "{val}" not allowed in assay.'
                 raise ParseIsatabException(msg)
             return self._parse_simple_column_header(self.simple_headers[val])
         else:
             for label, type_ in self.labeled_headers.items():
                 if val.startswith(label):
-                    if label not in self.allowed_headers:
-                        tpl = 'Header "{}" not allowed in {}.'
-                        msg = tpl.format(label, self.file_type)
+                    if self.allowed_headers and label not in self.allowed_headers:
+                        msg = f'Header "{label}" not allowed in {self.file_type}.'
                         raise ParseIsatabException(msg)
                     return self._parse_labeled_column_header(val, label, type_)
         # None of the if-statements above was taken
@@ -477,7 +483,7 @@ class StudyHeaderParser(HeaderParserBase):
 
     file_type = "study"  # for exceptions only
 
-    allowed_headers = (
+    allowed_headers: Tuple[str, ...] = (
         # Material names
         table_headers.SAMPLE_NAME,
         table_headers.SOURCE_NAME,
@@ -502,7 +508,7 @@ class AssayHeaderParser(HeaderParserBase):
 
     file_type = "assay"  # for exceptions only
 
-    allowed_headers = (
+    allowed_headers: Tuple[str, ...] = (
         # Material names
         table_headers.EXTRACT_NAME,
         table_headers.LABELED_EXTRACT_NAME,

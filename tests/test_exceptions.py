@@ -7,7 +7,6 @@ import pytest
 from altamisa.exceptions import ParseIsatabException
 from altamisa.isatab import AssayReader, InvestigationReader
 
-
 # Test header exceptions ---------------------------------------------------------------------------
 
 

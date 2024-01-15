@@ -6,14 +6,14 @@ However, the tree is only built within one file (e.g., a list of all materials i
 comments for a material).
 """
 
+import datetime
 from datetime import date
 from pathlib import Path
-from typing import Dict, List, Tuple, Union
+from typing import Dict, List, Literal, Optional, Sequence, Tuple, Union
 
 import attr
 
-
-__author__ = "Manuel Holtgrewe <manuel.holtgrewe@bihealth.de>"
+__author__ = "Manuel Holtgrewe <manuel.holtgrewe@bih-charite.de>"
 
 
 # Base types, used throughout -------------------------------------------------
@@ -66,16 +66,46 @@ class OntologyTermRef:
             object.__setattr__(self, "ontology_name", None)
 
     #: Human-readable name of the term
-    name: str = None
+    name: Optional[str] = None
     #: The accession of the referenced term
-    accession: str = None
+    accession: Optional[str] = None
     #: Name of the ontology (links to ``OntologyRef.name``)
-    ontology_name: str = None
+    ontology_name: Optional[str] = None
 
 
 #: Shortcut for the commonly used "free text or reference to a term in an
 #: ontology" idiom.
-FreeTextOrTermRef = Union[OntologyTermRef, str]
+FreeTextOrTermRef = Union[OntologyTermRef, str, None]
+
+
+def free_text_or_term_ref_to_str(value: FreeTextOrTermRef) -> Optional[str]:
+    """Extract ``name`` from a ``FreeTextOrTermRef`` or use String."""
+    if isinstance(value, str):
+        return value
+    elif isinstance(value, OntologyTermRef):
+        return value.name
+    else:
+        return ""
+
+
+def free_text_or_term_ref_accession(value: FreeTextOrTermRef) -> Optional[str]:
+    """Obtain accession from a ``FreeTextOrTermRef`` or ``None`` if is ``str``."""
+    if isinstance(value, str):
+        return None
+    elif isinstance(value, OntologyTermRef):
+        return value.accession
+    else:
+        return ""
+
+
+def free_text_or_term_ref_ontology(value: FreeTextOrTermRef) -> Optional[str]:
+    """Obtain ontology name from a ``FreeTextOrTermRef`` or ``None`` if is ``str``."""
+    if isinstance(value, str):
+        return None
+    elif isinstance(value, OntologyTermRef):
+        return value.ontology_name
+    else:
+        return ""
 
 
 @attr.s(auto_attribs=True, frozen=True)
@@ -104,7 +134,7 @@ class OntologyRef:
     #: Description of the ontology
     description: str
     #: Comments
-    comments: Tuple[Comment]
+    comments: Tuple[Comment, ...]
     #: Headers from/for ISA-tab parsing/writing
     headers: List[str]
 
@@ -114,7 +144,7 @@ class BasicInfo:
     """Basic metadata for an investigation or study (``INVESTIGATION`` or ``STUDY``)."""
 
     #: Path to the investigation or study file
-    path: Path
+    path: Optional[Path]
     #: Investigation/Study identifier
     identifier: str
     #: Investigation/Study title
@@ -122,11 +152,11 @@ class BasicInfo:
     #: Investigation/Study description
     description: str
     #: Investigation/Study submission date
-    submission_date: date
+    submission_date: Optional[date]
     #: Investigation/Study public release date
-    public_release_date: date
+    public_release_date: Optional[date]
     #: Comments
-    comments: Tuple[Comment]
+    comments: Tuple[Comment, ...]
     #: Headers from/for ISA-tab parsing/writing
     headers: List[str]
 
@@ -146,7 +176,7 @@ class PublicationInfo:
     #: Publication status
     status: FreeTextOrTermRef
     #: Comments
-    comments: Tuple[Comment]
+    comments: Tuple[Comment, ...]
     #: Headers from/for ISA-tab parsing/writing
     headers: List[str]
 
@@ -174,7 +204,7 @@ class ContactInfo:
     #: Role of contact
     role: FreeTextOrTermRef
     #: Comments
-    comments: Tuple[Comment]
+    comments: Tuple[Comment, ...]
     #: Headers from/for ISA-tab parsing/writing
     headers: List[str]
 
@@ -186,7 +216,7 @@ class DesignDescriptorsInfo:
     #: Design descriptors type
     type: FreeTextOrTermRef
     #: Comments
-    comments: Tuple[Comment]
+    comments: Tuple[Comment, ...]
     #: Headers from/for ISA-tab parsing/writing
     headers: List[str]
 
@@ -200,7 +230,7 @@ class FactorInfo:
     #: Factor type
     type: FreeTextOrTermRef
     #: Comments
-    comments: Tuple[Comment]
+    comments: Tuple[Comment, ...]
     #: Headers from/for ISA-tab parsing/writing
     headers: List[str]
 
@@ -216,9 +246,9 @@ class AssayInfo:
     #: Assay platform
     platform: str
     #: Path to assay file
-    path: Path
+    path: Optional[Path]
     #: Comments
-    comments: Tuple[Comment]
+    comments: Tuple[Comment, ...]
     #: Headers from/for ISA-tab parsing/writing
     headers: List[str]
 
@@ -252,7 +282,7 @@ class ProtocolInfo:
     #: Protocol components
     components: Dict[str, ProtocolComponentInfo]
     #: Comments
-    comments: Tuple[Comment]
+    comments: Tuple[Comment, ...]
     #: Headers from/for ISA-tab parsing/writing
     headers: List[str]
 
@@ -264,17 +294,17 @@ class StudyInfo:
     #: Basic study information
     info: BasicInfo
     #: Study designs by name
-    designs: Tuple[DesignDescriptorsInfo]
+    designs: Tuple[DesignDescriptorsInfo, ...]
     #: Publication list for study
-    publications: Tuple[PublicationInfo]
+    publications: Tuple[PublicationInfo, ...]
     #: Study factors by name
     factors: Dict[str, FactorInfo]
     #: Study assays
-    assays: Tuple[AssayInfo]
+    assays: Tuple[AssayInfo, ...]
     #: Study protocols by name
     protocols: Dict[str, ProtocolInfo]
     #: Study contact list
-    contacts: Tuple[ContactInfo]
+    contacts: Tuple[ContactInfo, ...]
 
 
 @attr.s(auto_attribs=True, frozen=True)
@@ -286,12 +316,24 @@ class InvestigationInfo:
     #: Basic information on investigation
     info: BasicInfo
     #: List of investigation publications
-    publications: Tuple[PublicationInfo]
+    publications: Tuple[PublicationInfo, ...]
     #: Contact list for investigation
-    contacts: Tuple[ContactInfo]
+    contacts: Tuple[ContactInfo, ...]
     #: List of studies in this investigation
-    studies: Tuple[StudyInfo]
+    studies: Tuple[StudyInfo, ...]
 
+
+#: Type alias for types in investigation file that have a comments.
+InvestigationFieldWithComments = Union[
+    OntologyRef,
+    BasicInfo,
+    PublicationInfo,
+    ContactInfo,
+    DesignDescriptorsInfo,
+    FactorInfo,
+    ProtocolInfo,
+    AssayInfo,
+]
 
 # Types used in study and assay files -----------------------------------------
 
@@ -305,7 +347,7 @@ class Characteristics:
     #: Characteristics value
     value: List[FreeTextOrTermRef]
     #: Characteristics unit
-    unit: FreeTextOrTermRef
+    unit: Optional[FreeTextOrTermRef]
 
 
 @attr.s(auto_attribs=True, frozen=True)
@@ -317,7 +359,7 @@ class FactorValue:
     #: Factor value
     value: List[FreeTextOrTermRef]
     #: Factor value unit
-    unit: FreeTextOrTermRef
+    unit: Optional[FreeTextOrTermRef]
 
 
 @attr.s(auto_attribs=True, frozen=True)
@@ -327,9 +369,46 @@ class ParameterValue:
     #: Parameter name
     name: str
     #: Parameter value
-    value: List[FreeTextOrTermRef]
+    value: Optional[List[FreeTextOrTermRef]]
     #: Parameter value unit
-    unit: FreeTextOrTermRef
+    unit: Optional[FreeTextOrTermRef]
+
+
+#: Type alias for "complex" values.
+ComplexValue = Union[Characteristics, FactorValue, ParameterValue]
+
+
+def build_characteristics(
+    name: str, value: Union[FreeTextOrTermRef, Sequence[FreeTextOrTermRef]], unit: FreeTextOrTermRef
+) -> Characteristics:
+    """Helper function that builds a `Characteristics`"""
+    if value is None or isinstance(value, (str, OntologyTermRef)):
+        # is free text or term ref
+        return Characteristics(name=name, value=[value], unit=unit)
+    else:
+        return Characteristics(name=name, value=list(value), unit=unit)
+
+
+def build_factor_value(
+    name: str, value: Union[FreeTextOrTermRef, Sequence[FreeTextOrTermRef]], unit: FreeTextOrTermRef
+) -> FactorValue:
+    """Helper function that builds a `FactorValue`"""
+    if value is None or isinstance(value, (str, OntologyTermRef)):
+        # is free text or term ref
+        return FactorValue(name=name, value=[value], unit=unit)
+    else:
+        return FactorValue(name=name, value=list(value), unit=unit)
+
+
+def build_parameter_value(
+    name: str, value: Union[FreeTextOrTermRef, Sequence[FreeTextOrTermRef]], unit: FreeTextOrTermRef
+) -> ParameterValue:
+    """Helper function that builds a `ParameterValue`"""
+    if value is None or isinstance(value, (str, OntologyTermRef)):
+        # is free text or term ref
+        return ParameterValue(name=name, value=[value], unit=unit)
+    else:
+        return ParameterValue(name=name, value=list(value), unit=unit)
 
 
 @attr.s(auto_attribs=True, frozen=True)
@@ -347,15 +426,15 @@ class Material:
     #: Original name of a material or data file
     name: str
     #: The label of a Labeled Extract
-    extract_label: FreeTextOrTermRef
+    extract_label: Optional[Union[FreeTextOrTermRef, Sequence[FreeTextOrTermRef]]]
     #: Material characteristics
-    characteristics: Tuple[Characteristics]
+    characteristics: Tuple[Characteristics, ...]
     #: Material comments
-    comments: Tuple[Comment]
+    comments: Tuple[Comment, ...]
     #: Material factor values
-    factor_values: Tuple[FactorValue]
+    factor_values: Tuple[FactorValue, ...]
     #: Material type
-    material_type: FreeTextOrTermRef
+    material_type: Optional[Union[FreeTextOrTermRef, Sequence[FreeTextOrTermRef]]]
     #: Columns headers from/for ISA-tab parsing/writing
     headers: List[str]
 
@@ -375,31 +454,31 @@ class Process:
     #: protocol reference with an auto-incrementing number.
     unique_name: str
     #: Original name of a process (e.g. from Assay Name etc.)
-    name: str
+    name: Optional[str]
     #: Type of original name (e.g. Assay Name)
-    name_type: str
+    name_type: Optional[str]
     #: Process date
-    date: date
+    date: Optional[Union[datetime.date, Literal[""]]]
     #: Performer of process
-    performer: str
+    performer: Optional[str]
     #: Tuple of parameters values
-    parameter_values: Tuple[ParameterValue]
+    parameter_values: Tuple[ParameterValue, ...]
     #: Tuple of process comments
-    comments: Tuple[Comment]
+    comments: Tuple[Comment, ...]
 
-    array_design_ref: str
+    array_design_ref: Optional[str]
     """
     Array design reference (special case annotation)\n
     Technology types: "DNA microarray", "protein microarray"\n
     Protocol types: "nucleic acid hybridization", "hybridization"
     """
-    first_dimension: FreeTextOrTermRef
+    first_dimension: Optional[Union[FreeTextOrTermRef, Sequence[FreeTextOrTermRef]]]
     """
     First dimension (special case annotation, INSTEAD of Gel Electrophoresis Assay Name)\n
     Technology types: "gel electrophoresis"\n
     Protocol types: "electrophoresis"
     """
-    second_dimension: FreeTextOrTermRef
+    second_dimension: Optional[Union[FreeTextOrTermRef, Sequence[FreeTextOrTermRef]]]
     """
     Second dimension (special case annotation, INSTEAD of Gel Electrophoresis Assay Name)\n
     Technology types: "gel electrophoresis"\n
@@ -408,6 +487,10 @@ class Process:
 
     #: Columns headers from/for ISA-tab parsing/writing
     headers: List[str]
+
+
+#: Type alias for a node in the graph.
+Node = Union[Material, Process]
 
 
 @attr.s(auto_attribs=True, frozen=True)
@@ -443,7 +526,7 @@ class Study:
     #: A mapping from process name to ``Process`` object
     processes: Dict[str, Process]
     #: The processing arcs
-    arcs: Tuple[Arc]
+    arcs: Tuple[Arc, ...]
 
 
 @attr.s(auto_attribs=True, frozen=True)
@@ -460,4 +543,4 @@ class Assay:
     #: A mapping from process name to ``Process`` object
     processes: Dict[str, Process]
     #: The processing arcs
-    arcs: Tuple[Arc]
+    arcs: Tuple[Arc, ...]

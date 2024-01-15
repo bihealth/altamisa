@@ -3,13 +3,12 @@
 
 
 __author__ = (
-    "Manuel Holtgrewe <manuel.holtgrewe@bihealth.de>, "
-    "Mathias Kuhring <mathias.kuhring@bihealth.de>"
+    "Manuel Holtgrewe <manuel.holtgrewe@bih-charite.de>, "
+    "Mathias Kuhring <mathias.kuhring@bih-charite.de>"
 )
 
 
 from . import table_headers
-
 
 # Assay measurement types (only the once needed for special validations)
 PROTEIN_EXPRESSION_PROFILING = "protein expression profiling"  #:
