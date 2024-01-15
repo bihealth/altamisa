@@ -369,7 +369,7 @@ class InvestigationReader:
             line = self._read_next_line()
             if not line or not line[0] == investigation_headers.STUDY:  # pragma: no cover
                 tpl = "Expected {} but got {}"
-                msg = tpl.format(investigation_headers.INVESTIGATION, line)
+                msg = tpl.format(investigation_headers.STUDY, line)
                 raise ParseIsatabException(msg)
             # Read the other lines in this section.
             section, comment_keys = self._read_single_column_section(
