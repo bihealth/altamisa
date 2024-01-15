@@ -55,7 +55,9 @@ def test_isatab2isatab_input_is_output(tmpdir, snapshot: SnapshotAssertion):
 
     result = runner.invoke(isatab2isatab.app, argv)
     assert result.exit_code == 1
-    assert snapshot == str(result)
+    assert snapshot == str(result).replace(
+        os.path.dirname(__file__), "/home/runner/work/altamisa/tests"
+    )
 
 
 def test_isatab2dot(tmpdir):

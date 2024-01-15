@@ -26,7 +26,7 @@
   ])
 # ---
 # name: test_isatab2isatab_input_is_output
-  '<Result IsaException("Can\'t output ISA-tab files to same directory as as input: /home/sellts_c/Code/altamisa/tests/data/i_minimal == /home/sellts_c/Code/altamisa/tests/data/i_minimal")>'
+  '<Result IsaException("Can\'t output ISA-tab files to same directory as as input: /home/runner/work/altamisa/tests/data/i_minimal == /home/runner/work/altamisa/tests/data/i_minimal")>'
 # ---
 # name: test_isatab_validate
   list([
