@@ -1,9 +1,9 @@
 # Process ISA model data
 
-from altamisa.isatab import *
 import os
 import warnings
 
+from altamisa.isatab import *
 
 # Parse and validate an investigation file
 with open("i_investigation.txt", "rt") as investigation_file:

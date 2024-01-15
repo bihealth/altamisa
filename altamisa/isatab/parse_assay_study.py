@@ -8,61 +8,99 @@ from __future__ import generator_stop
 import csv
 from datetime import datetime
 from pathlib import Path
-from typing import List, TextIO
+from typing import (
+    Callable,
+    Dict,
+    Generator,
+    Generic,
+    List,
+    Optional,
+    Sequence,
+    TextIO,
+    Tuple,
+    Type,
+    TypeVar,
+    Union,
+)
 
-from ..constants import table_tokens
-from ..constants import table_headers
-from ..exceptions import ParseIsatabException
-from .headers import ColumnHeader, StudyHeaderParser, AssayHeaderParser, LabeledColumnHeader
-from .helpers import list_strip
 from . import models
+from ..constants import table_headers, table_tokens
+from ..exceptions import ParseIsatabException
+from .headers import (
+    ArrayDesignRefHeader,
+    AssayHeaderParser,
+    CharacteristicsHeader,
+    ColumnHeader,
+    CommentHeader,
+    DateHeader,
+    FactorValueHeader,
+    FirstDimensionHeader,
+    LabeledColumnHeader,
+    LabeledExtractHeader,
+    MaterialTypeHeader,
+    ParameterValueHeader,
+    PerformerHeader,
+    SecondDimensionHeader,
+    StudyHeaderParser,
+    UnitHeader,
+)
+from .helpers import list_strip
+
+__author__ = "Manuel Holtgrewe <manuel.holtgrewe@bih-charite.de>"
 
 
-__author__ = "Manuel Holtgrewe <manuel.holtgrewe@bihealth.de>"
+#: Type variable for generic Material/Process.
+TNode = TypeVar("TNode")
+#: Type variable for cells/value.
+TCell = TypeVar("TCell")
 
 
-class _NodeBuilderBase:
+class _NodeBuilderBase(Generic[TNode]):
     """Base class for Material and Process builder objects"""
 
     #: Headers to use for naming
-    name_headers = None
+    name_headers: Tuple[str, ...]
     #: Allowed ``column_type``s.
-    allowed_column_types = None
+    allowed_column_types: Tuple[str, ...]
 
     def __init__(
-        self, column_headers: List[ColumnHeader], filename: str, study_id: str, assay_id: str
+        self,
+        column_headers: List[ColumnHeader],
+        filename: str,
+        study_id: str,
+        assay_id: Optional[str],
     ):
         #: The column descriptions to build ``Material`` from.
-        self.column_headers = column_headers
+        self.column_headers: List[ColumnHeader] = column_headers
         #: The "Protocol REF" header, if any
-        self.protocol_ref_header = None
+        self.protocol_ref_header: Optional[ColumnHeader] = None
         #: The header to use for building names, if any
-        self.name_header = None
+        self.name_header: Optional[ColumnHeader] = None
         #: The headers for the characteristics
-        self.characteristic_headers = []
+        self.characteristic_headers: List[CharacteristicsHeader] = []
         #: The headers for comments
-        self.comment_headers = []
+        self.comment_headers: List[CommentHeader] = []
         #: The factor value headers
-        self.factor_value_headers = []
+        self.factor_value_headers: List[FactorValueHeader] = []
         #: The parameter value headers
-        self.parameter_value_headers = []
+        self.parameter_value_headers: List[ParameterValueHeader] = []
         #: The header for array design ref
         self.array_design_ref = None
         #: The header for array design ref
-        self.array_design_ref_header = None
+        self.array_design_ref_header: Optional[ArrayDesignRefHeader] = None
         #: The header for first and second dimension
-        self.first_dimension_header = None
-        self.second_dimension_header = None
+        self.first_dimension_header: Optional[FirstDimensionHeader] = None
+        self.second_dimension_header: Optional[SecondDimensionHeader] = None
         #: The header for extract label type
-        self.extract_label_header = None
+        self.extract_label_header: Optional[LabeledExtractHeader] = None
         #: The header for material type
-        self.material_type_header = None
+        self.material_type_header: Optional[MaterialTypeHeader] = None
         #: The header for the performer
-        self.performer_header = None
+        self.performer_header: Optional[PerformerHeader] = None
         #: The header for the date
-        self.date_header = None
+        self.date_header: Optional[DateHeader] = None
         #: The header for the unit
-        self.unit_header = None
+        self.unit_header: Optional[UnitHeader] = None
         #: Current counter value
         self.counter_value = 0
         #: Assign column headers to their roles (properties above)
@@ -72,6 +110,10 @@ class _NodeBuilderBase:
         self.assay_id = assay_id
         #: Original file name
         self.filename = filename
+
+    def build(self, line: List[str]) -> TNode:
+        _ = line
+        raise NotImplementedError()
 
     def _next_counter(self):
         """Increment counter value and return"""
@@ -99,49 +141,49 @@ class _NodeBuilderBase:
             elif header.column_type in self.name_headers:
                 assert not self.name_header
                 self.name_header = header
-            elif header.column_type == table_headers.CHARACTERISTICS:
-                self.characteristic_headers.append(header)
-            elif header.column_type == table_headers.COMMENT:
-                self.comment_headers.append(header)
-            elif header.column_type == table_headers.FACTOR_VALUE:
-                self.factor_value_headers.append(header)
-            elif header.column_type == table_headers.PARAMETER_VALUE:
-                self.parameter_value_headers.append(header)
-            elif header.column_type == table_headers.MATERIAL_TYPE:
+            elif header.column_type == table_headers.CHARACTERISTICS:  # type check here
+                self.characteristic_headers.append(header)  # type: ignore
+            elif header.column_type == table_headers.COMMENT:  # type check here
+                self.comment_headers.append(header)  # type: ignore
+            elif header.column_type == table_headers.FACTOR_VALUE:  # type check here
+                self.factor_value_headers.append(header)  # type: ignore
+            elif header.column_type == table_headers.PARAMETER_VALUE:  # type check here
+                self.parameter_value_headers.append(header)  # type: ignore
+            elif header.column_type == table_headers.MATERIAL_TYPE:  # type check here
                 if self.material_type_header:  # pragma: no cover
                     self._raise_seen_before("Material Type", header.col_no)
                 else:
-                    self.material_type_header = header
-            elif header.column_type == table_headers.ARRAY_DESIGN_REF:
+                    self.material_type_header = header  # type: ignore
+            elif header.column_type == table_headers.ARRAY_DESIGN_REF:  # type check here
                 if self.array_design_ref_header:  # pragma: no cover
                     self._raise_seen_before("Array Design REF", header.col_no)
                 else:
-                    self.array_design_ref_header = header
-            elif header.column_type == table_headers.FIRST_DIMENSION:
+                    self.array_design_ref_header = header  # type: ignore
+            elif header.column_type == table_headers.FIRST_DIMENSION:  # type check here
                 if self.first_dimension_header:  # pragma: no cover
                     self._raise_seen_before("First Dimension", header.col_no)
                 else:
-                    self.first_dimension_header = header
-            elif header.column_type == table_headers.SECOND_DIMENSION:
+                    self.first_dimension_header = header  # type: ignore
+            elif header.column_type == table_headers.SECOND_DIMENSION:  # type check here
                 if self.second_dimension_header:  # pragma: no cover
                     self._raise_seen_before("Second Dimension", header.col_no)
                 else:
-                    self.second_dimension_header = header
-            elif header.column_type == table_headers.LABEL:
+                    self.second_dimension_header = header  # type: ignore
+            elif header.column_type == table_headers.LABEL:  # type check here
                 if self.extract_label_header:  # pragma: no cover
                     self._raise_seen_before("Label", header.col_no)
                 else:
-                    self.extract_label_header = header
-            elif header.column_type == table_headers.DATE:
+                    self.extract_label_header = header  # type: ignore
+            elif header.column_type == table_headers.DATE:  # type check here
                 if self.date_header:  # pragma: no cover
                     self._raise_seen_before("Date", header.col_no)
                 else:
-                    self.date_header = header
-            elif header.column_type == table_headers.PERFORMER:
+                    self.date_header = header  # type: ignore
+            elif header.column_type == table_headers.PERFORMER:  # type check here
                 if self.performer_header:  # pragma: no cover
                     self._raise_seen_before("Performer", header.col_no)
                 else:
-                    self.performer_header = header
+                    self.performer_header = header  # type: ignore
             elif header.column_type == table_headers.TERM_SOURCE_REF:
                 # Guard against misuse / errors
                 if not prev:  # pragma: no cover
@@ -175,9 +217,10 @@ class _NodeBuilderBase:
                     raise ParseIsatabException(msg)
                 else:
                     # The previous non-secondary header is annotated with an ontology term.
-                    prev.term_source_ref_header = header
+                    if prev:
+                        prev.term_source_ref_header = header
                     is_secondary = True
-            elif header.column_type == table_headers.UNIT:
+            elif prev and header.column_type == table_headers.UNIT:
                 if prev.unit_header or prev.column_type == table_headers.UNIT:  # pragma: no cover
                     self._raise_seen_before("Unit", header.col_no)
                 else:
@@ -193,17 +236,34 @@ class _NodeBuilderBase:
         msg = tpl.format(name, col_no)
         raise ParseIsatabException(msg)
 
-    def _build_complex(self, header, line, klass, allow_list=False):
+    def _build_complex(
+        self,
+        header: LabeledColumnHeader,
+        line: List[str],
+        klass: Callable[
+            [
+                str,
+                Union[models.FreeTextOrTermRef, Sequence[models.FreeTextOrTermRef]],
+                models.FreeTextOrTermRef,
+            ],
+            TCell,
+        ],
+        allow_list=False,
+    ) -> TCell:
         """Build a complex annotation (e.g., may have term reference or unit."""
         # First, build the individual components
         value = self._build_freetext_or_term_ref(header, line, allow_list=allow_list)
         unit = self._build_freetext_or_term_ref(header.unit_header, line)
+        if unit is not None and not isinstance(unit, (str, models.OntologyTermRef)):
+            raise ParseIsatabException(
+                "Unit must be a string or an OntologyTermRef, not {}".format(type(unit))
+            )
         # Then, constructing ``klass`` is easy
         return klass(header.label, value, unit)
 
     def _build_freetext_or_term_ref(
-        self, header, line: List[str], allow_list=False
-    ) -> models.FreeTextOrTermRef:
+        self, header: Optional[ColumnHeader], line: List[str], allow_list=False
+    ) -> Optional[Union[models.FreeTextOrTermRef, Sequence[models.FreeTextOrTermRef]]]:
         if not header:
             return None
         elif header.term_source_ref_header:
@@ -243,7 +303,7 @@ class _NodeBuilderBase:
         return [h for headers in self.column_headers for h in headers.get_simple_string()]
 
     @staticmethod
-    def _token_with_escape(string, escape="\\", separator=";"):
+    def _token_with_escape(string: str, escape: str = "\\", separator: str = ";") -> List[str]:
         # Source: https://rosettacode.org/wiki/Tokenize_a_string_with_escaping#Python
         result = []
         segment = ""
@@ -264,12 +324,12 @@ class _NodeBuilderBase:
         return result
 
 
-class _MaterialBuilder(_NodeBuilderBase):
+class _MaterialBuilder(_NodeBuilderBase[models.Material]):
     """Helper class to construct a ``Material`` object from a line"""
 
-    name_headers = table_headers.MATERIAL_NAME_HEADERS
+    name_headers: Tuple[str, ...] = table_headers.MATERIAL_NAME_HEADERS
 
-    allowed_column_types = (
+    allowed_column_types: Tuple[str, ...] = (
         # Primary annotations (not parametrized)
         table_headers.MATERIAL_TYPE,
         # Primary annotations (parametrized)
@@ -286,7 +346,10 @@ class _MaterialBuilder(_NodeBuilderBase):
         """Build and return ``Material`` from TSV file line."""
         counter_value = self._next_counter()
         # First, build the individual components
-        assert self.name_header or self.protocol_ref_header
+        if not self.name_header:
+            raise ParseIsatabException(
+                "No name header found for material found for file {}".format(self.filename)
+            )
         type_ = self.name_header.column_type
         assay_id = "-{}".format(self.assay_id) if self.assay_id else ""
         name = line[self.name_header.col_no]
@@ -315,14 +378,15 @@ class _MaterialBuilder(_NodeBuilderBase):
             unique_name = models.AnnotatedStr(name_val, was_empty=True)
         extract_label = self._build_freetext_or_term_ref(self.extract_label_header, line)
         characteristics = tuple(
-            self._build_complex(hdr, line, models.Characteristics, allow_list=True)
+            self._build_complex(hdr, line, models.build_characteristics, allow_list=True)
             for hdr in self.characteristic_headers
         )
         comments = tuple(
             models.Comment(hdr.label, line[hdr.col_no]) for hdr in self.comment_headers
         )
         factor_values = tuple(
-            self._build_complex(hdr, line, models.FactorValue) for hdr in self.factor_value_headers
+            self._build_complex(hdr, line, models.build_factor_value)
+            for hdr in self.factor_value_headers
         )
         material_type = self._build_freetext_or_term_ref(self.material_type_header, line)
         # Then, constructing ``Material`` is easy
@@ -339,12 +403,12 @@ class _MaterialBuilder(_NodeBuilderBase):
         )
 
 
-class _ProcessBuilder(_NodeBuilderBase):
+class _ProcessBuilder(_NodeBuilderBase[models.Process]):
     """Helper class to construct ``Process`` objects."""
 
-    name_headers = table_headers.PROCESS_NAME_HEADERS
+    name_headers: Tuple[str, ...] = table_headers.PROCESS_NAME_HEADERS
 
-    allowed_column_types = (
+    allowed_column_types: Tuple[str, ...] = (
         table_headers.PROTOCOL_REF,
         # Primary annotations (not parametrized)
         table_headers.PERFORMER,
@@ -385,7 +449,7 @@ class _ProcessBuilder(_NodeBuilderBase):
             models.Comment(hdr.label, line[hdr.col_no]) for hdr in self.comment_headers
         )
         parameter_values = tuple(
-            self._build_complex(hdr, line, models.ParameterValue, allow_list=True)
+            self._build_complex(hdr, line, models.build_parameter_value, allow_list=True)
             for hdr in self.parameter_value_headers
         )
         # Check for special case annotations
@@ -410,15 +474,23 @@ class _ProcessBuilder(_NodeBuilderBase):
             self._build_simple_headers_list(),
         )
 
-    def _build_protocol_ref_and_name(self, line: List[str]):
+    def _build_protocol_ref_and_name(
+        self, line: List[str]
+    ) -> Tuple[str, Union[models.AnnotatedStr, str], Optional[str], Optional[str]]:
         # At least one of these headers has to be specified
-        assert self.name_header or self.protocol_ref_header
+        if not self.name_header and not self.protocol_ref_header:  # pragma: no cover
+            raise ParseIsatabException(
+                "No protocol reference header found for process found for file {}".format(
+                    self.filename
+                )
+            )
         # Perform case distinction on which case is actually true
         counter_value = self._next_counter()
         assay_id = "-{}".format(self.assay_id) if self.assay_id else ""
         name = None
         name_type = None
-        if not self.name_header:
+        if not self.name_header:  # and self.protocol_ref_header:
+            assert self.protocol_ref_header, "invariant: checked above"
             # Name header is not given, will use auto-generated unique name
             # based on protocol ref.
             protocol_ref = line[self.protocol_ref_header.col_no]
@@ -431,6 +503,7 @@ class _ProcessBuilder(_NodeBuilderBase):
             )
             unique_name = models.AnnotatedStr(name_val, was_empty=True)
         elif not self.protocol_ref_header:
+            assert self.name_header, "invariant: checked above"
             # Name header is given, but protocol ref header is not
             protocol_ref = table_tokens.TOKEN_UNKNOWN
             name = line[self.name_header.col_no]
@@ -467,8 +540,11 @@ class _ProcessBuilder(_NodeBuilderBase):
                 )
                 unique_name = models.AnnotatedStr(name_val, was_empty=True)
         if not protocol_ref:  # pragma: no cover
-            tpl = "Missing protocol reference in column {} of file {} "
-            msg = tpl.format(self.protocol_ref_header.col_no + 1, self.filename)
+            if self.protocol_ref_header:
+                tpl = "Missing protocol reference in column {} of file {} "
+                msg = tpl.format(self.protocol_ref_header.col_no + 1, self.filename)
+            else:
+                msg = "Missing protocol reference in file {}".format(self.filename)
             raise ParseIsatabException(msg)
         return protocol_ref, unique_name, name, name_type
 
@@ -477,10 +553,14 @@ class _RowBuilderBase:
     """Base class for row builders from study and assay files"""
 
     #: Registry of column header to node builder
-    node_builders = None
+    node_builders: Dict[str, Type[_NodeBuilderBase]]
 
     def __init__(
-        self, header: List[ColumnHeader], filename: str, study_id: str, assay_id: str = None
+        self,
+        header: List[ColumnHeader],
+        filename: str,
+        study_id: str,
+        assay_id: Optional[str] = None,
     ):
         self.header = header
         self.filename = filename
@@ -488,7 +568,7 @@ class _RowBuilderBase:
         self.assay_id = assay_id
         self._builders = list(self._make_builders())
 
-    def _make_builders(self):
+    def _make_builders(self) -> Generator[_NodeBuilderBase, None, None]:
         """Construct the builder objects for the objects"""
         breaks = list(self._make_breaks())
         for start, end in zip(breaks, breaks[1:]):
@@ -566,7 +646,7 @@ class _RowBuilderBase:
                     noname_protocol_ref = False
         yield len(self.header)  # index to end of list
 
-    def build(self, line):
+    def build(self, line: List[str]) -> List[models.Node]:
         return [b.build(line) for b in self._builders]
 
 
@@ -730,11 +810,11 @@ class StudyRowReader:
     """
 
     @classmethod
-    def from_stream(klass, study_id: str, input_file: TextIO, filename: str = None):
+    def from_stream(cls, study_id: str, input_file: TextIO, filename: Optional[str] = None):
         """Construct from file-like object"""
         return StudyRowReader(study_id, input_file, filename)
 
-    def __init__(self, study_id: str, input_file: TextIO, filename: str):
+    def __init__(self, study_id: str, input_file: TextIO, filename: Optional[str]):
         self.study_id = study_id
         self.input_file = input_file
         self.filename = filename or getattr(input_file, "name", "<no file>")
@@ -804,7 +884,7 @@ class StudyReader:
     """
 
     @classmethod
-    def from_stream(klass, study_id: str, input_file: TextIO, filename=None):
+    def from_stream(cls, study_id: str, input_file: TextIO, filename: Optional[str] = None):
         """Construct from file-like object"""
         return StudyReader(study_id, input_file, filename)
 
@@ -849,11 +929,13 @@ class AssayRowReader:
     """
 
     @classmethod
-    def from_stream(klass, study_id: str, assay_id: str, input_file: TextIO, filename: str = None):
+    def from_stream(
+        cls, study_id: str, assay_id: str, input_file: TextIO, filename: Optional[str] = None
+    ):
         """Construct from file-like object"""
         return AssayRowReader(study_id, assay_id, input_file, filename)
 
-    def __init__(self, study_id: str, assay_id: str, input_file: TextIO, filename: str):
+    def __init__(self, study_id: str, assay_id: str, input_file: TextIO, filename: Optional[str]):
         self.study_id = study_id
         self.assay_id = assay_id
         self.input_file = input_file
@@ -926,7 +1008,9 @@ class AssayReader:
     """
 
     @classmethod
-    def from_stream(klass, study_id: str, assay_id: str, input_file: TextIO, filename=None):
+    def from_stream(
+        cls, study_id: str, assay_id: str, input_file: TextIO, filename: Optional[str] = None
+    ):
         """Construct from file-like object"""
         return AssayReader(study_id, assay_id, input_file, filename)
 

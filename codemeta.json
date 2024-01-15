@@ -5,35 +5,35 @@
     {
       "@id": "https://orcid.org/0000-0002-3287-0313",
       "@type": "Person",
-      "email": "mathias.kuhring@bihealth.de",
+      "email": "mathias.kuhring@bih-charite.de",
       "name": "Mathias Kuhring",
       "affiliation": "Berlin Institute of Health (BIH), Berlin, German"
     },
     {
       "@id": "https://orcid.org/0000-0002-4180-8810",
       "@type": "Person",
-      "email": "mikko.nieminen@bihealth.de",
+      "email": "mikko.nieminen@bih-charite.de",
       "name": "Mikko Nieminen",
       "affiliation": "Berlin Institute of Health (BIH), Berlin, German"
     },
     {
       "@id": "https://orcid.org/0000-0002-5423-1651",
       "@type": "Person",
-      "email": "jennifer.kirwan@bihealth.de",
+      "email": "jennifer.kirwan@bih-charite.de",
       "name": "Jennifer Kirwan",
       "affiliation": "Berlin Institute of Health (BIH), Berlin, German"
     },
     {
       "@id": "https://orcid.org/0000-0002-3284-0632",
       "@type": "Person",
-      "email": "dieter.beule@bihealth.de",
+      "email": "dieter.beule@bih-charite.de",
       "name": "Dieter Beule",
       "affiliation": "Berlin Institute of Health (BIH), Berlin, German"
     },
     {
       "@id": "https://orcid.org/0000-0002-3051-1763",
       "@type": "Person",
-      "email": "manuel.holtgrewe@bihealth.de",
+      "email": "manuel.holtgrewe@bih-charite.de",
       "name": "Manuel Holtgrewe",
       "affiliation": "Berlin Institute of Health (BIH), Berlin, German"
     }

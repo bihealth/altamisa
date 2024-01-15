@@ -4,9 +4,9 @@
 
 from datetime import date
 from pathlib import Path
-import pytest
 import warnings
 
+import pytest
 
 from altamisa.constants import investigation_headers
 from altamisa.exceptions import (
@@ -16,8 +16,7 @@ from altamisa.exceptions import (
     ModerateIsaValidationWarning,
     ParseIsatabWarning,
 )
-from altamisa.isatab import models
-from altamisa.isatab import InvestigationReader, InvestigationValidator
+from altamisa.isatab import InvestigationReader, InvestigationValidator, models
 
 
 def test_parse_minimal_investigation(minimal_investigation_file):

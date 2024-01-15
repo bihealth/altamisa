@@ -11,7 +11,10 @@ pytest-cov
 
 # Coverage report
 coverage
-codacy-coverage >=1.3.6
 
-# Flake8 for lintoing
+# Flake8 for linting
 flake8 >=3.5.0
+
+isort
+
+pyright

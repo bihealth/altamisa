@@ -3,6 +3,7 @@
 
 
 import filecmp
+
 import pytest
 
 from altamisa.exceptions import (
@@ -12,8 +13,11 @@ from altamisa.exceptions import (
     ParseIsatabWarning,
     WriteIsatabWarning,
 )
-from altamisa.isatab import InvestigationReader, InvestigationWriter, InvestigationValidator
-
+from altamisa.isatab import (
+    InvestigationReader,
+    InvestigationValidator,
+    InvestigationWriter,
+)
 
 # Tests with one-time reading and writing
 

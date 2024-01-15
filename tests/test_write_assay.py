@@ -4,6 +4,7 @@
 
 import filecmp
 import os
+
 import pytest
 
 from altamisa.exceptions import (
@@ -14,11 +15,11 @@ from altamisa.exceptions import (
     ParseIsatabWarning,
 )
 from altamisa.isatab import (
-    InvestigationReader,
-    InvestigationValidator,
     AssayReader,
     AssayValidator,
     AssayWriter,
+    InvestigationReader,
+    InvestigationValidator,
 )
 
 
@@ -34,6 +35,8 @@ def _parse_write_assert_assay(investigation_file, tmp_path, quote=None, normaliz
             if skip and str(assay_info.path) in skip:
                 continue
             # Load assay
+            if not assay_info.path:
+                raise ValueError("Assay {} has no path".format(assay_info))
             path_in = os.path.join(directory, assay_info.path)
             with open(path_in, "rt") as inputf:
                 assay = AssayReader.from_stream(

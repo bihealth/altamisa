@@ -7,16 +7,15 @@ here. Then, validations can be performed on whole models (e.g. after parsing or 
 writing) and provide a comprehensive list of warnings of different degree.
 """
 
-from typing import Dict
+from typing import Dict, Optional, Union
 import warnings
 
-from ..constants import table_headers, table_restrictions, table_tokens
-from ..exceptions import ModerateIsaValidationWarning, CriticalIsaValidationWarning
-from .helpers import is_ontology_term_ref
 from . import models
+from ..constants import table_headers, table_restrictions, table_tokens
+from ..exceptions import CriticalIsaValidationWarning, ModerateIsaValidationWarning
+from .helpers import is_ontology_term_ref
 
-
-__author__ = "Mathias Kuhring <mathias.kuhring@bihealth.de>"
+__author__ = "Mathias Kuhring <mathias.kuhring@bih-charite.de>"
 
 
 # Constants to differentiate models when validating materials, processes or arcs
@@ -69,7 +68,7 @@ class _MaterialValidator:
         model_type,
         factor_refs: Dict[str, models.FactorInfo],
         ontology_validator: _OntologyTermRefValidator,
-        assay_info: models.AssayInfo = None,
+        assay_info: Optional[models.AssayInfo] = None,
     ):
         self._model_type = model_type
         self._factor_refs = factor_refs
@@ -215,15 +214,15 @@ class _MaterialValidator:
 
     def _validate_ontology_term_refs(self, material: models.Material):
         # Validate consistency of all potential ontology term references in a material
-        if material.extract_label and is_ontology_term_ref(material.extract_label):
+        if isinstance(material.extract_label, models.OntologyTermRef):
             self._ontology_validator.validate(material.extract_label)
-        if material.material_type and is_ontology_term_ref(material.material_type):
+        if isinstance(material.material_type, models.OntologyTermRef):
             self._ontology_validator.validate(material.material_type)
         for c in material.characteristics:
             for v in c.value:
-                if is_ontology_term_ref(v):
+                if isinstance(v, models.OntologyTermRef):
                     self._ontology_validator.validate(v)
-            if is_ontology_term_ref(c.unit):
+            if isinstance(c.unit, models.OntologyTermRef):
                 self._ontology_validator.validate(c.unit)
 
     def _validate_factor_values(self, factor_values):
@@ -241,8 +240,8 @@ class _ProcessValidator:
     def __init__(
         self,
         protocols: Dict[str, models.ProtocolInfo],
-        ontology_validator: _OntologyTermRefValidator = None,
-        assay_info: models.AssayInfo = None,
+        ontology_validator: Optional[_OntologyTermRefValidator] = None,
+        assay_info: Optional[models.AssayInfo] = None,
     ):
         self._protocols = protocols
         self._ontology_validator = ontology_validator
@@ -305,6 +304,9 @@ class _ProcessValidator:
         # Check if restricted to assay technology
         if (
             test in assay_tech_restrictions
+            and self._assay_info
+            and isinstance(self._assay_info.technology_type, models.OntologyTermRef)
+            and self._assay_info.technology_type.name
             and self._assay_info.technology_type.name.lower() not in assay_tech_restrictions[test]
         ):
             tpl = '"{}" not supported by assay technology "{}" (only "{}")'
@@ -322,15 +324,19 @@ class _ProcessValidator:
         if test in protocol_type_restrictions:
             # Check prototype with partial matching, as types are sometimes extended
             any_match = False
+            protocol = self._protocols[process.protocol_ref]
+            if isinstance(protocol.type, models.OntologyTermRef) and protocol.type.name:
+                protocol_name = protocol.type.name
+            else:
+                protocol_name = None
             for res_type in protocol_type_restrictions[test]:
-                any_match = (
-                    any_match or res_type in self._protocols[process.protocol_ref].type.name.lower()
-                )
+                if isinstance(protocol.type, models.OntologyTermRef) and protocol.type.name:
+                    any_match = any_match or res_type in protocol.type.name.lower()
             if not any_match:
                 tpl = '"{}" not supported by protocol type "{}" (only "{}")'
                 msg = tpl.format(
                     test,
-                    self._protocols[process.protocol_ref].type.name,
+                    protocol_name,
                     ", ".join(protocol_type_restrictions[test]),
                 )
                 warnings.warn(msg, ModerateIsaValidationWarning)
@@ -368,23 +374,25 @@ class _ProcessValidator:
             )
 
     def _validate_ontology_term_refs(self, process: models.Process):
+        if not self._ontology_validator:
+            return  # skip
         # Validate consistency of all potential ontology term references in a process
         for parameter in process.parameter_values:
-            for v in parameter.value:
-                if is_ontology_term_ref(v):
+            for v in parameter.value or []:
+                if isinstance(v, models.OntologyTermRef):
                     self._ontology_validator.validate(v)
-            if is_ontology_term_ref(parameter.unit):
+            if isinstance(parameter.unit, models.OntologyTermRef):
                 self._ontology_validator.validate(parameter.unit)
-        if process.first_dimension and is_ontology_term_ref(process.first_dimension):
+        if isinstance(process.first_dimension, models.OntologyTermRef):
             self._ontology_validator.validate(process.first_dimension)
-        if process.second_dimension and is_ontology_term_ref(process.second_dimension):
+        if isinstance(process.second_dimension, models.OntologyTermRef):
             self._ontology_validator.validate(process.second_dimension)
 
 
 class _ArcValidator:
     """Validator for Arcs"""
 
-    def __init__(self, materials, processes, model_type):
+    def __init__(self, materials, processes, model_type: str):
         self._nodes = {**materials, **processes}
         self._model_type = model_type
 
@@ -419,10 +427,10 @@ class _ArcValidator:
 class _AssayAndStudyValidator:
     """Base validator for Study and Assay"""
 
-    _study_info = None
-    _assay_info = None
-    _model = None
-    _model_type = None
+    _study_info: models.StudyInfo
+    _assay_info: Optional[models.AssayInfo]
+    _model: Union[models.Study, models.Assay]
+    _model_type: str
 
     def __init__(self, investigation: models.InvestigationInfo):
         self._ontology_validator = _OntologyTermRefValidator(investigation.ontology_source_refs)
@@ -506,7 +514,7 @@ class AssayValidator(_AssayAndStudyValidator):
         study_info: models.StudyInfo,
         assay_info: models.AssayInfo,
         assay: models.Assay,
-        parent_study: models.Study = None,
+        parent_study: Optional[models.Study] = None,
     ):
         self._study_info = study_info
         self._assay_info = assay_info
@@ -524,6 +532,8 @@ class AssayValidator(_AssayAndStudyValidator):
 
     def _validate_dependency(self):
         """Validate if assay complies with parent study"""
+        if not self._parent_study:
+            return  # skip
 
         # Check if all samples in the assays are declared in the parent study
         # Collect materials of type "Sample Name"
@@ -539,9 +549,12 @@ class AssayValidator(_AssayAndStudyValidator):
         samples_not_in_study = [s for s in assay_samples if s not in study_samples]
         if samples_not_in_study:
             tpl = "Found samples in assay '{}' but not in parent study '{}':\\n{}"
-            msg = tpl.format(
-                self._assay_info.path.name,
-                self._study_info.info.path.name,
-                ", ".join(samples_not_in_study),
-            )
+            if self._assay_info:
+                msg = tpl.format(
+                    self._assay_info.path.name if self._assay_info.path else "<unknown>",
+                    self._study_info.info.path.name if self._study_info.info.path else "<unknown>",
+                    ", ".join(samples_not_in_study),
+                )
+            else:
+                msg = "Found samples in assay but not in parent study"
             warnings.warn(msg, CriticalIsaValidationWarning)
