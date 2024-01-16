@@ -42,7 +42,7 @@ def _parse_comments(section, comment_keys, i=None):
 
 # Helper function to extract protocol parameters
 def _split_study_protocols_parameters(
-    protocol_name, names, name_term_accs, name_term_srcs
+    protocol_name: str, names: str, name_term_accs: str, name_term_srcs: str
 ) -> Iterator[models.FreeTextOrTermRef]:
     names = names.split(";")
     name_term_accs = name_term_accs.split(";")
@@ -66,7 +66,7 @@ def _split_study_protocols_parameters(
 
 # Helper function to extract protocol components
 def _split_study_protocols_components(
-    protocol_name, names, types, type_term_accs, type_term_srcs
+    protocol_name: str, names: str, types: str, type_term_accs: str, type_term_srcs: str
 ) -> Iterator[models.ProtocolComponentInfo]:
     names = names.split(";")
     types = types.split(";")
