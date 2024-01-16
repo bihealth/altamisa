@@ -817,7 +817,7 @@ class StudyRowReader:
     def __init__(self, study_id: str, input_file: TextIO, filename: Optional[str]):
         self.study_id = study_id
         self.input_file = input_file
-        self.filename = filename or getattr(input_file, "name", "<no file>")
+        self._filename = filename or getattr(input_file, "name", "<no file>")
         self.unique_rows = set()
         self.duplicate_rows = []
         self._reader = csv.reader(input_file, delimiter="\t", quotechar='"')
@@ -859,7 +859,7 @@ class StudyRowReader:
 
         :returns: Nodes per row of the study file
         """
-        builder = _StudyRowBuilder(self.header, self.filename, self.study_id)
+        builder = _StudyRowBuilder(self.header, self._filename, self.study_id)
         while True:
             line = self._read_next_line()
             if line:
@@ -942,7 +942,7 @@ class AssayRowReader:
         self.study_id = study_id
         self.assay_id = assay_id
         self.input_file = input_file
-        self.filename = filename or getattr(input_file, "name", "<no file>")
+        self._filename = filename or getattr(input_file, "name", "<no file>")
         self.unique_rows = set()
         self.duplicate_rows = []
         self._reader = csv.reader(input_file, delimiter="\t", quotechar='"')
@@ -984,7 +984,7 @@ class AssayRowReader:
 
         :return: Nodes per row of the assay file
         """
-        builder = _AssayRowBuilder(self.header, self.filename, self.study_id, self.assay_id)
+        builder = _AssayRowBuilder(self.header, self._filename, self.study_id, self.assay_id)
         while True:
             line = self._read_next_line()
             if line:
