@@ -5,7 +5,6 @@
 from datetime import date
 import io
 import os
-from typing import Iterator, TextIO
 
 import pytest
 from syrupy.assertion import SnapshotAssertion
