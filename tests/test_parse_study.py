@@ -5,10 +5,10 @@
 from datetime import date
 import io
 import os
+from typing import Iterator, TextIO
 
 import pytest
 from syrupy.assertion import SnapshotAssertion
-from typing import Iterator, TextIO
 
 from altamisa.constants import table_headers
 from altamisa.exceptions import IsaWarning
@@ -71,7 +71,9 @@ def test_study_row_reader_minimal_study(minimal_investigation_file, minimal_stud
     assert expected == first_row[2]
 
 
-def test_study_reader_minimal_study(minimal_investigation_file, minimal_study_file, snapshot: SnapshotAssertion):
+def test_study_reader_minimal_study(
+    minimal_investigation_file, minimal_study_file, snapshot: SnapshotAssertion
+):
     """Use ``StudyReader`` to read in minimal study file.
 
     Using the ``StudyReader`` instead of the ``StudyRowReader`` gives us
@@ -320,7 +322,9 @@ def test_study_row_reader_small_study(small_investigation_file, small_study_file
     assert expected == third_row[2]
 
 
-def test_study_reader_small_study(small_investigation_file, small_study_file, snapshot: SnapshotAssertion):
+def test_study_reader_small_study(
+    small_investigation_file, small_study_file, snapshot: SnapshotAssertion
+):
     """Use ``StudyReader`` to read in small study file."""
     # Load investigation (tested elsewhere)
     with pytest.warns(IsaWarning) as record:
@@ -561,7 +565,9 @@ def test_study_reader_small_study(small_investigation_file, small_study_file, sn
     assert expected == study.arcs
 
 
-def test_study_reader_minimal_study_iostring(minimal_investigation_file, minimal_study_file, snapshot: SnapshotAssertion):
+def test_study_reader_minimal_study_iostring(
+    minimal_investigation_file, minimal_study_file, snapshot: SnapshotAssertion
+):
     # Load investigation (tested elsewhere)
     stringio = io.StringIO(minimal_investigation_file.read())
     investigation = InvestigationReader.from_stream(stringio).read()
@@ -590,7 +596,9 @@ def test_study_reader_minimal_study_iostring(minimal_investigation_file, minimal
     assert 2 == len(study.arcs)
 
 
-def test_study_reader_minimal_study_iostring2(minimal_investigation_file, minimal_study_file, snapshot: SnapshotAssertion):
+def test_study_reader_minimal_study_iostring2(
+    minimal_investigation_file, minimal_study_file, snapshot: SnapshotAssertion
+):
     # Load investigation (tested elsewhere)
     stringio = io.StringIO(minimal_investigation_file.read())
     investigation = InvestigationReader.from_stream(stringio).read()
