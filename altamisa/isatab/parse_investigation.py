@@ -42,11 +42,11 @@ def _parse_comments(section, comment_keys, i=None):
 
 # Helper function to extract protocol parameters
 def _split_study_protocols_parameters(
-    protocol_name: str, names: str, name_term_accs: str, name_term_srcs: str
+    protocol_name: str, names_str: str, name_term_accs_str: str, name_term_srcs_str: str
 ) -> Iterator[models.FreeTextOrTermRef]:
-    names = names.split(";")
-    name_term_accs = name_term_accs.split(";")
-    name_term_srcs = name_term_srcs.split(";")
+    names = names_str.split(";")
+    name_term_accs = name_term_accs_str.split(";")
+    name_term_srcs = name_term_srcs_str.split(";")
     if not (len(names) == len(name_term_accs) == len(name_term_srcs)):  # pragma: no cover
         msg = (
             f"Unequal parameter splits in protocol '{protocol_name}':\n"
@@ -66,12 +66,16 @@ def _split_study_protocols_parameters(
 
 # Helper function to extract protocol components
 def _split_study_protocols_components(
-    protocol_name: str, names: str, types: str, type_term_accs: str, type_term_srcs: str
+    protocol_name: str,
+    names_str: str,
+    types_str: str,
+    type_term_accs_str: str,
+    type_term_srcs_str: str,
 ) -> Iterator[models.ProtocolComponentInfo]:
-    names = names.split(";")
-    types = types.split(";")
-    type_term_accs = type_term_accs.split(";")
-    type_term_srcs = type_term_srcs.split(";")
+    names = names_str.split(";")
+    types = types_str.split(";")
+    type_term_accs = type_term_accs_str.split(";")
+    type_term_srcs = type_term_srcs_str.split(";")
     if not (
         len(names) == len(types) == len(type_term_accs) == len(type_term_srcs)
     ):  # pragma: no cover
