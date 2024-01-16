@@ -3,9 +3,16 @@
 import os
 import sys
 
-from altamisa.isatab import models, table_headers
-from altamisa.isatab import AssayValidator, InvestigationValidator, StudyValidator
-from altamisa.isatab import AssayWriter, InvestigationWriter, StudyWriter
+from altamisa.isatab import (
+    AssayValidator,
+    AssayWriter,
+    InvestigationValidator,
+    InvestigationWriter,
+    StudyValidator,
+    StudyWriter,
+    models,
+    table_headers,
+)
 
 
 def create_and_write(out_path):

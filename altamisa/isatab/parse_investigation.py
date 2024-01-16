@@ -4,20 +4,19 @@
 
 from __future__ import generator_stop
 
-import os
 import csv
-from datetime import datetime
+import datetime
+import os
 from pathlib import Path
-from typing import Iterator, TextIO
+from typing import Dict, Iterator, List, Optional, Sequence, TextIO
 import warnings
 
+from . import models
 from ..constants import investigation_headers
 from ..exceptions import ParseIsatabException, ParseIsatabWarning
 from .helpers import list_strip
-from . import models
 
-
-__author__ = "Manuel Holtgrewe <manuel.holtgrewe@bihealth.de>"
+__author__ = "Manuel Holtgrewe <manuel.holtgrewe@bih-charite.de>"
 
 
 # Helper function to extract comment headers and values from a section dict
@@ -100,17 +99,14 @@ def _split_study_protocols_components(
 
 
 # Helper function to validate and convert string dates to date objects
-def _parse_date(date_string) -> datetime.date:
+def _parse_date(date_string: str) -> Optional[datetime.date]:
     if date_string:
         try:
-            date = datetime.strptime(date_string, "%Y-%m-%d").date()
+            return datetime.datetime.strptime(date_string, "%Y-%m-%d").date()
         except ValueError as e:  # pragma: no cover
-            tpl = 'Invalid ISO8601 date "{}"'
-            msg = tpl.format(date_string)
-            raise ParseIsatabException(msg) from e
+            raise ParseIsatabException(f'Invalid ISO8601 date "{date_string}"') from e
     else:
-        date = None
-    return date
+        return None
 
 
 class InvestigationReader:
@@ -122,17 +118,17 @@ class InvestigationReader:
     """
 
     @classmethod
-    def from_stream(self, input_file: TextIO, filename=None):
+    def from_stream(cls, input_file: TextIO, filename=None):
         """Construct from file-like object"""
         return InvestigationReader(input_file, filename)
 
     def __init__(self, input_file: TextIO, filename=None):
         self._filename = filename or getattr(input_file, "name", "<no file>")
         self._reader = csv.reader(input_file, delimiter="\t", quotechar='"')
-        self._line = None
+        self._line: Optional[List[str]] = None
         self._read_next_line()
 
-    def _read_next_line(self):
+    def _read_next_line(self) -> Optional[List[str]]:
         """Read next line, skipping comments starting with ``'#'``."""
         prev_line = self._line
         try:
@@ -141,6 +137,9 @@ class InvestigationReader:
                 self._line = list_strip(next(self._reader))
         except StopIteration:
             self._line = None
+        except UnicodeDecodeError as e:  # pragma: no cover
+            msg = f"Invalid encoding of investigation file '{self._filename}' (use Unicode/UTF-8)."
+            raise ParseIsatabException(msg) from e
         return prev_line
 
     def _next_line_startswith_comment(self):
@@ -167,9 +166,9 @@ class InvestigationReader:
         # ("section headings MUST appear in the Investigation file (in order)")
         ontology_refs = {o.name: o for o in self._read_ontology_source_reference()}
         info = self._read_basic_info()
-        publications = list(self._read_publications())
-        contacts = list(self._read_contacts())
-        studies = list(self._read_studies())
+        publications = tuple(self._read_publications())
+        contacts = tuple(self._read_contacts())
+        studies = tuple(self._read_studies())
         investigation = models.InvestigationInfo(
             ontology_refs, info, publications, contacts, studies
         )
@@ -179,11 +178,12 @@ class InvestigationReader:
     # i.e. ONTOLOGY SOURCE REFERENCE, INVESTIGATION PUBLICATIONS,
     # INVESTIGATION CONTACTS, STUDY DESIGN DESCRIPTORS, STUDY PUBLICATIONS,
     # STUDY FACTORS, STUDY ASSAYS, STUDY PROTOCOLS, STUDY CONTACTS
-    def _read_multi_column_section(self, prefix, ref_keys, section_name):
+    def _read_multi_column_section(self, prefix: str, ref_keys: Sequence[str], section_name: str):
         section = {}
         comment_keys = []
         while self._next_line_startswith(prefix) or self._next_line_startswith_comment():
             line = self._read_next_line()
+            assert line is not None
             key = line[0]
             if key.startswith("Comment"):
                 comment_keys.append(key)
@@ -217,6 +217,8 @@ class InvestigationReader:
         comment_keys = []
         while self._next_line_startswith(prefix) or self._next_line_startswith_comment():
             line = self._read_next_line()
+            if line is None:
+                break
             if len(line) > 2:  # pragma: no cover
                 tpl = "Line {} contains more than one value: {}"
                 msg = tpl.format(line[0], line[1:])
@@ -244,7 +246,9 @@ class InvestigationReader:
     def _read_ontology_source_reference(self) -> Iterator[models.OntologyRef]:
         # Read ONTOLOGY SOURCE REFERENCE header
         line = self._read_next_line()
-        if not line[0] == investigation_headers.ONTOLOGY_SOURCE_REFERENCE:  # pragma: no cover
+        if (
+            not line or not line[0] == investigation_headers.ONTOLOGY_SOURCE_REFERENCE
+        ):  # pragma: no cover
             tpl = "Expected {} but got {}"
             msg = tpl.format(investigation_headers.ONTOLOGY_SOURCE_REFERENCE, line)
             raise ParseIsatabException(msg)
@@ -270,7 +274,7 @@ class InvestigationReader:
     def _read_basic_info(self) -> models.BasicInfo:
         # Read INVESTIGATION header
         line = self._read_next_line()
-        if not line[0] == investigation_headers.INVESTIGATION:  # pragma: no cover
+        if not line or not line[0] == investigation_headers.INVESTIGATION:  # pragma: no cover
             tpl = "Expected {} but got {}"
             msg = tpl.format(investigation_headers.INVESTIGATION, line)
             raise ParseIsatabException(msg)
@@ -297,7 +301,9 @@ class InvestigationReader:
     def _read_publications(self) -> Iterator[models.PublicationInfo]:
         # Read INVESTIGATION PUBLICATIONS header
         line = self._read_next_line()
-        if not line[0] == investigation_headers.INVESTIGATION_PUBLICATIONS:  # pragma: no cover
+        if (
+            not line or not line[0] == investigation_headers.INVESTIGATION_PUBLICATIONS
+        ):  # pragma: no cover
             tpl = "Expected {} but got {}"
             msg = tpl.format(investigation_headers.INVESTIGATION_PUBLICATIONS, line)
             raise ParseIsatabException(msg)
@@ -322,7 +328,9 @@ class InvestigationReader:
     def _read_contacts(self) -> Iterator[models.ContactInfo]:
         # Read INVESTIGATION CONTACTS header
         line = self._read_next_line()
-        if not line[0] == investigation_headers.INVESTIGATION_CONTACTS:  # pragma: no cover
+        if (
+            not line or not line[0] == investigation_headers.INVESTIGATION_CONTACTS
+        ):  # pragma: no cover
             tpl = "Expected {} but got {}"
             msg = tpl.format(investigation_headers.INVESTIGATION_CONTACTS, line)
             raise ParseIsatabException(msg)
@@ -370,9 +378,9 @@ class InvestigationReader:
         while self._line:
             # Read STUDY header
             line = self._read_next_line()
-            if not line[0] == investigation_headers.STUDY:  # pragma: no cover
+            if not line or not line[0] == investigation_headers.STUDY:  # pragma: no cover
                 tpl = "Expected {} but got {}"
-                msg = tpl.format(investigation_headers.INVESTIGATION, line)
+                msg = tpl.format(investigation_headers.STUDY, line)
                 raise ParseIsatabException(msg)
             # Read the other lines in this section.
             section, comment_keys = self._read_single_column_section(
@@ -407,10 +415,12 @@ class InvestigationReader:
                 basic_info, design_descriptors, publications, factors, assays, protocols, contacts
             )
 
-    def _read_study_design_descriptors(self) -> Iterator[models.FreeTextOrTermRef]:
+    def _read_study_design_descriptors(self) -> Iterator[models.DesignDescriptorsInfo]:
         # Read STUDY DESIGN DESCRIPTORS header
         line = self._read_next_line()
-        if not line[0] == investigation_headers.STUDY_DESIGN_DESCRIPTORS:  # pragma: no cover
+        if (
+            not line or not line[0] == investigation_headers.STUDY_DESIGN_DESCRIPTORS
+        ):  # pragma: no cover
             tpl = "Expected {} but got {}"
             msg = tpl.format(investigation_headers.STUDY_DESIGN_DESCRIPTORS, line)
             raise ParseIsatabException(msg)
@@ -430,7 +440,7 @@ class InvestigationReader:
     def _read_study_publications(self) -> Iterator[models.PublicationInfo]:
         # Read STUDY PUBLICATIONS header
         line = self._read_next_line()
-        if not line[0] == investigation_headers.STUDY_PUBLICATIONS:  # pragma: no cover
+        if not line or not line[0] == investigation_headers.STUDY_PUBLICATIONS:  # pragma: no cover
             tpl = "Expected {} but got {}"
             msg = tpl.format(investigation_headers.STUDY_PUBLICATIONS, line)
             raise ParseIsatabException(msg)
@@ -455,7 +465,7 @@ class InvestigationReader:
     def _read_study_factors(self) -> Iterator[models.FactorInfo]:
         # Read STUDY FACTORS header
         line = self._read_next_line()
-        if not line[0] == investigation_headers.STUDY_FACTORS:  # pragma: no cover
+        if not line or not line[0] == investigation_headers.STUDY_FACTORS:  # pragma: no cover
             tpl = "Expected {} but got {}"
             msg = tpl.format(investigation_headers.STUDY_FACTORS, line)
             raise ParseIsatabException(msg)
@@ -475,7 +485,7 @@ class InvestigationReader:
     def _read_study_assays(self) -> Iterator[models.AssayInfo]:
         # Read STUDY ASSAYS header
         line = self._read_next_line()
-        if not line[0] == investigation_headers.STUDY_ASSAYS:  # pragma: no cover
+        if not line or not line[0] == investigation_headers.STUDY_ASSAYS:  # pragma: no cover
             tpl = "Expected {} but got {}"
             msg = tpl.format(investigation_headers.STUDY_ASSAYS, line)
             raise ParseIsatabException(msg)
@@ -528,7 +538,7 @@ class InvestigationReader:
     def _read_study_protocols(self) -> Iterator[models.ProtocolInfo]:
         # Read STUDY PROTOCOLS header
         line = self._read_next_line()
-        if not line[0] == investigation_headers.STUDY_PROTOCOLS:  # pragma: no cover
+        if not line or not line[0] == investigation_headers.STUDY_PROTOCOLS:  # pragma: no cover
             tpl = "Expected {} but got {}"
             msg = tpl.format(investigation_headers.STUDY_PROTOCOLS, line)
             raise ParseIsatabException(msg)
@@ -564,12 +574,13 @@ class InvestigationReader:
                 msg = tpl.format(investigation_headers.STUDY_PROTOCOL_NAME, name)
                 raise ParseIsatabException(msg)
             type_ont = models.OntologyTermRef(type_term, type_term_acc, type_term_src)
-            paras = {
-                p.name if hasattr(p, "name") else p: p
-                for p in _split_study_protocols_parameters(
-                    name, para_names, para_name_term_accs, para_name_term_srcs
-                )
-            }
+            paras: Dict[str, models.FreeTextOrTermRef] = {}
+            for p in _split_study_protocols_parameters(
+                name, para_names, para_name_term_accs, para_name_term_srcs
+            ):
+                key = models.free_text_or_term_ref_to_str(p)
+                if key:
+                    paras[key] = p
             comps = {
                 c.name: c
                 for c in _split_study_protocols_components(
@@ -592,7 +603,7 @@ class InvestigationReader:
     def _read_study_contacts(self) -> Iterator[models.ContactInfo]:
         # Read STUDY CONTACTS header
         line = self._read_next_line()
-        if not line[0] == investigation_headers.STUDY_CONTACTS:  # pragma: no cover
+        if not line or not line[0] == investigation_headers.STUDY_CONTACTS:  # pragma: no cover
             tpl = "Expected {} but got {}"
             msg = tpl.format(investigation_headers.STUDY_CONTACTS, line)
             raise ParseIsatabException(msg)

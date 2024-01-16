@@ -3,25 +3,24 @@
 """
 
 from __future__ import generator_stop
+
 import csv
 import os
-from typing import Dict, List, TextIO
+from typing import Collection, Dict, List, Optional, TextIO
 import warnings
 
-from ..exceptions import WriteIsatabException, WriteIsatabWarning
-from ..constants import investigation_headers
-from .helpers import is_ontology_term_ref
 from . import models
-
+from ..constants import investigation_headers
+from ..exceptions import WriteIsatabException, WriteIsatabWarning
 
 __author__ = (
-    "Manuel Holtgrewe <manuel.holtgrewe@bihealth.de>, "
-    "Mathias Kuhring <mathias.kuhring@bihealth.de>"
+    "Manuel Holtgrewe <manuel.holtgrewe@bih-charite.de>, "
+    "Mathias Kuhring <mathias.kuhring@bih-charite.de>"
 )
 
 
 # Helper to extract comments and align them into rows
-def _extract_comments(section_objects: list):
+def _extract_comments(section_objects: Collection[models.InvestigationFieldWithComments]):
     names = sorted({comment.name for obj in section_objects for comment in obj.comments})
     comments = {name: [""] * len(section_objects) for name in names}
     for i, obj in enumerate(section_objects):
@@ -121,7 +120,7 @@ class InvestigationWriter:
         section_name: str,
         section: Dict[str, list],
         comments: Dict[str, list],
-        headers: List[str] = None,
+        headers: Optional[List[str]] = None,
     ):
         # Add comments to section dict
         if comments:
@@ -200,26 +199,15 @@ class InvestigationWriter:
                 publication.authors
             )
             section[investigation_headers.INVESTIGATION_PUBLICATION_TITLE].append(publication.title)
-            if is_ontology_term_ref(publication.status):
-                section[investigation_headers.INVESTIGATION_PUBLICATION_STATUS].append(
-                    publication.status.name or ""
-                )
-                section[
-                    investigation_headers.INVESTIGATION_PUBLICATION_STATUS_TERM_ACCESSION_NUMBER
-                ].append(publication.status.accession or "")
-                section[
-                    investigation_headers.INVESTIGATION_PUBLICATION_STATUS_TERM_SOURCE_REF
-                ].append(publication.status.ontology_name or "")
-            else:
-                section[investigation_headers.INVESTIGATION_PUBLICATION_STATUS].append(
-                    publication.status
-                )
-                section[
-                    investigation_headers.INVESTIGATION_PUBLICATION_STATUS_TERM_ACCESSION_NUMBER
-                ].append("")
-                section[
-                    investigation_headers.INVESTIGATION_PUBLICATION_STATUS_TERM_SOURCE_REF
-                ].append("")
+            section[investigation_headers.INVESTIGATION_PUBLICATION_STATUS].append(
+                models.free_text_or_term_ref_to_str(publication.status) or ""
+            )
+            section[
+                investigation_headers.INVESTIGATION_PUBLICATION_STATUS_TERM_ACCESSION_NUMBER
+            ].append(models.free_text_or_term_ref_accession(publication.status) or "")
+            section[investigation_headers.INVESTIGATION_PUBLICATION_STATUS_TERM_SOURCE_REF].append(
+                models.free_text_or_term_ref_ontology(publication.status) or ""
+            )
         comments = _extract_comments(self.investigation.publications)
         headers = _extract_section_header(
             list(self.investigation.publications)[0] if self.investigation.publications else None,
@@ -247,22 +235,15 @@ class InvestigationWriter:
             section[investigation_headers.INVESTIGATION_PERSON_AFFILIATION].append(
                 contact.affiliation
             )
-            if is_ontology_term_ref(contact.role):
-                section[investigation_headers.INVESTIGATION_PERSON_ROLES].append(
-                    contact.role.name or ""
-                )
-                section[
-                    investigation_headers.INVESTIGATION_PERSON_ROLES_TERM_ACCESSION_NUMBER
-                ].append(contact.role.accession or "")
-                section[investigation_headers.INVESTIGATION_PERSON_ROLES_TERM_SOURCE_REF].append(
-                    contact.role.ontology_name or ""
-                )
-            else:
-                section[investigation_headers.INVESTIGATION_PERSON_ROLES].append(contact.role)
-                section[
-                    investigation_headers.INVESTIGATION_PERSON_ROLES_TERM_ACCESSION_NUMBER
-                ].append("")
-                section[investigation_headers.INVESTIGATION_PERSON_ROLES_TERM_SOURCE_REF].append("")
+            section[investigation_headers.INVESTIGATION_PERSON_ROLES].append(
+                models.free_text_or_term_ref_to_str(contact.role) or ""
+            )
+            section[investigation_headers.INVESTIGATION_PERSON_ROLES_TERM_ACCESSION_NUMBER].append(
+                models.free_text_or_term_ref_accession(contact.role) or ""
+            )
+            section[investigation_headers.INVESTIGATION_PERSON_ROLES_TERM_SOURCE_REF].append(
+                models.free_text_or_term_ref_ontology(contact.role) or ""
+            )
         comments = _extract_comments(self.investigation.contacts)
         headers = _extract_section_header(
             list(self.investigation.contacts)[0] if self.investigation.contacts else None,
@@ -302,18 +283,15 @@ class InvestigationWriter:
         # Read STUDY DESIGN DESCRIPTORS section
         section = _init_multi_column_section(investigation_headers.STUDY_DESIGN_DESCR_KEYS)
         for design in study.designs:
-            if is_ontology_term_ref(design.type):
-                section[investigation_headers.STUDY_DESIGN_TYPE].append(design.type.name or "")
-                section[investigation_headers.STUDY_DESIGN_TYPE_TERM_ACCESSION_NUMBER].append(
-                    design.type.accession or ""
-                )
-                section[investigation_headers.STUDY_DESIGN_TYPE_TERM_SOURCE_REF].append(
-                    design.type.ontology_name or ""
-                )
-            else:
-                section[investigation_headers.STUDY_DESIGN_TYPE].append(design.type)
-                section[investigation_headers.STUDY_DESIGN_TYPE_TERM_ACCESSION_NUMBER].append("")
-                section[investigation_headers.STUDY_DESIGN_TYPE_TERM_SOURCE_REF].append("")
+            section[investigation_headers.STUDY_DESIGN_TYPE].append(
+                models.free_text_or_term_ref_to_str(design.type) or ""
+            )
+            section[investigation_headers.STUDY_DESIGN_TYPE_TERM_ACCESSION_NUMBER].append(
+                models.free_text_or_term_ref_accession(design.type) or ""
+            )
+            section[investigation_headers.STUDY_DESIGN_TYPE_TERM_SOURCE_REF].append(
+                models.free_text_or_term_ref_ontology(design.type) or ""
+            )
         comments = _extract_comments(study.designs)
         headers = _extract_section_header(
             list(study.designs)[0] if study.designs else None,
@@ -331,22 +309,15 @@ class InvestigationWriter:
             section[investigation_headers.STUDY_PUBLICATION_DOI].append(publication.doi)
             section[investigation_headers.STUDY_PUBLICATION_AUTHOR_LIST].append(publication.authors)
             section[investigation_headers.STUDY_PUBLICATION_TITLE].append(publication.title)
-            if is_ontology_term_ref(publication.status):
-                section[investigation_headers.STUDY_PUBLICATION_STATUS].append(
-                    publication.status.name or ""
-                )
-                section[
-                    investigation_headers.STUDY_PUBLICATION_STATUS_TERM_ACCESSION_NUMBER
-                ].append(publication.status.accession or "")
-                section[investigation_headers.STUDY_PUBLICATION_STATUS_TERM_SOURCE_REF].append(
-                    publication.status.ontology_name or ""
-                )
-            else:
-                section[investigation_headers.STUDY_PUBLICATION_STATUS].append(publication.status)
-                section[
-                    investigation_headers.STUDY_PUBLICATION_STATUS_TERM_ACCESSION_NUMBER
-                ].append("")
-                section[investigation_headers.STUDY_PUBLICATION_STATUS_TERM_SOURCE_REF].append("")
+            section[investigation_headers.STUDY_PUBLICATION_STATUS].append(
+                models.free_text_or_term_ref_to_str(publication.status) or ""
+            )
+            section[investigation_headers.STUDY_PUBLICATION_STATUS_TERM_ACCESSION_NUMBER].append(
+                models.free_text_or_term_ref_accession(publication.status) or ""
+            )
+            section[investigation_headers.STUDY_PUBLICATION_STATUS_TERM_SOURCE_REF].append(
+                models.free_text_or_term_ref_ontology(publication.status) or ""
+            )
         comments = _extract_comments(study.publications)
         headers = _extract_section_header(
             list(study.publications)[0] if study.publications else None,
@@ -359,18 +330,15 @@ class InvestigationWriter:
         section = _init_multi_column_section(investigation_headers.STUDY_FACTORS_KEYS)
         for factor in study.factors.values():
             section[investigation_headers.STUDY_FACTOR_NAME].append(factor.name)
-            if is_ontology_term_ref(factor.type):
-                section[investigation_headers.STUDY_FACTOR_TYPE].append(factor.type.name)
-                section[investigation_headers.STUDY_FACTOR_TYPE_TERM_ACCESSION_NUMBER].append(
-                    factor.type.accession
-                )
-                section[investigation_headers.STUDY_FACTOR_TYPE_TERM_SOURCE_REF].append(
-                    factor.type.ontology_name
-                )
-            else:
-                section[investigation_headers.STUDY_FACTOR_TYPE].append(factor.type)
-                section[investigation_headers.STUDY_FACTOR_TYPE_TERM_ACCESSION_NUMBER].append("")
-                section[investigation_headers.STUDY_FACTOR_TYPE_TERM_SOURCE_REF].append("")
+            section[investigation_headers.STUDY_FACTOR_TYPE].append(
+                models.free_text_or_term_ref_to_str(factor.type) or ""
+            )
+            section[investigation_headers.STUDY_FACTOR_TYPE_TERM_ACCESSION_NUMBER].append(
+                models.free_text_or_term_ref_accession(factor.type) or ""
+            )
+            section[investigation_headers.STUDY_FACTOR_TYPE_TERM_SOURCE_REF].append(
+                models.free_text_or_term_ref_ontology(factor.type) or ""
+            )
         comments = _extract_comments(study.factors.values())
         headers = _extract_section_header(
             list(study.factors.values())[0] if study.factors else None,
@@ -384,47 +352,25 @@ class InvestigationWriter:
         for assay in study.assays:
             section[investigation_headers.STUDY_ASSAY_FILE_NAME].append(assay.path or "")
 
-            if is_ontology_term_ref(assay.measurement_type):
-                section[investigation_headers.STUDY_ASSAY_MEASUREMENT_TYPE].append(
-                    assay.measurement_type.name or ""
-                )
-                section[
-                    investigation_headers.STUDY_ASSAY_MEASUREMENT_TYPE_TERM_ACCESSION_NUMBER
-                ].append(assay.measurement_type.accession or "")
-                section[investigation_headers.STUDY_ASSAY_MEASUREMENT_TYPE_TERM_SOURCE_REF].append(
-                    assay.measurement_type.ontology_name or ""
-                )
-            else:
-                section[investigation_headers.STUDY_ASSAY_MEASUREMENT_TYPE].append(
-                    assay.measurement_type
-                )
-                section[
-                    investigation_headers.STUDY_ASSAY_MEASUREMENT_TYPE_TERM_ACCESSION_NUMBER
-                ].append("")
-                section[investigation_headers.STUDY_ASSAY_MEASUREMENT_TYPE_TERM_SOURCE_REF].append(
-                    ""
-                )
+            section[investigation_headers.STUDY_ASSAY_MEASUREMENT_TYPE].append(
+                models.free_text_or_term_ref_to_str(assay.measurement_type) or ""
+            )
+            section[
+                investigation_headers.STUDY_ASSAY_MEASUREMENT_TYPE_TERM_ACCESSION_NUMBER
+            ].append(models.free_text_or_term_ref_accession(assay.measurement_type) or "")
+            section[investigation_headers.STUDY_ASSAY_MEASUREMENT_TYPE_TERM_SOURCE_REF].append(
+                models.free_text_or_term_ref_ontology(assay.measurement_type) or ""
+            )
 
-            if is_ontology_term_ref(assay.technology_type):
-                section[investigation_headers.STUDY_ASSAY_TECHNOLOGY_TYPE].append(
-                    assay.technology_type.name or ""
-                )
-                section[
-                    investigation_headers.STUDY_ASSAY_TECHNOLOGY_TYPE_TERM_ACCESSION_NUMBER
-                ].append(assay.technology_type.accession or "")
-                section[investigation_headers.STUDY_ASSAY_TECHNOLOGY_TYPE_TERM_SOURCE_REF].append(
-                    assay.technology_type.ontology_name or ""
-                )
-            else:
-                section[investigation_headers.STUDY_ASSAY_TECHNOLOGY_TYPE].append(
-                    assay.technology_type
-                )
-                section[
-                    investigation_headers.STUDY_ASSAY_TECHNOLOGY_TYPE_TERM_ACCESSION_NUMBER
-                ].append("")
-                section[investigation_headers.STUDY_ASSAY_TECHNOLOGY_TYPE_TERM_SOURCE_REF].append(
-                    ""
-                )
+            section[investigation_headers.STUDY_ASSAY_TECHNOLOGY_TYPE].append(
+                models.free_text_or_term_ref_to_str(assay.technology_type) or ""
+            )
+            section[investigation_headers.STUDY_ASSAY_TECHNOLOGY_TYPE_TERM_ACCESSION_NUMBER].append(
+                models.free_text_or_term_ref_accession(assay.technology_type) or ""
+            )
+            section[investigation_headers.STUDY_ASSAY_TECHNOLOGY_TYPE_TERM_SOURCE_REF].append(
+                models.free_text_or_term_ref_ontology(assay.technology_type) or ""
+            )
 
             section[investigation_headers.STUDY_ASSAY_TECHNOLOGY_PLATFORM].append(assay.platform)
 
@@ -440,18 +386,15 @@ class InvestigationWriter:
         for protocol in study.protocols.values():
             section[investigation_headers.STUDY_PROTOCOL_NAME].append(protocol.name)
 
-            if is_ontology_term_ref(protocol.type):
-                section[investigation_headers.STUDY_PROTOCOL_TYPE].append(protocol.type.name or "")
-                section[investigation_headers.STUDY_PROTOCOL_TYPE_TERM_ACCESSION_NUMBER].append(
-                    protocol.type.accession or ""
-                )
-                section[investigation_headers.STUDY_PROTOCOL_TYPE_TERM_SOURCE_REF].append(
-                    protocol.type.ontology_name or ""
-                )
-            else:
-                section[investigation_headers.STUDY_PROTOCOL_TYPE].append(protocol.type)
-                section[investigation_headers.STUDY_PROTOCOL_TYPE_TERM_ACCESSION_NUMBER].append("")
-                section[investigation_headers.STUDY_PROTOCOL_TYPE_TERM_SOURCE_REF].append("")
+            section[investigation_headers.STUDY_PROTOCOL_TYPE].append(
+                models.free_text_or_term_ref_to_str(protocol.type) or ""
+            )
+            section[investigation_headers.STUDY_PROTOCOL_TYPE_TERM_ACCESSION_NUMBER].append(
+                models.free_text_or_term_ref_accession(protocol.type) or ""
+            )
+            section[investigation_headers.STUDY_PROTOCOL_TYPE_TERM_SOURCE_REF].append(
+                models.free_text_or_term_ref_ontology(protocol.type) or ""
+            )
 
             section[investigation_headers.STUDY_PROTOCOL_DESCRIPTION].append(protocol.description)
             section[investigation_headers.STUDY_PROTOCOL_URI].append(protocol.uri)
@@ -461,14 +404,9 @@ class InvestigationWriter:
             accessions = []
             ontologies = []
             for parameter in protocol.parameters.values():
-                if is_ontology_term_ref(parameter):
-                    names.append(parameter.name or "")
-                    accessions.append(parameter.accession or "")
-                    ontologies.append(parameter.ontology_name or "")
-                else:
-                    names.append(parameter.name)
-                    accessions.append("")
-                    ontologies.append("")
+                names.append(models.free_text_or_term_ref_to_str(parameter) or "")
+                accessions.append(models.free_text_or_term_ref_accession(parameter) or "")
+                ontologies.append(models.free_text_or_term_ref_ontology(parameter) or "")
             section[investigation_headers.STUDY_PROTOCOL_PARAMETERS_NAME].append(";".join(names))
             section[
                 investigation_headers.STUDY_PROTOCOL_PARAMETERS_NAME_TERM_ACCESSION_NUMBER
@@ -483,14 +421,9 @@ class InvestigationWriter:
             ontologies = []
             for component in protocol.components.values():
                 names.append(component.name)
-                if is_ontology_term_ref(component.type):
-                    types.append(component.type.name or "")
-                    accessions.append(component.type.accession or "")
-                    ontologies.append(component.type.ontology_name or "")
-                else:
-                    names.append(component.type)
-                    accessions.append("")
-                    ontologies.append("")
+                types.append(models.free_text_or_term_ref_to_str(component.type) or "")
+                accessions.append(models.free_text_or_term_ref_accession(component.type) or "")
+                ontologies.append(models.free_text_or_term_ref_ontology(component.type) or "")
             section[investigation_headers.STUDY_PROTOCOL_COMPONENTS_NAME].append(";".join(names))
             section[investigation_headers.STUDY_PROTOCOL_COMPONENTS_TYPE].append(";".join(types))
             section[
@@ -519,18 +452,15 @@ class InvestigationWriter:
             section[investigation_headers.STUDY_PERSON_FAX].append(contact.fax)
             section[investigation_headers.STUDY_PERSON_ADDRESS].append(contact.address)
             section[investigation_headers.STUDY_PERSON_AFFILIATION].append(contact.affiliation)
-            if is_ontology_term_ref(contact.role):
-                section[investigation_headers.STUDY_PERSON_ROLES].append(contact.role.name or "")
-                section[investigation_headers.STUDY_PERSON_ROLES_TERM_ACCESSION_NUMBER].append(
-                    contact.role.accession or ""
-                )
-                section[investigation_headers.STUDY_PERSON_ROLES_TERM_SOURCE_REF].append(
-                    contact.role.ontology_name or ""
-                )
-            else:
-                section[investigation_headers.STUDY_PERSON_ROLES].append(contact.role)
-                section[investigation_headers.STUDY_PERSON_ROLES_TERM_ACCESSION_NUMBER].append("")
-                section[investigation_headers.STUDY_PERSON_ROLES_TERM_SOURCE_REF].append("")
+            section[investigation_headers.STUDY_PERSON_ROLES].append(
+                models.free_text_or_term_ref_to_str(contact.role) or ""
+            )
+            section[investigation_headers.STUDY_PERSON_ROLES_TERM_ACCESSION_NUMBER].append(
+                models.free_text_or_term_ref_accession(contact.role) or ""
+            )
+            section[investigation_headers.STUDY_PERSON_ROLES_TERM_SOURCE_REF].append(
+                models.free_text_or_term_ref_ontology(contact.role) or ""
+            )
         comments = _extract_comments(study.contacts)
         headers = _extract_section_header(
             list(study.contacts)[0] if study.contacts else None,

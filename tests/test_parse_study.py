@@ -5,17 +5,18 @@
 from datetime import date
 import io
 import os
+
 import pytest
 
 from altamisa.constants import table_headers
 from altamisa.exceptions import IsaWarning
-from altamisa.isatab import models
 from altamisa.isatab import (
     InvestigationReader,
     InvestigationValidator,
-    StudyRowReader,
     StudyReader,
+    StudyRowReader,
     StudyValidator,
+    models,
 )
 
 
@@ -269,7 +270,7 @@ def test_study_row_reader_small_study(small_investigation_file, small_study_file
         None,
         (models.Characteristics("status", ["0"], None),),
         (),
-        (models.FactorValue("treatment", "yes", None),),
+        (models.FactorValue("treatment", ["yes"], None),),
         None,
         headers_sample,
     )
@@ -310,7 +311,7 @@ def test_study_row_reader_small_study(small_investigation_file, small_study_file
         None,
         (models.Characteristics("status", ["2"], None),),
         (),
-        (models.FactorValue("treatment", "", None),),
+        (models.FactorValue("treatment", [""], None),),
         None,
         headers_sample,
     )
@@ -333,7 +334,10 @@ def test_study_reader_small_study(small_investigation_file, small_study_file):
 
     # Read study
     study = reader.read()
-    StudyValidator(investigation, investigation.studies[0], study).validate()
+    with pytest.warns(IsaWarning) as record:
+        StudyValidator(investigation, investigation.studies[0], study).validate()
+    # Check warnings
+    assert 1 == len(record)
 
     # Check results
     assert os.path.normpath(str(study.file)).endswith(os.path.normpath("data/i_small/s_small.txt"))
@@ -438,7 +442,7 @@ def test_study_reader_small_study(small_investigation_file, small_study_file):
         None,
         (models.Characteristics("status", ["0"], None),),
         (),
-        (models.FactorValue("treatment", "yes", None),),
+        (models.FactorValue("treatment", ["yes"], None),),
         None,
         headers_sample,
     )
@@ -450,7 +454,7 @@ def test_study_reader_small_study(small_investigation_file, small_study_file):
         None,
         (models.Characteristics("status", ["2"], None),),
         (),
-        (models.FactorValue("treatment", "", None),),
+        (models.FactorValue("treatment", [""], None),),
         None,
         headers_sample,
     )
@@ -462,7 +466,7 @@ def test_study_reader_small_study(small_investigation_file, small_study_file):
         None,
         (models.Characteristics("status", ["1"], None),),
         (),
-        (models.FactorValue("treatment", "yes", None),),
+        (models.FactorValue("treatment", ["yes"], None),),
         None,
         headers_sample,
     )
@@ -474,7 +478,7 @@ def test_study_reader_small_study(small_investigation_file, small_study_file):
         None,
         (models.Characteristics("status", [""], None),),
         (),
-        (models.FactorValue("treatment", "", None),),
+        (models.FactorValue("treatment", [""], None),),
         None,
         headers_sample,
     )

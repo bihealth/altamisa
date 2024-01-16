@@ -1,0 +1,19 @@
+[tool.pyright]
+include = [
+    "altamisa",
+    "tests",
+]
+exclude = [
+    "**/node_modules",
+    "**/__pycache__",
+    "altamisa/versioneer.py",
+    "altamisa/_version.py"
+]
+defineConstant = { DEBUG = true }
+stubPath = "stubs"
+
+reportMissingImports = true
+reportMissingTypeStubs = false
+
+pythonVersion = "3.8"
+pythonPlatform = "Linux"
