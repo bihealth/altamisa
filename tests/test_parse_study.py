@@ -155,7 +155,7 @@ def test_study_row_reader_small_study(small_investigation_file, small_study_file
     rows = list(row_reader.read())
 
     # Check results
-    assert 5 == len(rows)
+    assert 6 == len(rows)
     first_row = rows[0]
     second_row = rows[1]
     third_row = rows[2]
@@ -342,9 +342,9 @@ def test_study_reader_small_study(small_investigation_file, small_study_file):
     # Check results
     assert os.path.normpath(str(study.file)).endswith(os.path.normpath("data/i_small/s_small.txt"))
     assert 13 == len(study.header)
-    assert 9 == len(study.materials)
-    assert 5 == len(study.processes)
-    assert 10 == len(study.arcs)
+    assert 11 == len(study.materials)
+    assert 6 == len(study.processes)
+    assert 12 == len(study.arcs)
 
     headers_source = [
         table_headers.SOURCE_NAME,
@@ -476,13 +476,25 @@ def test_study_reader_small_study(small_investigation_file, small_study_file):
         "S1-Empty Sample Name-13-5",
         "",
         None,
-        (models.Characteristics("status", [""], None),),
+        (models.Characteristics("status", ["1"], None),),
         (),
         (models.FactorValue("treatment", [""], None),),
         None,
         headers_sample,
     )
     assert expected == study.materials["S1-Empty Sample Name-13-5"]
+    expected = models.Material(
+        "Sample Name",
+        "S1-Empty Sample Name-13-6",
+        "",
+        None,
+        (models.Characteristics("status", [""], None),),
+        (),
+        (models.FactorValue("treatment", [""], None),),
+        None,
+        headers_sample,
+    )
+    assert expected == study.materials["S1-Empty Sample Name-13-6"]
 
     expected = models.Process(
         "sample collection",
@@ -541,6 +553,8 @@ def test_study_reader_small_study(small_investigation_file, small_study_file):
         models.Arc("S1-sample collection-9-4", "S1-sample-0816-T1"),
         models.Arc("S1-source-0817", "S1-sample collection-9-5"),
         models.Arc("S1-sample collection-9-5", "S1-Empty Sample Name-13-5"),
+        models.Arc("S1-source-0818", "S1-sample collection-9-6"),
+        models.Arc("S1-sample collection-9-6", "S1-Empty Sample Name-13-6"),
     )
     assert expected == study.arcs
 
