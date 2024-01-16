@@ -128,6 +128,9 @@ class InvestigationReader:
                 self._line = list_strip(next(self._reader))
         except StopIteration:
             self._line = None
+        except UnicodeDecodeError as e:  # pragma: no cover
+            msg = f"Invalid encoding of investigation file '{self._filename}' (use Unicode/UTF-8)."
+            raise ParseIsatabException(msg) from e
         return prev_line
 
     def _next_line_startswith_comment(self):
@@ -366,7 +369,7 @@ class InvestigationReader:
             line = self._read_next_line()
             if not line or not line[0] == investigation_headers.STUDY:  # pragma: no cover
                 tpl = "Expected {} but got {}"
-                msg = tpl.format(investigation_headers.INVESTIGATION, line)
+                msg = tpl.format(investigation_headers.STUDY, line)
                 raise ParseIsatabException(msg)
             # Read the other lines in this section.
             section, comment_keys = self._read_single_column_section(
