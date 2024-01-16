@@ -7,6 +7,8 @@ import io
 import os
 
 import pytest
+from syrupy.assertion import SnapshotAssertion
+from typing import Iterator, TextIO
 
 from altamisa.constants import table_headers
 from altamisa.exceptions import IsaWarning
@@ -69,7 +71,7 @@ def test_study_row_reader_minimal_study(minimal_investigation_file, minimal_stud
     assert expected == first_row[2]
 
 
-def test_study_reader_minimal_study(minimal_investigation_file, minimal_study_file):
+def test_study_reader_minimal_study(minimal_investigation_file, minimal_study_file, snapshot: SnapshotAssertion):
     """Use ``StudyReader`` to read in minimal study file.
 
     Using the ``StudyReader`` instead of the ``StudyRowReader`` gives us
@@ -81,7 +83,7 @@ def test_study_reader_minimal_study(minimal_investigation_file, minimal_study_fi
         InvestigationValidator(investigation).validate()
 
     # Check warnings
-    assert 2 == len(record)
+    assert snapshot == [str(r.message) for r in record]
 
     # Create new row reader and check read headers
     reader = StudyReader.from_stream("S1", minimal_study_file)
@@ -318,7 +320,7 @@ def test_study_row_reader_small_study(small_investigation_file, small_study_file
     assert expected == third_row[2]
 
 
-def test_study_reader_small_study(small_investigation_file, small_study_file):
+def test_study_reader_small_study(small_investigation_file, small_study_file, snapshot: SnapshotAssertion):
     """Use ``StudyReader`` to read in small study file."""
     # Load investigation (tested elsewhere)
     with pytest.warns(IsaWarning) as record:
@@ -326,7 +328,7 @@ def test_study_reader_small_study(small_investigation_file, small_study_file):
         InvestigationValidator(investigation).validate()
 
     # Check warnings
-    assert 2 == len(record)
+    assert snapshot == [str(r.message) for r in record]
 
     # Create new row reader and check read headers
     reader = StudyReader.from_stream("S1", small_study_file)
@@ -337,7 +339,7 @@ def test_study_reader_small_study(small_investigation_file, small_study_file):
     with pytest.warns(IsaWarning) as record:
         StudyValidator(investigation, investigation.studies[0], study).validate()
     # Check warnings
-    assert 1 == len(record)
+    assert snapshot == [str(r.message) for r in record]
 
     # Check results
     assert os.path.normpath(str(study.file)).endswith(os.path.normpath("data/i_small/s_small.txt"))
@@ -559,7 +561,7 @@ def test_study_reader_small_study(small_investigation_file, small_study_file):
     assert expected == study.arcs
 
 
-def test_study_reader_minimal_study_iostring(minimal_investigation_file, minimal_study_file):
+def test_study_reader_minimal_study_iostring(minimal_investigation_file, minimal_study_file, snapshot: SnapshotAssertion):
     # Load investigation (tested elsewhere)
     stringio = io.StringIO(minimal_investigation_file.read())
     investigation = InvestigationReader.from_stream(stringio).read()
@@ -567,7 +569,7 @@ def test_study_reader_minimal_study_iostring(minimal_investigation_file, minimal
         InvestigationValidator(investigation).validate()
 
     # Check warnings
-    assert 2 == len(record)
+    assert snapshot == [str(r.message) for r in record]
 
     # Create new study reader and read from StringIO with original filename indicated
     stringio = io.StringIO(minimal_study_file.read())
@@ -588,7 +590,7 @@ def test_study_reader_minimal_study_iostring(minimal_investigation_file, minimal
     assert 2 == len(study.arcs)
 
 
-def test_study_reader_minimal_study_iostring2(minimal_investigation_file, minimal_study_file):
+def test_study_reader_minimal_study_iostring2(minimal_investigation_file, minimal_study_file, snapshot: SnapshotAssertion):
     # Load investigation (tested elsewhere)
     stringio = io.StringIO(minimal_investigation_file.read())
     investigation = InvestigationReader.from_stream(stringio).read()
@@ -596,7 +598,7 @@ def test_study_reader_minimal_study_iostring2(minimal_investigation_file, minima
         InvestigationValidator(investigation).validate()
 
     # Check warnings
-    assert 2 == len(record)
+    assert snapshot == [str(r.message) for r in record]
 
     # Create new study reader and read from StringIO with no filename indicated
     stringio = io.StringIO(minimal_study_file.read())
