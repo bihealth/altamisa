@@ -10,8 +10,7 @@ recursive-exclude * *.py[co]
 
 recursive-include docs *.rst conf.py Makefile make.bat *.jpg *.png *.gif
 
-include versioneer.py
-include altamisa/_version.py
 include altamisa/py.typed
+recursive-include altamisa *.py
 
 include requirements.txt requirements/*.txt
