@@ -53,7 +53,7 @@ Special Extensions
 In addition to the original ISA-Tab format specifications, AltamISA supports
  the following special modifications to improve specific use cases:
 
-- **List of values** in ``Characterics`` or ``Parameter Value`` fields by using
+- **List of values** in ``Characterics``, ``Parameter Value``, or ``Factor Value`` fields by using
   semicolon-separators (";"). Note, for ontology terms the same number of
   splits is expected in the associated field ``Term Source REF`` and
   ``Term Accession Number``.
