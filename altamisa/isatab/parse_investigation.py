@@ -42,14 +42,18 @@ def _parse_comments(section, comment_keys, i=None):
 
 # Helper function to extract protocol parameters
 def _split_study_protocols_parameters(
-    names, name_term_accs, name_term_srcs
+    protocol_name: str, names_str: str, name_term_accs_str: str, name_term_srcs_str: str
 ) -> Iterator[models.FreeTextOrTermRef]:
-    names = names.split(";")
-    name_term_accs = name_term_accs.split(";")
-    name_term_srcs = name_term_srcs.split(";")
+    names = names_str.split(";")
+    name_term_accs = name_term_accs_str.split(";")
+    name_term_srcs = name_term_srcs_str.split(";")
     if not (len(names) == len(name_term_accs) == len(name_term_srcs)):  # pragma: no cover
-        tpl = 'Unequal protocol parameter splits; found: "{}", "{}", "{}"'
-        msg = tpl.format(names, name_term_accs, name_term_srcs)
+        msg = (
+            f"Unequal parameter splits in protocol '{protocol_name}':\n"
+            f"Parameter Names: {len(names)}\n"
+            f"Term Accession Numers: {len(name_term_accs)}\n"
+            f"Term Source REFs: {len(name_term_srcs)}"
+        )
         raise ParseIsatabException(msg)
     if len(names) > len(set(names)):  # pragma: no cover
         tpl = "Repeated protocol parameter; found: {}"
@@ -62,17 +66,26 @@ def _split_study_protocols_parameters(
 
 # Helper function to extract protocol components
 def _split_study_protocols_components(
-    names, types, type_term_accs, type_term_srcs
+    protocol_name: str,
+    names_str: str,
+    types_str: str,
+    type_term_accs_str: str,
+    type_term_srcs_str: str,
 ) -> Iterator[models.ProtocolComponentInfo]:
-    names = names.split(";")
-    types = types.split(";")
-    type_term_accs = type_term_accs.split(";")
-    type_term_srcs = type_term_srcs.split(";")
+    names = names_str.split(";")
+    types = types_str.split(";")
+    type_term_accs = type_term_accs_str.split(";")
+    type_term_srcs = type_term_srcs_str.split(";")
     if not (
         len(names) == len(types) == len(type_term_accs) == len(type_term_srcs)
     ):  # pragma: no cover
-        tpl = "Unequal protocol component splits; " 'found: "{}", "{}", "{}", "{}"'
-        msg = tpl.format(names, types, type_term_accs, type_term_srcs)
+        msg = (
+            f"Unequal component splits in protocol '{protocol_name}':\n"
+            f"Components Names: {len(names)}\n"
+            f"Components Types: {len(types)}\n"
+            f"Type Term Accession Numers: {len(type_term_accs)}\n"
+            f"Type Term Source REFs: {len(type_term_srcs)}"
+        )
         raise ParseIsatabException(msg)
     if len(names) > len(set(names)):  # pragma: no cover
         tpl = "Repeated protocol components; found: {}"
@@ -193,8 +206,10 @@ class InvestigationReader:
             msg = tpl.format(section_name, list(sorted(section)))
             raise ParseIsatabException(msg)  # TODO: should be warning?
         if not len(set([len(v) for v in section.values()])) == 1:  # pragma: no cover
-            tpl = "Inconsistent entry lengths in section {}"
-            msg = tpl.format(section_name)
+            lengths = "\n".join(
+                map(str, [f"{key}: {len(value)}" for key, value in section.items()])
+            )
+            msg = f"Inconsistent entry lengths in section {section_name}:\n{lengths}"
             raise ParseIsatabException(msg)
         return section, comment_keys
 
@@ -565,7 +580,7 @@ class InvestigationReader:
             type_ont = models.OntologyTermRef(type_term, type_term_acc, type_term_src)
             paras: Dict[str, models.FreeTextOrTermRef] = {}
             for p in _split_study_protocols_parameters(
-                para_names, para_name_term_accs, para_name_term_srcs
+                name, para_names, para_name_term_accs, para_name_term_srcs
             ):
                 key = models.free_text_or_term_ref_to_str(p)
                 if key:
@@ -573,7 +588,7 @@ class InvestigationReader:
             comps = {
                 c.name: c
                 for c in _split_study_protocols_components(
-                    comp_names, comp_types, comp_type_term_accs, comp_type_term_srcs
+                    name, comp_names, comp_types, comp_type_term_accs, comp_type_term_srcs
                 )
             }
             comments = _parse_comments(section, comment_keys, i)

@@ -13,7 +13,6 @@ import warnings
 from . import models
 from ..constants import table_headers, table_restrictions, table_tokens
 from ..exceptions import CriticalIsaValidationWarning, ModerateIsaValidationWarning
-from .helpers import is_ontology_term_ref
 
 __author__ = "Mathias Kuhring <mathias.kuhring@bih-charite.de>"
 
@@ -87,7 +86,7 @@ class _MaterialValidator:
     def _validate_material_annotations(self, material: models.Material):
         # Warn about unnamed materials/data files if there are annotations
         def has_content(value):
-            if is_ontology_term_ref(value):
+            if isinstance(value, models.OntologyTermRef):
                 return value.name or value.accession or value.ontology_name
             else:
                 return value
@@ -96,7 +95,7 @@ class _MaterialValidator:
             [any(has_content(v) for v in char.value) for char in material.characteristics]
         )
         any_comm = any([comm.value for comm in material.comments])
-        any_fact = any([fact.value for fact in material.factor_values])
+        any_fact = any([any(has_content(v) for v in fact.value) for fact in material.factor_values])
         if not material.name and any(
             (
                 any_char,
