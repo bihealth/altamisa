@@ -509,7 +509,7 @@ class Arc:
         elif idx == 1:
             return self.head
         else:
-            raise IndexError("Invalid index: %d" % idx)  # pragma: no cover
+            raise IndexError(f"Invalid index: {idx}")  # pragma: no cover
 
 
 @attr.s(auto_attribs=True, frozen=True)

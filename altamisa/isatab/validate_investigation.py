@@ -35,32 +35,28 @@ PMID_PATTERN = re.compile("^\\d+$")
 def _validate_mail_address(mail_address: str) -> None:
     """Helper function to validate mail strings"""
     if mail_address and not MAIL_PATTERN.match(mail_address):
-        tpl = "Invalid mail address: {}"
-        msg = tpl.format(mail_address)
+        msg = f"Invalid mail address: {mail_address}"
         warnings.warn(msg, AdvisoryIsaValidationWarning)
 
 
 def _validate_phone_number(phone_number: str) -> None:
     """Helper function to validate phone/fax number strings"""
     if phone_number and not PHONE_PATTERN.match(phone_number):
-        tpl = "Invalid phone/fax number: {}"
-        msg = tpl.format(phone_number)
+        msg = f"Invalid phone/fax number: {phone_number}"
         warnings.warn(msg, AdvisoryIsaValidationWarning)
 
 
 def _validate_doi(doi: str) -> None:
     """Helper function to validate doi strings"""
     if doi and not DOI_PATTERN.match(doi):
-        tpl = "Invalid doi string: {}"
-        msg = tpl.format(doi)
+        msg = f"Invalid doi string: {doi}"
         warnings.warn(msg, AdvisoryIsaValidationWarning)
 
 
 def _validate_pubmed_id(pubmed_id: str) -> None:
     """Helper function to validate pubmed id strings"""
     if pubmed_id and not PMID_PATTERN.match(pubmed_id):
-        tpl = "Invalid pubmed_id string: {}"
-        msg = tpl.format(pubmed_id)
+        msg = f"Invalid pubmed_id string: {pubmed_id}"
         warnings.warn(msg, AdvisoryIsaValidationWarning)
 
 
@@ -92,16 +88,16 @@ class InvestigationValidator:
         for source in self._investigation.ontology_source_refs.values():
             # Check that ontology sources are complete
             if not all((source.name, source.file, source.version, source.description)):
-                tpl = "Incomplete ontology source; found: {}, {}, {}, {}, {}"
-                msg = tpl.format(
-                    source.name, source.file, source.version, source.description, source.comments
+                msg = (
+                    f"Incomplete ontology source; found: {source.name}, {source.file}, "
+                    f"{source.version}, {source.description}, {source.comments}"
                 )
                 warnings.warn(msg, CriticalIsaValidationWarning)
             # Check that ontology source names contain no whitespaces
             if re.search("\\s", source.name):
-                tpl = "Ontology source name including whitespace(s); found: {}, {}, {}, {}, {}"
-                msg = tpl.format(
-                    source.name, source.file, source.version, source.description, source.comments
+                msg = (
+                    f"Ontology source name including whitespace(s); found: {source.name}, "
+                    f"{source.file}, {source.version}, {source.description}, {source.comments}"
                 )
                 warnings.warn(msg, AdvisoryIsaValidationWarning)
 
@@ -117,71 +113,69 @@ class InvestigationValidator:
         # (https://isa-specs.readthedocs.io/en/latest/isatab.html#investigation-section)
         if len(self._investigation.studies) == 1:
             if any((info.title, info.description, info.submission_date, info.public_release_date)):
-                tpl = (
-                    "Investigation with only one study contains metadata:\n\tID:\t{}\n\tTitle:\t"
-                    "{}\n\tPath:\t{}\n\tSubmission Date:\t{}\n\tPublic Release Date:\t{"
-                    "}\n\tPrefer recording metadata in the study section."
-                )
-                msg = tpl.format(
-                    info.identifier,
-                    info.title,
-                    info.path or "",
-                    info.description,
-                    info.submission_date,
-                    info.public_release_date,
+                msg = (
+                    "Investigation with only one study contains metadata:\n"
+                    f"\tID:\t{info.identifier}\n\tTitle:\t{info.title}\n"
+                    f"\tPath:\t{info.path or ''}\n\tDescription:\t{info.description}\n"
+                    f"\tSubmission Date:\t{info.submission_date}\n"
+                    f"\tPublic Release Date:\t{info.public_release_date}\n"
+                    "\tPrefer recording metadata in the study section."
                 )
                 warnings.warn(msg, ModerateIsaValidationWarning)
         # If more than one study is available, investigation should at least contain an id and title
         else:
             # Validate availability of investigation identifier
             if not info.identifier:
-                tpl = "Investigation without identifier:\nTitle:\t{}\nPath:\t{}"
-                msg = tpl.format(info.title, info.path or "")
+                msg = (
+                    "Investigation without identifier:\n"
+                    f"Title:\t{info.title}\nPath:\t{info.path or ''}"
+                )
                 warnings.warn(msg, ModerateIsaValidationWarning)
             # Validate availability of investigation title
             if not info.title:
-                tpl = "Investigation without title:\nID:\t{}\nPath:\t{}"
-                msg = tpl.format(info.identifier, info.path or "")
+                msg = (
+                    "Investigation without title:\n"
+                    f"ID:\t{info.identifier}\nPath:\t{info.path or ''}"
+                )
                 warnings.warn(msg, ModerateIsaValidationWarning)
 
     def _validate_studies(self):
         # Check if any study exists
         if not self._investigation.studies:
-            tpl = "No studies declared in investigation: {}"
-            msg = tpl.format(self._investigation.info.path)
+            msg = f"No studies declared in investigation: {self._investigation.info.path}"
             warnings.warn(msg, CriticalIsaValidationWarning)
             return
         for study in self._investigation.studies:
             # Validate availability of minimal study information (ids, paths, titles)
             if not (study.info.identifier and study.info.path):
-                tpl = (
+                msg = (
                     "Study with incomplete minimal information (ID and path):"
-                    "\nID:\t{}\nTitle:\t{}\nPath:\t{}"
+                    f"\nID:\t{study.info.identifier}\nTitle:\t{study.info.title}\n"
+                    f"Path:\t{study.info.path or ''}"
                 )
-                msg = tpl.format(study.info.identifier, study.info.title, study.info.path or "")
                 warnings.warn(msg, CriticalIsaValidationWarning)
             if not study.info.title:
-                tpl = "Study without title:\nID:\t{}\nTitle:\t{}\nPath:\t{}"
-                msg = tpl.format(study.info.identifier, study.info.title, study.info.path or "")
+                msg = (
+                    "Study without title:\n"
+                    f"ID:\t{study.info.identifier}\nTitle:\t{study.info.title}\n"
+                    f"Path:\t{study.info.path or ''}"
+                )
                 warnings.warn(msg, ModerateIsaValidationWarning)
             # Assure distinct studies, i.e. unique ids, paths and preferably titles
             if study.info.identifier in self._study_ids:
-                tpl = "Study identifier used more than once: {}"
-                msg = tpl.format(study.info.identifier)
+                msg = f"Study identifier used more than once: {study.info.identifier}"
                 warnings.warn(msg, CriticalIsaValidationWarning)
             else:
                 self._study_ids.add(study.info.identifier)
             if study.info.path:
                 if study.info.path in self._study_paths:
-                    tpl = "Study path used more than once: {}"
-                    msg = tpl.format(study.info.path or "")
+                    msg = f"Study path used more than once: {study.info.path or ''}"
                     warnings.warn(msg, CriticalIsaValidationWarning)
                 else:
                     self._study_paths.add(study.info.path)
             if study.info.title:
                 if study.info.title in self._study_titles:
-                    tpl = "Study title used more than once: {}"
-                    msg = tpl.format(study.info.title)
+                    msg = f"Study title used more than once: {study.info.title}"
                     warnings.warn(msg, ModerateIsaValidationWarning)
                 else:
                     self._study_titles.add(study.info.title)
@@ -225,8 +219,10 @@ class InvestigationValidator:
     def _validate_assays(self, assays: Tuple[models.AssayInfo, ...], study_id: str):
         # Check if any assays exists (according to specs, having an assays is not mandatory)
         if not assays:
-            tpl = "No assays declared in study '{}' of investigation '{}'"
-            msg = tpl.format(study_id, self._investigation.info.path)
+            msg = (
+                f'No assays declared in study "{study_id}" of '
+                f'investigation "{self._investigation.info.path}"'
+            )
             warnings.warn(msg, AdvisoryIsaValidationWarning)
             return
         for assay in assays:
@@ -243,25 +239,24 @@ class InvestigationValidator:
                 else assay.technology_type
             )
             if not (assay.path and meas_type and tech_type):
-                tpl = (
+                msg = (
                     "Assay with incomplete minimal information (path, measurement and "
-                    "technology type):\nPath:\t{}\nMeasurement Type:\t{}\nTechnology Type:\t{"
-                    "}\nTechnology Platform:\t{}"
+                    f"technology type):\nPath:\t{assay.path or ''}\n"
+                    f"Measurement Type:\t{meas_type}\nTechnology Type:\t{tech_type}\n"
+                    f"Technology Platform:\t{assay.platform}"
                 )
-                msg = tpl.format(assay.path or "", meas_type, tech_type, assay.platform)
                 warnings.warn(msg, CriticalIsaValidationWarning)
             if not assay.platform:
-                tpl = (
-                    "Assay without platform:\nPath:\t{}"
-                    "\nMeasurement Type:\t{}\nTechnology Type:\t{}\nTechnology Platform:\t{}"
+                msg = (
+                    f"Assay without platform:\nPath:\t{assay.path or ''}"
+                    f"\nMeasurement Type:\t{meas_type}\nTechnology Type:\t{tech_type}\n"
+                    f"Technology Platform:\t{assay.platform}"
                 )
-                msg = tpl.format(assay.path or "", meas_type, tech_type, assay.platform)
                 warnings.warn(msg, AdvisoryIsaValidationWarning)
             # Assure distinct assays, i.e. unique paths
             if assay.path:
                 if assay.path in self._assay_paths:
-                    tpl = "Assay path used more than once: {}"
-                    msg = tpl.format(assay.path or "")
+                    msg = f"Assay path used more than once: {assay.path or ''}"
                     warnings.warn(msg, CriticalIsaValidationWarning)
                 else:
                     self._assay_paths.add(assay.path)

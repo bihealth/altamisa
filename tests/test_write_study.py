@@ -31,10 +31,10 @@ def _parse_write_assert(investigation_file, tmp_path, quote=None):
     for s, study_info in enumerate(investigation.studies):
         # Load study
         if not study_info.info.path:
-            raise ValueError("Study {} has no path".format(study_info))
+            raise ValueError(f"Study {study_info} has no path")
         path_in = os.path.join(directory, study_info.info.path)
         with open(path_in, "rt") as inputf:
-            study = StudyReader.from_stream("S{}".format(s + 1), inputf).read()
+            study = StudyReader.from_stream(f"S{s + 1}", inputf).read()
         StudyValidator(investigation, study_info, study).validate()
         # Write study to temporary file
         path_out = tmp_path / study_info.info.path

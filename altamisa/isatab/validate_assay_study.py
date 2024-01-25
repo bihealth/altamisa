@@ -41,9 +41,11 @@ class _OntologyTermRefValidator:
         # All three variables must be available, if ontology name or accession is provided
         if term_ref.ontology_name or term_ref.accession:
             if not all((term_ref.name, term_ref.ontology_name, term_ref.accession)):
-                tpl = "Incomplete ontology term reference:\nName: {}\nOntology: {}\nAccession: {}"
-                msg = tpl.format(
-                    term_ref.name or "?", term_ref.ontology_name or "?", term_ref.accession or "?"
+                msg = (
+                    "Incomplete ontology term reference:\n"
+                    f"Name: {term_ref.name or '?'}\n"
+                    f"Ontology: {term_ref.ontology_name or '?'}\n"
+                    f"Accession: {term_ref.accession or '?'}"
                 )
                 warnings.warn(msg, CriticalIsaValidationWarning)
 
@@ -54,8 +56,7 @@ class _OntologyTermRefValidator:
             and self.ontology_source_refs
             and term_ref.ontology_name not in self.ontology_source_refs
         ):
-            tpl = 'Ontology with name "{}" not defined in investigation!'
-            msg = tpl.format(term_ref.ontology_name)
+            msg = f'Ontology with name "{term_ref.ontology_name}" not defined in investigation!'
             warnings.warn(msg, CriticalIsaValidationWarning)
 
 
@@ -105,8 +106,7 @@ class _MaterialValidator:
                 has_content(material.material_type),
             )
         ):
-            tpl = "Found annotated material/file without name: {}"
-            msg = tpl.format(material)
+            msg = f"Found annotated material/file without name: {material}"
             warnings.warn(msg, CriticalIsaValidationWarning)
 
         # Warn about assay samples containing annotations, as they should be recorded in studies
@@ -115,8 +115,9 @@ class _MaterialValidator:
             and material.type == table_headers.SAMPLE_NAME
             and any((any_char, any_comm, any_fact, material.extract_label, material.material_type))
         ):
-            tpl = "Found annotated Sample in assay (should be annotated in studies only): {}"
-            msg = tpl.format(material)
+            msg = (
+                f"Found annotated Sample in assay (should be annotated in studies only): {material}"
+            )
             warnings.warn(msg, CriticalIsaValidationWarning)
 
     def _validate_material_naming_start_node(self, material: models.Material):
@@ -125,21 +126,18 @@ class _MaterialValidator:
             (self._model_type == MODEL_TYPE_STUDY and material.type == table_headers.SOURCE_NAME)
             or (self._model_type == MODEL_TYPE_ASSAY and material.type == table_headers.SAMPLE_NAME)
         ) and not material.name:
-            tpl = "Found start node without original name: {}"
-            msg = tpl.format(material.unique_name)
+            msg = f"Found start node without original name: {material.unique_name}"
             warnings.warn(msg, CriticalIsaValidationWarning)
 
     @staticmethod
     def _validate_annotation_restrictions(material: models.Material):
         # Restrict certain annotations to corresponding material types
         if material.extract_label and material.type != table_headers.LABELED_EXTRACT_NAME:
-            tpl = "Label not applied to Labeled Extract Name: {}."
-            msg = tpl.format(material.type)
+            msg = f"Label not applied to Labeled Extract Name: {material.type}."
             warnings.warn(msg, CriticalIsaValidationWarning)
 
         if material.characteristics and material.type in table_headers.DATA_FILE_HEADERS:
-            tpl = "Data nodes don't support Characteristics: {}."
-            msg = tpl.format(material.characteristics)
+            msg = f"Data nodes don't support Characteristics: {material.characteristics}."
             warnings.warn(msg, CriticalIsaValidationWarning)
 
         if material.material_type and material.type not in (
@@ -150,8 +148,7 @@ class _MaterialValidator:
             table_headers.SAMPLE_NAME,
             table_headers.SOURCE_NAME,
         ):
-            tpl = "Material Type not applied to proper Material: {}."
-            msg = tpl.format(material.type)
+            msg = f"Material Type not applied to proper Material: {material.type}."
             warnings.warn(msg, CriticalIsaValidationWarning)
 
     def _validate_assay_restrictions(self, type_):
@@ -163,8 +160,7 @@ class _MaterialValidator:
             **table_restrictions.RESTRICTED_FILES_ATECH,
         }:
             if self._assay_info is None:
-                tpl = "Material/data '{}' not recommended for unspecified assay."
-                msg = tpl.format(type_)
+                msg = f"Material/data '{type_}' not recommended for unspecified assay."
                 warnings.warn(msg, ModerateIsaValidationWarning)
             else:
                 self._validate_single_assay_restriction(
@@ -228,8 +224,7 @@ class _MaterialValidator:
         # Validate whether used factor values are declared in investigation
         for factor in factor_values:
             if factor.name not in self._factor_refs:
-                tpl = 'Factor "{}" not declared in investigation'
-                msg = tpl.format(factor.name)
+                msg = f'Factor "{factor.name}" not declared in investigation'
                 warnings.warn(msg, ModerateIsaValidationWarning)
 
 
@@ -254,11 +249,10 @@ class _ProcessValidator:
             self._validate_name_types(process)
             self._validate_special_case_annotations(process)
         else:
-            tpl = (
+            msg = (
                 "Can't validate parameter values and names for process with "
-                'undeclared protocol "{}" and name type "{}"'
+                f'undeclared protocol "{process.protocol_ref}" and name type "{process.name_type}"'
             )
-            msg = tpl.format(process.protocol_ref, process.name_type)
             warnings.warn(msg, ModerateIsaValidationWarning)
         self._validate_ontology_term_refs(process)
 
@@ -267,8 +261,7 @@ class _ProcessValidator:
         if process.protocol_ref == table_tokens.TOKEN_UNKNOWN:
             return False
         elif process.protocol_ref not in self._protocols:
-            tpl = 'Protocol "{}" not declared in investigation file'
-            msg = tpl.format(process.protocol_ref)
+            msg = f'Protocol "{process.protocol_ref}" not declared in investigation file'
             warnings.warn(msg, CriticalIsaValidationWarning)
             return False
         else:
@@ -277,10 +270,12 @@ class _ProcessValidator:
     def _validate_parameter_values(self, process: models.Process):
         # Check if parameter value is declared in corresponding protocol
         if process.protocol_ref != table_tokens.TOKEN_UNKNOWN:
-            tpl = 'Parameter Value "{}" not declared for Protocol "{}" in investigation file'
             for pv in process.parameter_values:
                 if pv.name not in self._protocols[process.protocol_ref].parameters:
-                    msg = tpl.format(pv.name, process.protocol_ref)
+                    msg = (
+                        f'Parameter Value "{pv.name}" not declared for Protocol '
+                        f'"{process.protocol_ref}" in investigation file'
+                    )
                     warnings.warn(msg, ModerateIsaValidationWarning)
 
     def _validate_restrictions(
@@ -288,8 +283,7 @@ class _ProcessValidator:
     ):
         if test in assay_tech_restrictions or test in protocol_type_restrictions:
             if self._assay_info is None:
-                tpl = '"{}" not supported for unspecified assay.'
-                msg = tpl.format(test)
+                msg = f'"{test}" not supported for unspecified assay.'
                 warnings.warn(msg, ModerateIsaValidationWarning)
             else:
                 # Check if restricted to assay technology
@@ -403,8 +397,10 @@ class _ArcValidator:
             # Check that samples only start arcs, i.e. head can't be sample
             head = self._nodes[arc.head]
             if hasattr(head, "type") and head.type == table_headers.SAMPLE_NAME:
-                tpl = "Found a sample not starting the assay graph: '{}' ('{}')"
-                msg = tpl.format(head.name, head.unique_name)
+                msg = (
+                    "Found a sample not starting the assay graph: "
+                    f'"{head.name}" ("{head.unique_name}")'
+                )
                 warnings.warn(msg, CriticalIsaValidationWarning)
 
         # Study checks
@@ -412,14 +408,18 @@ class _ArcValidator:
             # Check that sources only start arcs, i.e. head can't be source
             head = self._nodes[arc.head]
             if hasattr(head, "type") and head.type == table_headers.SOURCE_NAME:
-                tpl = "Found a source not starting the study graph: '{}' ('{}')"
-                msg = tpl.format(head.name, head.unique_name)
+                msg = (
+                    "Found a source not starting the study graph: "
+                    f'"{head.name}" ("{head.unique_name}")'
+                )
                 warnings.warn(msg, CriticalIsaValidationWarning)
             # Check that samples only start arcs, i.e. tail can't be sample
             tail = self._nodes[arc.tail]
             if hasattr(tail, "type") and tail.type == table_headers.SAMPLE_NAME:
-                tpl = "Found a sample not ending the study graph: '{}' ('{}')"
-                msg = tpl.format(tail.name, tail.unique_name)
+                msg = (
+                    "Found a sample not ending the study graph: "
+                    f'"{tail.name}" ("{tail.unique_name}")'
+                )
                 warnings.warn(msg, CriticalIsaValidationWarning)
 
 

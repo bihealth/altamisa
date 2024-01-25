@@ -39,8 +39,7 @@ def _extract_section_header(first_entry, section_name):
         # TODO: check that headers and attributes match
         return first_entry.headers
     else:
-        tpl = "No reference headers available for section {}. Applying default order."
-        msg = tpl.format(section_name)
+        msg = f"No reference headers available for section {section_name}. Applying default order."
         warnings.warn(msg, WriteIsatabWarning)
         return None
 
@@ -125,7 +124,7 @@ class InvestigationWriter:
         # Add comments to section dict
         if comments:
             for key, value in comments.items():
-                section["Comment[{}]".format(key)] = value
+                section[f"Comment[{key}]"] = value
         # Write the section name
         self._writer.writerow((section_name,))
         # Write the lines in this section.
@@ -144,12 +143,10 @@ class InvestigationWriter:
                 values = section.pop(header)
                 self._write_line(header, values)
             else:  # pragma: no cover
-                tpl = "No data found for header {} in section {}"
-                msg = tpl.format(header, section_name)
+                msg = f"No data found for header {header} in section {section_name}"
                 raise WriteIsatabException(msg)
         if len(section) > 0:  # pragma: no cover
-            tpl = "Leftover rows found in section {}:\n{}"
-            msg = tpl.format(section_name, section)
+            msg = f"Leftover rows found in section {section_name}:\n{section}"
             raise WriteIsatabException(msg)
 
     def _write_ontology_source_reference(self):

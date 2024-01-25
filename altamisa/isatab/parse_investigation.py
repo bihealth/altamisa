@@ -25,8 +25,7 @@ def _parse_comments(section, comment_keys, i=None):
         # key might start with "Comment[" but NOT "Comment ["
         tok = val[len("Comment") :]
         if not tok or tok[0] != "[" or tok[-1] != "]":  # pragma: no cover
-            tpl = 'Problem parsing comment header "{}"'
-            msg = tpl.format(val)
+            msg = f'Problem parsing comment header "{val}"'
             raise ParseIsatabException(msg)
         return tok[1:-1]
 
@@ -56,8 +55,7 @@ def _split_study_protocols_parameters(
         )
         raise ParseIsatabException(msg)
     if len(names) > len(set(names)):  # pragma: no cover
-        tpl = "Repeated protocol parameter; found: {}"
-        msg = tpl.format(names)
+        msg = f"Repeated protocol parameter; found: {names}"
         raise ParseIsatabException(msg)
     for name, acc, src in zip(names, name_term_accs, name_term_srcs):
         if any((name, acc, src)):  # skips empty parameters
@@ -88,15 +86,13 @@ def _split_study_protocols_components(
         )
         raise ParseIsatabException(msg)
     if len(names) > len(set(names)):  # pragma: no cover
-        tpl = "Repeated protocol components; found: {}"
-        msg = tpl.format(names)
+        msg = f"Repeated protocol components; found: {names}"
         raise ParseIsatabException(msg)
     for name, ctype, acc, src in zip(
         names, types, type_term_accs, type_term_srcs
     ):  # pragma: no cover
         if not name and any((ctype, acc, src)):
-            tpl = "Missing protocol component name; " 'found: "{}", "{}", "{}", "{}"'
-            msg = tpl.format(name, ctype, acc, src)
+            msg = f'Missing protocol component name; found: "{name}", "{ctype}", "{acc}", "{src}"'
             raise ParseIsatabException(msg)
         if any((name, ctype, acc, src)):  # skips empty components
             yield models.ProtocolComponentInfo(name, models.OntologyTermRef(ctype, acc, src))
@@ -192,18 +188,15 @@ class InvestigationReader:
             if key.startswith("Comment"):
                 comment_keys.append(key)
             elif key not in ref_keys:  # pragma: no cover
-                tpl = "Line must start with one of {} but is {}"
-                msg = tpl.format(ref_keys, line)
+                msg = f"Line must start with one of {ref_keys} but is {line}"
                 raise ParseIsatabException(msg)
             if key in section:  # pragma: no cover
-                tpl = 'Key {} repeated, previous value "{}"'
-                msg = tpl.format(key, section[key])
+                msg = f'Key {key} repeated, previous value "{section[key]}"'
                 raise ParseIsatabException(msg)
             section[key] = line[1:]
         # Check that all keys are given and all contain the same number of entries
         if len(section) != len(ref_keys) + len(comment_keys):  # pragma: no cover
-            tpl = "Missing entries in section {}; only found: {}"
-            msg = tpl.format(section_name, list(sorted(section)))
+            msg = f"Missing entries in section {section_name}; only found: {list(sorted(section))}"
             raise ParseIsatabException(msg)  # TODO: should be warning?
         if not len(set([len(v) for v in section.values()])) == 1:  # pragma: no cover
             lengths = "\n".join(
@@ -224,26 +217,22 @@ class InvestigationReader:
             if line is None:
                 break
             if len(line) > 2:  # pragma: no cover
-                tpl = "Line {} contains more than one value: {}"
-                msg = tpl.format(line[0], line[1:])
+                msg = f"Line {line[0]} contains more than one value: {line[1:]}"
                 raise ParseIsatabException(msg)
             key = line[0]
             if key.startswith("Comment"):
                 comment_keys.append(key)
             elif key not in ref_keys:  # pragma: no cover
-                tpl = "Line must start with one of {} but is {}"
-                msg = tpl.format(ref_keys, line)
+                msg = f"Line must start with one of {ref_keys} but is {line}"
                 raise ParseIsatabException(msg)
             if key in section:  # pragma: no cover
-                tpl = 'Key {} repeated, previous value "{}"'
-                msg = tpl.format(key, section[key])
+                msg = f'Key {key} repeated, previous value "{section[key]}"'
                 raise ParseIsatabException(msg)
             # read value if field is available, empty string else
             section[key] = line[1] if len(line) > 1 else ""
         # Check that all keys are given
         if len(section) != len(ref_keys) + len(comment_keys):  # pragma: no cover
-            tpl = "Missing entries in section {}; only found: {}"
-            msg = tpl.format(section_name, list(sorted(section)))
+            msg = f"Missing entries in section {section_name}; only found: {list(sorted(section))}"
             raise ParseIsatabException(msg)  # TODO: should be warning?
         return section, comment_keys
 
@@ -253,8 +242,7 @@ class InvestigationReader:
         if (
             not line or not line[0] == investigation_headers.ONTOLOGY_SOURCE_REFERENCE
         ):  # pragma: no cover
-            tpl = "Expected {} but got {}"
-            msg = tpl.format(investigation_headers.ONTOLOGY_SOURCE_REFERENCE, line)
+            msg = f"Expected {investigation_headers.ONTOLOGY_SOURCE_REFERENCE} but got {line}"
             raise ParseIsatabException(msg)
         # Read the other four lines in this section.
         section, comment_keys = self._read_multi_column_section(
@@ -269,8 +257,7 @@ class InvestigationReader:
             # If ontology source is empty, skip it
             # (since ISAcreator always adds a last empty ontology column)
             if not any((name, file_, version, desc, any(comments))):
-                tpl = "Skipping empty ontology source: {}, {}, {}, {}"
-                msg = tpl.format(name, file_, version, desc)
+                msg = f"Skipping empty ontology source: {name}, {file_}, {version}, {desc}"
                 warnings.warn(msg, ParseIsatabWarning)
                 continue
             yield models.OntologyRef(name, file_, version, desc, comments, list(section.keys()))
@@ -279,8 +266,7 @@ class InvestigationReader:
         # Read INVESTIGATION header
         line = self._read_next_line()
         if not line or not line[0] == investigation_headers.INVESTIGATION:  # pragma: no cover
-            tpl = "Expected {} but got {}"
-            msg = tpl.format(investigation_headers.INVESTIGATION, line)
+            msg = f"Expected {investigation_headers.INVESTIGATION} but got {line}"
             raise ParseIsatabException(msg)
         # Read the other lines in this section.
         section, comment_keys = self._read_single_column_section(
@@ -308,8 +294,7 @@ class InvestigationReader:
         if (
             not line or not line[0] == investigation_headers.INVESTIGATION_PUBLICATIONS
         ):  # pragma: no cover
-            tpl = "Expected {} but got {}"
-            msg = tpl.format(investigation_headers.INVESTIGATION_PUBLICATIONS, line)
+            msg = "Expected {investigation_headers.INVESTIGATION_PUBLICATIONS} but got {line}"
             raise ParseIsatabException(msg)
         # Read the other lines in this section.
         section, comment_keys = self._read_multi_column_section(
@@ -335,8 +320,7 @@ class InvestigationReader:
         if (
             not line or not line[0] == investigation_headers.INVESTIGATION_CONTACTS
         ):  # pragma: no cover
-            tpl = "Expected {} but got {}"
-            msg = tpl.format(investigation_headers.INVESTIGATION_CONTACTS, line)
+            msg = f"Expected {investigation_headers.INVESTIGATION_CONTACTS} but got {line}"
             raise ParseIsatabException(msg)
         # Read the other lines in this section.
         section, comment_keys = self._read_multi_column_section(
@@ -383,8 +367,7 @@ class InvestigationReader:
             # Read STUDY header
             line = self._read_next_line()
             if not line or not line[0] == investigation_headers.STUDY:  # pragma: no cover
-                tpl = "Expected {} but got {}"
-                msg = tpl.format(investigation_headers.STUDY, line)
+                msg = f"Expected {investigation_headers.STUDY} but got {line}"
                 raise ParseIsatabException(msg)
             # Read the other lines in this section.
             section, comment_keys = self._read_single_column_section(
@@ -425,8 +408,7 @@ class InvestigationReader:
         if (
             not line or not line[0] == investigation_headers.STUDY_DESIGN_DESCRIPTORS
         ):  # pragma: no cover
-            tpl = "Expected {} but got {}"
-            msg = tpl.format(investigation_headers.STUDY_DESIGN_DESCRIPTORS, line)
+            msg = f"Expected {investigation_headers.STUDY_DESIGN_DESCRIPTORS} but got {line}"
             raise ParseIsatabException(msg)
         # Read the other lines in this section.
         section, comment_keys = self._read_multi_column_section(
@@ -445,8 +427,7 @@ class InvestigationReader:
         # Read STUDY PUBLICATIONS header
         line = self._read_next_line()
         if not line or not line[0] == investigation_headers.STUDY_PUBLICATIONS:  # pragma: no cover
-            tpl = "Expected {} but got {}"
-            msg = tpl.format(investigation_headers.STUDY_PUBLICATIONS, line)
+            msg = f"Expected {investigation_headers.STUDY_PUBLICATIONS} but got {line}"
             raise ParseIsatabException(msg)
         # Read the other lines in this section.
         section, comment_keys = self._read_multi_column_section(
@@ -470,8 +451,7 @@ class InvestigationReader:
         # Read STUDY FACTORS header
         line = self._read_next_line()
         if not line or not line[0] == investigation_headers.STUDY_FACTORS:  # pragma: no cover
-            tpl = "Expected {} but got {}"
-            msg = tpl.format(investigation_headers.STUDY_FACTORS, line)
+            msg = f"Expected {investigation_headers.STUDY_FACTORS} but got {line}"
             raise ParseIsatabException(msg)
         # Read the other lines in this section.
         section, comment_keys = self._read_multi_column_section(
@@ -490,8 +470,7 @@ class InvestigationReader:
         # Read STUDY ASSAYS header
         line = self._read_next_line()
         if not line or not line[0] == investigation_headers.STUDY_ASSAYS:  # pragma: no cover
-            tpl = "Expected {} but got {}"
-            msg = tpl.format(investigation_headers.STUDY_ASSAYS, line)
+            msg = f"Expected {investigation_headers.STUDY_ASSAYS} but got {line}"
             raise ParseIsatabException(msg)
         # Read the other lines in this section.
         section, comment_keys = self._read_multi_column_section(
@@ -543,8 +522,7 @@ class InvestigationReader:
         # Read STUDY PROTOCOLS header
         line = self._read_next_line()
         if not line or not line[0] == investigation_headers.STUDY_PROTOCOLS:  # pragma: no cover
-            tpl = "Expected {} but got {}"
-            msg = tpl.format(investigation_headers.STUDY_PROTOCOLS, line)
+            msg = f"Expected {investigation_headers.STUDY_PROTOCOLS} but got {line}"
             raise ParseIsatabException(msg)
         # Read the other lines in this section.
         section, comment_keys = self._read_multi_column_section(
@@ -608,8 +586,7 @@ class InvestigationReader:
         # Read STUDY CONTACTS header
         line = self._read_next_line()
         if not line or not line[0] == investigation_headers.STUDY_CONTACTS:  # pragma: no cover
-            tpl = "Expected {} but got {}"
-            msg = tpl.format(investigation_headers.STUDY_CONTACTS, line)
+            msg = f"Expected {investigation_headers.STUDY_CONTACTS} but got {line}"
             raise ParseIsatabException(msg)
         # Read the other lines in this section.
         section, comment_keys = self._read_multi_column_section(

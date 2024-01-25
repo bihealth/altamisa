@@ -36,12 +36,10 @@ def _parse_write_assert_assay(investigation_file, tmp_path, quote=None, normaliz
                 continue
             # Load assay
             if not assay_info.path:
-                raise ValueError("Assay {} has no path".format(assay_info))
+                raise ValueError(f"Assay {assay_info} has no path")
             path_in = os.path.join(directory, assay_info.path)
             with open(path_in, "rt") as inputf:
-                assay = AssayReader.from_stream(
-                    "S{}".format(s + 1), "A{}".format(a + 1), inputf
-                ).read()
+                assay = AssayReader.from_stream(f"S{s + 1}", f"A{a + 1}", inputf).read()
             AssayValidator(investigation, study_info, assay_info, assay).validate()
             # Write assay to temporary file
             path_out = tmp_path / assay_info.path
@@ -51,9 +49,7 @@ def _parse_write_assert_assay(investigation_file, tmp_path, quote=None, normaliz
                 # Read and write assay again
                 path_in = path_out
                 with open(path_out, "rt") as inputf:
-                    assay = AssayReader.from_stream(
-                        "S{}".format(s + 1), "A{}".format(a + 1), inputf
-                    ).read()
+                    assay = AssayReader.from_stream(f"S{s + 1}", f"A{a + 1}", inputf).read()
                 AssayValidator(investigation, study_info, assay_info, assay).validate()
                 path_out = tmp_path / (assay_info.path.name + "_b")
                 with open(path_out, "wt", newline="") as file:

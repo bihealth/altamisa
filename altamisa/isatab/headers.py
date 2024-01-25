@@ -446,8 +446,7 @@ class HeaderParserBase:
                         raise ParseIsatabException(msg)
                     return self._parse_labeled_column_header(val, label, type_)
         # None of the if-statements above was taken
-        tpl = 'Header "{}" unknown, processing unclear'
-        msg = tpl.format(val)
+        msg = f'Header "{val}" unknown, processing unclear'
         raise ParseIsatabException(msg)
 
     def _parse_term_source_ref(self):
@@ -471,8 +470,7 @@ class HeaderParserBase:
     def _parse_labeled_column_header(self, val, key, type_):
         tok = val[len(key) :]  # strip '^{key}'
         if not tok or tok[0] != "[" or tok[-1] != "]":
-            tpl = "Problem parsing labeled header {}"
-            msg = tpl.format(val)
+            msg = f"Problem parsing labeled header {val}"
             raise ParseIsatabException(msg)
         self.col_no += 1
         return type_(self.col_no - 1, tok[1:-1])
