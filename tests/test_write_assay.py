@@ -8,13 +8,7 @@ import os
 import pytest
 from syrupy.assertion import SnapshotAssertion
 
-from altamisa.exceptions import (
-    AdvisoryIsaValidationWarning,
-    CriticalIsaValidationWarning,
-    IsaWarning,
-    ModerateIsaValidationWarning,
-    ParseIsatabWarning,
-)
+from altamisa.exceptions import IsaWarning
 from altamisa.isatab import (
     AssayReader,
     AssayValidator,
@@ -58,14 +52,18 @@ def _parse_write_assert_assay(investigation_file, tmp_path, quote=None, normaliz
             assert filecmp.cmp(path_in, path_out, shallow=False)
 
 
-def test_assay_writer_minimal_assay(minimal_investigation_file, tmp_path, snapshot: SnapshotAssertion):
+def test_assay_writer_minimal_assay(
+    minimal_investigation_file, tmp_path, snapshot: SnapshotAssertion
+):
     with pytest.warns(IsaWarning) as record:
         _parse_write_assert_assay(minimal_investigation_file, tmp_path)
     # Check warnings
     assert snapshot == [str(r.message) for r in record]
 
 
-def test_assay_writer_minimal2_assay(minimal2_investigation_file, tmp_path, snapshot: SnapshotAssertion):
+def test_assay_writer_minimal2_assay(
+    minimal2_investigation_file, tmp_path, snapshot: SnapshotAssertion
+):
     with pytest.warns(IsaWarning) as record:
         _parse_write_assert_assay(minimal2_investigation_file, tmp_path)
     # Check warnings
@@ -80,7 +78,9 @@ def test_assay_writer_small_assay(small_investigation_file, tmp_path, snapshot: 
     assert snapshot == [str(r.message) for r in record]
 
 
-def test_assay_writer_small2_assay(small2_investigation_file, tmp_path, snapshot: SnapshotAssertion):
+def test_assay_writer_small2_assay(
+    small2_investigation_file, tmp_path, snapshot: SnapshotAssertion
+):
     with pytest.warns(IsaWarning) as record:
         _parse_write_assert_assay(small2_investigation_file, tmp_path, normalize=True)
     # Check warnings
@@ -113,6 +113,7 @@ def test_assay_writer_BII_I_1(BII_I_1_investigation_file, tmp_path, snapshot: Sn
     )
     assert snapshot == [str(r.category) for r in record]
     assert snapshot == [str(r.message) for r in record]
+
 
 def test_assay_writer_gelelect(gelelect_investigation_file, tmp_path, snapshot: SnapshotAssertion):
     with pytest.warns(IsaWarning) as record:
