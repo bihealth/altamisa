@@ -294,7 +294,7 @@ class InvestigationReader:
         if (
             not line or not line[0] == investigation_headers.INVESTIGATION_PUBLICATIONS
         ):  # pragma: no cover
-            msg = "Expected {investigation_headers.INVESTIGATION_PUBLICATIONS} but got {line}"
+            msg = f"Expected {investigation_headers.INVESTIGATION_PUBLICATIONS} but got {line}"
             raise ParseIsatabException(msg)
         # Read the other lines in this section.
         section, comment_keys = self._read_multi_column_section(
