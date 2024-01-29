@@ -180,8 +180,9 @@ def test_assay_writer_gelelect(gelelect_investigation_file, tmp_path):
     assert str(record[0].message) == msg
     msg = (
         "Investigation with only one study contains metadata:\n\tID:\t1551099271112"
-        "\n\tTitle:\tInvestigation\n\tPath:\ti_Investigation.txt\n\tSubmission Date:\t\n\tPublic Release"
-        " Date:\tNone\n\tPrefer recording metadata in the study section."
+        "\n\tTitle:\tInvestigation\n\tPath:\ti_Investigation.txt\n\tDescription:\t\n"
+        "\tSubmission Date:\tNone\n\tPublic Release Date:\tNone\n"
+        "\tPrefer recording metadata in the study section."
     )
     assert record[1].category == ModerateIsaValidationWarning
     assert str(record[1].message) == msg
