@@ -442,7 +442,7 @@ class _ProcessBuilder(_NodeBuilderBase[models.Process]):
         else:
             date = None
         if self.performer_header:
-            performer = line[self.performer_header.col_no]
+            performer = tuple(self._token_with_escape(line[self.performer_header.col_no]))
         else:
             performer = None
         comments = tuple(

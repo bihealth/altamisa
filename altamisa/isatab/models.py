@@ -460,7 +460,7 @@ class Process:
     #: Process date
     date: Optional[Union[datetime.date, Literal[""]]]
     #: Performer of process
-    performer: Optional[str]
+    performer: Optional[Tuple[str]]
     #: Tuple of parameters values
     parameter_values: Tuple[ParameterValue, ...]
     #: Tuple of process comments
