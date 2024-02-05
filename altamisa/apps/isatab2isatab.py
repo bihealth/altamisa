@@ -61,8 +61,7 @@ def run_warnings_caught(args: Arguments):
     path_in = os.path.realpath(os.path.dirname(args.input_investigation_file))
     path_out = os.path.realpath(os.path.dirname(args.output_investigation_file))
     if path_in == path_out:
-        tpl = "Can't output ISA-tab files to same directory as as input: {} == {}"
-        msg = tpl.format(path_in, path_out)
+        msg = f"Can't output ISA-tab files to same directory as as input: {path_in} == {path_out}"
         raise IsaException(msg)
 
     with ExitStack() as stack:
@@ -98,15 +97,13 @@ def run_reading(
     for s, study_info in enumerate(investigation.studies):
         if study_info.info.path:
             with open(os.path.join(path_in, study_info.info.path), "rt") as inputf:
-                studies[s] = StudyReader.from_stream("S{}".format(s + 1), inputf).read()
+                studies[s] = StudyReader.from_stream(f"S{s + 1}", inputf).read()
         if study_info.assays:
             assays[s] = {}
         for a, assay_info in enumerate(study_info.assays):
             if assay_info.path:
                 with open(os.path.join(path_in, assay_info.path), "rt") as inputf:
-                    assays[s][a] = AssayReader.from_stream(
-                        "S{}".format(s + 1), "A{}".format(a + 1), inputf
-                    ).read()
+                    assays[s][a] = AssayReader.from_stream(f"S{s + 1}", f"A{a + 1}", inputf).read()
 
     # Validate studies and assays
     for s, study_info in enumerate(investigation.studies):

@@ -909,7 +909,7 @@ def test_parse_assays_investigation(assays_investigation_file):
     )
     assert record[1].category == ParseIsatabWarning
     assert str(record[1].message) == msg
-    msg = "No assays declared in study 's_assays' of investigation 'i_assays.txt'"
+    msg = 'No assays declared in study "s_assays" of investigation "i_assays.txt"'
     assert record[2].category == AdvisoryIsaValidationWarning
     assert str(record[2].message) == msg
     msg = "Study identifier used more than once: s_assays"

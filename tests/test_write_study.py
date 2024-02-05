@@ -31,10 +31,10 @@ def _parse_write_assert(investigation_file, tmp_path, quote=None):
     for s, study_info in enumerate(investigation.studies):
         # Load study
         if not study_info.info.path:
-            raise ValueError("Study {} has no path".format(study_info))
+            raise ValueError(f"Study {study_info} has no path")
         path_in = os.path.join(directory, study_info.info.path)
         with open(path_in, "rt") as inputf:
-            study = StudyReader.from_stream("S{}".format(s + 1), inputf).read()
+            study = StudyReader.from_stream(f"S{s + 1}", inputf).read()
         StudyValidator(investigation, study_info, study).validate()
         # Write study to temporary file
         path_out = tmp_path / study_info.info.path
@@ -88,8 +88,8 @@ def test_study_writer_gelelect(gelelect_investigation_file, tmp_path):
     assert str(record[0].message) == msg
     msg = (
         "Investigation with only one study contains metadata:\n\tID:\t1551099271112\n\tTitle:\t"
-        "Investigation\n\tPath:\ti_Investigation.txt\n\tSubmission Date:\t\n\tPublic Release "
-        "Date:\tNone\n\tPrefer recording metadata in the study section."
+        "Investigation\n\tPath:\ti_Investigation.txt\n\tDescription:\t\n\tSubmission Date:\tNone\n"
+        "\tPublic Release Date:\tNone\n\tPrefer recording metadata in the study section."
     )
     assert record[1].category == ModerateIsaValidationWarning
     assert str(record[1].message) == msg
