@@ -6,7 +6,8 @@
       	ID:	i_minimal
       	Title:	Minimal Investigation
       	Path:	i_minimal.txt
-      	Submission Date:	
+      	Description:	
+      	Submission Date:	None
       	Public Release Date:	None
       	Prefer recording metadata in the study section.
     ''',
@@ -26,7 +27,8 @@
       	ID:	i_minimal
       	Title:	Minimal Investigation
       	Path:	<no file>
-      	Submission Date:	
+      	Description:	
+      	Submission Date:	None
       	Public Release Date:	None
       	Prefer recording metadata in the study section.
     ''',
@@ -46,7 +48,8 @@
       	ID:	i_minimal
       	Title:	Minimal Investigation
       	Path:	<no file>
-      	Submission Date:	
+      	Description:	
+      	Submission Date:	None
       	Public Release Date:	None
       	Prefer recording metadata in the study section.
     ''',
@@ -66,7 +69,8 @@
       	ID:	i_small
       	Title:	Small Investigation
       	Path:	i_small.txt
-      	Submission Date:	
+      	Description:	
+      	Submission Date:	None
       	Public Release Date:	None
       	Prefer recording metadata in the study section.
     ''',

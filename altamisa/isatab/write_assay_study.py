@@ -251,8 +251,7 @@ class _WriterBase:
                 # self._headers.append(node.headers)
             else:  # pragma: no cover
                 # TODO: create new headers based on attributes
-                tpl = "No reference headers available in node {} of first row"
-                msg = tpl.format(node.unique_name)
+                msg = f"No reference headers available in node {node.unique_name} of first row"
                 raise WriteIsatabException(msg)
 
     def _write_headers(self):
@@ -265,18 +264,16 @@ class _WriterBase:
         for row in self._ref_table:
             # Number of nodes per row must match number of header groups
             if len(row) < len(self._headers):
-                tpl = (
+                msg = (
                     "Fewer nodes in row than header groups available:"
-                    "\n\tHeader groups:\t{}\n\tRow nodes:\t{}"
+                    f"\n\tHeader groups:\t{self._headers}\n\tRow nodes:\t{row}"
                 )
-                msg = tpl.format(self._headers, row)
                 raise WriteIsatabException(msg)
             elif len(row) > len(self._headers):
-                tpl = (
+                msg = (
                     "More nodes in row than header groups available:"
-                    "\n\tHeader groups:\t{}\n\tRow nodes:\t{}"
+                    f"\n\tHeader groups:\t{self._headers}\n\tRow nodes:\t{row}"
                 )
-                msg = tpl.format(self._headers, row)
                 raise WriteIsatabException(msg)
 
             # Iterate nodes and corresponding headers
@@ -292,8 +289,7 @@ class _WriterBase:
                     self._append_attribute(line, attributes, header, node)
                 # Iterating the headers should deplete attributes
                 if len(attributes) > 0:  # pragma: no cover
-                    tpl = "Leftover attributes {} found in node {}"
-                    msg = tpl.format(attributes, node.unique_name)
+                    msg = f"Leftover attributes {attributes} found in node {node.unique_name}"
                     raise WriteIsatabException(msg)
             self._write_next_line(line)
 
@@ -318,8 +314,10 @@ class _WriterBase:
                 line.append(attribute)
             self._previous_attribute = attribute
         else:  # pragma: no cover
-            tpl = "Expected '{}' not found in node '{}' after/for attribute '{}'"
-            msg = tpl.format(header, node.unique_name, self._previous_attribute)
+            msg = (
+                f'Expected {header} not found in node "{node.unique_name}" '
+                f'after/for attribute "{self._previous_attribute}"'
+            )
             raise WriteIsatabException(msg)
 
     @staticmethod
@@ -328,8 +326,10 @@ class _WriterBase:
         if is_ontology_term_ref(attribute):
             line.extend([attribute.ontology_name or "", attribute.accession or ""])
         else:  # pragma: no cover
-            tpl = "Expected {} not found in attribute {} of node {}"
-            msg = tpl.format(header, attribute, node.unique_name)
+            msg = (
+                f'Expected {header} not found in attribute "{attribute}" of node '
+                f'"{node.unique_name}"'
+            )
             raise WriteIsatabException(msg)
 
     @staticmethod
@@ -382,8 +382,7 @@ class _WriterBase:
         elif hasattr(node, "parameter_values"):  # is process node
             attributes = self._extract_process(node)
         else:  # unknown node type  # pragma: no cover
-            tpl = "Node of unexpected type (not material/data nor process): {}"
-            msg = tpl.format(node)
+            msg = f"Node of unexpected type (not material/data nor process): {node}"
             raise WriteIsatabException(msg)
         return attributes
 
@@ -411,7 +410,9 @@ class _WriterBase:
         if node.protocol_ref != TOKEN_UNKNOWN:
             attributes[table_headers.PROTOCOL_REF] = node.protocol_ref
         if node.performer is not None:
-            attributes[table_headers.PERFORMER] = node.performer
+            attributes[table_headers.PERFORMER] = ";".join(
+                [p.replace(";", "\\;") if p else "" for p in node.performer]
+            )
         if node.date is not None:
             attributes[table_headers.DATE] = node.date
         for parameter in node.parameter_values:

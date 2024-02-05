@@ -130,8 +130,10 @@ class _NodeBuilderBase(Generic[TNode]):
                 header.column_type not in self.name_headers
                 and header.column_type not in self.allowed_column_types
             ):
-                tpl = 'Invalid column type occured "{}" not in {}'
-                msg = tpl.format(header.column_type, self.allowed_column_types)
+                msg = (
+                    "Invalid column type occured "
+                    f'"{header.column_type}" not in {self.allowed_column_types}'
+                )
                 raise ParseIsatabException(msg)
             # Most headers are not secondary, so make this the default state.
             is_secondary = False
@@ -206,7 +208,7 @@ class _NodeBuilderBase(Generic[TNode]):
                 ):  # pragma: no cover
                     tpl = (
                         "Ontologies not supported for primary annotation "
-                        "'{}' (in col {}).".format(prev.column_type, "{}")
+                        f"'{prev.column_type}' (in col {{}})."
                     )
                 elif prev.term_source_ref_header:  # pragma: no cover
                     tpl = 'Seen "Term Source REF" header for same entity ' "in col {}"
@@ -232,8 +234,7 @@ class _NodeBuilderBase(Generic[TNode]):
 
     @staticmethod
     def _raise_seen_before(name, col_no):  # pragma: no cover
-        tpl = 'Seen "{}" header for same entity in col {}'
-        msg = tpl.format(name, col_no)
+        msg = f'Seen "{name}" header for same entity in col {col_no}'
         raise ParseIsatabException(msg)
 
     def _build_complex(
@@ -256,7 +257,7 @@ class _NodeBuilderBase(Generic[TNode]):
         unit = self._build_freetext_or_term_ref(header.unit_header, line)
         if unit is not None and not isinstance(unit, (str, models.OntologyTermRef)):
             raise ParseIsatabException(
-                "Unit must be a string or an OntologyTermRef, not {}".format(type(unit))
+                f"Unit must be a string or an OntologyTermRef, not {type(unit)}"
             )
         # Then, constructing ``klass`` is easy
         return klass(header.label, value, unit)
@@ -284,11 +285,10 @@ class _NodeBuilderBase(Generic[TNode]):
                     ]
                     return term_refs
                 else:  # pragma: no cover
-                    tpl = (
+                    msg = (
                         "Irregular numbers of fields in ontology term columns"
-                        "(i.e. ';'-separated fields): {}"
+                        f"(i.e. ';'-separated fields): {line[header.col_no : header2.col_no + 2]}"
                     )
-                    msg = tpl.format(line[header.col_no : header2.col_no + 2])
                     raise ParseIsatabException(msg)
 
             # Else, just create single ontology term references
@@ -348,24 +348,22 @@ class _MaterialBuilder(_NodeBuilderBase[models.Material]):
         # First, build the individual components
         if not self.name_header:
             raise ParseIsatabException(
-                "No name header found for material found for file {}".format(self.filename)
+                f"No name header found for material found for file {self.filename}"
             )
         type_ = self.name_header.column_type
-        assay_id = "-{}".format(self.assay_id) if self.assay_id else ""
+        assay_id = f"-{self.assay_id}" if self.assay_id else ""
         name = line[self.name_header.col_no]
         if name:
             # make material/data names unique by column
             if self.name_header.column_type == table_headers.SOURCE_NAME:
-                unique_name = "{}-{}-{}".format(self.study_id, "source", name)
+                unique_name = f"{self.study_id}-source-{name}"
             elif self.name_header.column_type == table_headers.SAMPLE_NAME:
                 # use static column identifier "sample-", since the same
                 # samples occur in different columns in study and assay
-                unique_name = "{}-{}-{}".format(self.study_id, "sample", name)
+                unique_name = f"{self.study_id}-sample-{name}"
             else:
                 # anything else gets the column id
-                unique_name = "{}{}-{}-COL{}".format(
-                    self.study_id, assay_id, name, self.name_header.col_no + 1
-                )
+                unique_name = f"{self.study_id}{assay_id}-{name}-COL{self.name_header.col_no + 1}"
         else:
             name_val = "{}{}-{} {}-{}-{}".format(
                 self.study_id,
@@ -434,15 +432,14 @@ class _ProcessBuilder(_NodeBuilderBase[models.Process]):
                 try:
                     date = datetime.strptime(line[self.date_header.col_no], "%Y-%m-%d").date()
                 except ValueError as e:  # pragma: no cover
-                    tpl = 'Invalid ISO8601 date "{}"'  # pragma: no cover
-                    msg = tpl.format(line[self.date_header.col_no])
+                    msg = f'Invalid ISO8601 date "{line[self.date_header.col_no]}"'  # pragma: no cover
                     raise ParseIsatabException(msg) from e
             else:
                 date = ""
         else:
             date = None
         if self.performer_header:
-            performer = line[self.performer_header.col_no]
+            performer = tuple(self._token_with_escape(line[self.performer_header.col_no]))
         else:
             performer = None
         comments = tuple(
@@ -479,14 +476,11 @@ class _ProcessBuilder(_NodeBuilderBase[models.Process]):
     ) -> Tuple[str, Union[models.AnnotatedStr, str], Optional[str], Optional[str]]:
         # At least one of these headers has to be specified
         if not self.name_header and not self.protocol_ref_header:  # pragma: no cover
-            raise ParseIsatabException(
-                "No protocol reference header found for process found for file {}".format(
-                    self.filename
-                )
-            )
+            msg = f"No protocol reference header found for process found for file {self.filename}"
+            raise ParseIsatabException(msg)
         # Perform case distinction on which case is actually true
         counter_value = self._next_counter()
-        assay_id = "-{}".format(self.assay_id) if self.assay_id else ""
+        assay_id = f"-{self.assay_id}" if self.assay_id else ""
         name = None
         name_type = None
         if not self.name_header:  # and self.protocol_ref_header:
@@ -509,9 +503,7 @@ class _ProcessBuilder(_NodeBuilderBase[models.Process]):
             name = line[self.name_header.col_no]
             name_type = self.name_header.column_type
             if name:  # Use name if available
-                unique_name = "{}{}-{}-{}".format(
-                    self.study_id, assay_id, name, self.name_header.col_no + 1
-                )
+                unique_name = f"{self.study_id}{assay_id}-{name}-{self.name_header.col_no + 1}"
             else:  # Empty!  # pragma: no cover
                 name_val = "{}{}-{} {}-{}-{}".format(
                     self.study_id,
@@ -527,9 +519,7 @@ class _ProcessBuilder(_NodeBuilderBase[models.Process]):
             name = line[self.name_header.col_no]
             name_type = self.name_header.column_type
             if name:
-                unique_name = "{}{}-{}-{}".format(
-                    self.study_id, assay_id, name, self.name_header.col_no + 1
-                )
+                unique_name = f"{self.study_id}{assay_id}-{name}-{self.name_header.col_no + 1}"
             else:
                 name_val = "{}{}-{}-{}-{}".format(
                     self.study_id,
@@ -544,7 +534,7 @@ class _ProcessBuilder(_NodeBuilderBase[models.Process]):
                 tpl = "Missing protocol reference in column {} of file {} "
                 msg = tpl.format(self.protocol_ref_header.col_no + 1, self.filename)
             else:
-                msg = "Missing protocol reference in file {}".format(self.filename)
+                msg = f"Missing protocol reference in file {self.filename}"
             raise ParseIsatabException(msg)
         return protocol_ref, unique_name, name, name_type
 
@@ -596,16 +586,16 @@ class _RowBuilderBase:
         ]
         header = [h for h in self.header[start:end] if h.column_type in column_types_to_check]
         names = [
-            "{}[{}]".format(h.column_type, h.label)
-            if isinstance(h, LabeledColumnHeader)
-            else h.column_type
+            f"{h.column_type}[{h.label}]" if isinstance(h, LabeledColumnHeader) else h.column_type
             for h in header
         ]
         duplicates = set([c for c in names if names.count(c) > 1])
         if duplicates:
-            assay = " assay {}".format(self.assay_id) if self.assay_id else ""
-            tpl = "Found duplicated column types in header of study {}{}: {}"
-            msg = tpl.format(self.study_id, assay, ", ".join(duplicates))
+            assay = f" assay {self.assay_id}" if self.assay_id else ""
+            msg = (
+                "Found duplicated column types in header of study "
+                f"{self.study_id}{assay}: {', '.join(duplicates)}"
+            )
             raise ParseIsatabException(msg)
 
     def _make_breaks(self):
@@ -768,11 +758,11 @@ class _AssayAndStudyBuilder:
                     if (
                         entry.unique_name in processes and entry != processes[entry.unique_name]
                     ):  # pragma: no cover
-                        tpl = (
+                        msg = (
                             "Found processes with same name but different "
-                            "annotation:\nprocess 1: {}\nprocess 2: {}"
+                            f"annotation:\nprocess 1: {entry}\n"
+                            f"process 2: {processes[entry.unique_name]}"
                         )
-                        msg = tpl.format(entry, processes[entry.unique_name])
                         raise ParseIsatabException(msg)
                     processes[entry.unique_name] = entry
                 else:
@@ -780,11 +770,11 @@ class _AssayAndStudyBuilder:
                     if (
                         entry.unique_name in materials and entry != materials[entry.unique_name]
                     ):  # pragma: no cover
-                        tpl = (
+                        msg = (
                             "Found materials with same name but different "
-                            "annotation:\nmaterial 1: {}\nmaterial 2: {}"
+                            f"annotation:\nmaterial 1: {entry}\n"
+                            f"material 2: {materials[entry.unique_name]}"
                         )
-                        msg = tpl.format(entry, materials[entry.unique_name])
                         raise ParseIsatabException(msg)
                     materials[entry.unique_name] = entry
                 # Collect arc

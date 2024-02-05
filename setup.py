@@ -32,7 +32,7 @@ install_requirements = parse_requirements("requirements/base.txt")
 
 package_root = os.path.abspath(os.path.dirname(__file__))
 version = {}
-with open(os.path.join(package_root, "altamisa/_version.py")) as fp:
+with open(os.path.join(package_root, "altamisa/version.py")) as fp:
     exec(fp.read(), version)
 version = version["__version__"]
 

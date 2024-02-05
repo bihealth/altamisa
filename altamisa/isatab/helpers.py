@@ -21,7 +21,6 @@ def list_strip(line: List[str]) -> List[str]:
     """Remove trailing space from strings in a list (e.g. a csv line)"""
     new_line = [field.strip() for field in line]
     if new_line != line:
-        tpl = "Removed trailing whitespaces in fields of line: {}"
-        msg = tpl.format(line)
+        msg = f"Removed trailing whitespaces in fields of line: {line}"
         warnings.warn(msg, ParseIsatabWarning)
     return new_line

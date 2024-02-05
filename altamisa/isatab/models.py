@@ -460,7 +460,7 @@ class Process:
     #: Process date
     date: Optional[Union[datetime.date, Literal[""]]]
     #: Performer of process
-    performer: Optional[str]
+    performer: Optional[Tuple[str, ...]]
     #: Tuple of parameters values
     parameter_values: Tuple[ParameterValue, ...]
     #: Tuple of process comments
@@ -509,7 +509,7 @@ class Arc:
         elif idx == 1:
             return self.head
         else:
-            raise IndexError("Invalid index: %d" % idx)  # pragma: no cover
+            raise IndexError(f"Invalid index: {idx}")  # pragma: no cover
 
 
 @attr.s(auto_attribs=True, frozen=True)
