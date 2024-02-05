@@ -1,6 +1,6 @@
 -r test_black.txt
 
-pip==23.3.2
+pip==24.0
 wheel==0.42.0
 watchdog==3.0.0
 
