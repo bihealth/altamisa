@@ -376,9 +376,11 @@ class InvestigationReader:
             # From this, parse the basic information from the study
             comments = _parse_comments(section, comment_keys)
             basic_info = models.BasicInfo(
-                Path(section[investigation_headers.STUDY_FILE_NAME])
-                if section[investigation_headers.STUDY_FILE_NAME]
-                else None,
+                (
+                    Path(section[investigation_headers.STUDY_FILE_NAME])
+                    if section[investigation_headers.STUDY_FILE_NAME]
+                    else None
+                ),
                 section[investigation_headers.STUDY_IDENTIFIER],
                 section[investigation_headers.STUDY_TITLE],
                 section[investigation_headers.STUDY_DESCRIPTION],
