@@ -159,9 +159,11 @@ class InvestigationWriter:
             section[investigation_headers.TERM_SOURCE_DESCRIPTION].append(ontology_ref.description)
         comments = _extract_comments(self.investigation.ontology_source_refs.values())
         headers = _extract_section_header(
-            list(self.investigation.ontology_source_refs.values())[0]
-            if self.investigation.ontology_source_refs
-            else None,
+            (
+                list(self.investigation.ontology_source_refs.values())[0]
+                if self.investigation.ontology_source_refs
+                else None
+            ),
             investigation_headers.ONTOLOGY_SOURCE_REFERENCE,
         )
         self._write_section(

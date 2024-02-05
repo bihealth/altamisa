@@ -416,9 +416,9 @@ class _WriterBase:
         if node.date is not None:
             attributes[table_headers.DATE] = node.date
         for parameter in node.parameter_values:
-            attributes[
-                self._create_labeled_name(table_headers.PARAMETER_VALUE, parameter.name)
-            ] = parameter
+            attributes[self._create_labeled_name(table_headers.PARAMETER_VALUE, parameter.name)] = (
+                parameter
+            )
         for comment in node.comments:
             attributes[self._create_labeled_name(table_headers.COMMENT, comment.name)] = comment
         if node.name_type:
