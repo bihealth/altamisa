@@ -1,0 +1,112 @@
+# serializer version: 1
+# name: test_study_writer_BII_I_1
+  list([
+    'Skipping empty ontology source: , , , ',
+  ])
+# ---
+# name: test_study_writer_gelelect
+  list([
+    "<class 'altamisa.exceptions.ParseIsatabWarning'>",
+    "<class 'altamisa.exceptions.ModerateIsaValidationWarning'>",
+    "<class 'altamisa.exceptions.ModerateIsaValidationWarning'>",
+  ])
+# ---
+# name: test_study_writer_gelelect.1
+  list([
+    'Skipping empty ontology source: , , , ',
+    '''
+      Investigation with only one study contains metadata:
+      	ID:	1551099271112
+      	Title:	Investigation
+      	Path:	i_Investigation.txt
+      	Description:	
+      	Submission Date:	None
+      	Public Release Date:	None
+      	Prefer recording metadata in the study section.
+    ''',
+    '''
+      Study without title:
+      ID:	study01
+      Title:	
+      Path:	s_study01.txt
+    ''',
+  ])
+# ---
+# name: test_study_writer_minimal
+  list([
+    '''
+      Investigation with only one study contains metadata:
+      	ID:	i_minimal
+      	Title:	Minimal Investigation
+      	Path:	i_minimal.txt
+      	Description:	
+      	Submission Date:	None
+      	Public Release Date:	None
+      	Prefer recording metadata in the study section.
+    ''',
+    '''
+      Assay without platform:
+      Path:	a_minimal.txt
+      Measurement Type:	exome sequencing assay
+      Technology Type:	nucleotide sequencing
+      Technology Platform:	
+    ''',
+  ])
+# ---
+# name: test_study_writer_minimal2
+  list([
+    '''
+      Investigation with only one study contains metadata:
+      	ID:	i_minimal
+      	Title:	Minimal Investigation
+      	Path:	i_minimal2.txt
+      	Description:	
+      	Submission Date:	None
+      	Public Release Date:	None
+      	Prefer recording metadata in the study section.
+    ''',
+    '''
+      Assay without platform:
+      Path:	a_minimal2.txt
+      Measurement Type:	exome sequencing assay
+      Technology Type:	nucleotide sequencing
+      Technology Platform:	
+    ''',
+  ])
+# ---
+# name: test_study_writer_small
+  list([
+    '''
+      Investigation with only one study contains metadata:
+      	ID:	i_small
+      	Title:	Small Investigation
+      	Path:	i_small.txt
+      	Description:	
+      	Submission Date:	None
+      	Public Release Date:	None
+      	Prefer recording metadata in the study section.
+    ''',
+    '''
+      Assay without platform:
+      Path:	a_small.txt
+      Measurement Type:	exome sequencing assay
+      Technology Type:	nucleotide sequencing
+      Technology Platform:	
+    ''',
+    "Found annotated material/file without name: Material(type='Sample Name', unique_name='S1-Empty Sample Name-13-5', name='', extract_label=None, characteristics=(Characteristics(name='status', value=['1'], unit=None),), comments=(), factor_values=(FactorValue(name='treatment', value=[''], unit=None),), material_type=None, headers=['Sample Name', 'Characteristics[status]', 'Factor Value[treatment]'])",
+  ])
+# ---
+# name: test_study_writer_small2
+  list([
+    '''
+      Investigation with only one study contains metadata:
+      	ID:	i_small2
+      	Title:	Small Investigation
+      	Path:	i_small2.txt
+      	Description:	
+      	Submission Date:	None
+      	Public Release Date:	None
+      	Prefer recording metadata in the study section.
+    ''',
+  ])
+# ---
