@@ -118,4 +118,5 @@ def test_assay_writer_BII_I_1(BII_I_1_investigation_file, tmp_path, snapshot: Sn
 def test_assay_writer_gelelect(gelelect_investigation_file, tmp_path, snapshot: SnapshotAssertion):
     with pytest.warns(IsaWarning) as record:
         _parse_write_assert_assay(gelelect_investigation_file, tmp_path, quote='"')
+    assert snapshot == [str(r.category) for r in record]
     assert snapshot == [str(r.message) for r in record]

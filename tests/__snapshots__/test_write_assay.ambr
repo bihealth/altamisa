@@ -545,6 +545,15 @@
 # ---
 # name: test_assay_writer_gelelect
   list([
+    "<class 'altamisa.exceptions.ParseIsatabWarning'>",
+    "<class 'altamisa.exceptions.ModerateIsaValidationWarning'>",
+    "<class 'altamisa.exceptions.ModerateIsaValidationWarning'>",
+    "<class 'altamisa.exceptions.ModerateIsaValidationWarning'>",
+    "<class 'altamisa.exceptions.ModerateIsaValidationWarning'>",
+  ])
+# ---
+# name: test_assay_writer_gelelect.1
+  list([
     'Skipping empty ontology source: , , , ',
     '''
       Investigation with only one study contains metadata:
