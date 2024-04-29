@@ -1,7 +1,7 @@
 -r base.txt
 
 # Multi-environment testing
-tox ==4.12.1
+tox ==4.15.0
 
 # Wonderful py.test for testing
 pytest >=3.6.0
