@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.3.1](https://github.com/bihealth/altamisa/compare/v0.3.0...v0.3.1) (2025-11-10)
+
+
+### Miscellaneous Chores
+
+* release 0.3.1 ([#168](https://github.com/bihealth/altamisa/issues/168)) ([ca85f76](https://github.com/bihealth/altamisa/commit/ca85f766148e329ec9efe54c9d85c4e04ab1ca48))
+
 ## [0.3.0](https://github.com/bihealth/altamisa/compare/v0.2.9...v0.3.0) (2024-10-28)
 
 
