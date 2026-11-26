@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
-"""Code for parsing investigation files.
-"""
+"""Code for parsing investigation files."""
 
 from __future__ import generator_stop
 

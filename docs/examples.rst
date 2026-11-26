@@ -51,7 +51,7 @@ investigation, as files might be overwritten otherwise):
 
 .. literalinclude:: examples/process_isa_model.py
     :language: python
-    :lines: 56-72
+    :lines: 54-70
 
 
 Working with AltamISA warnings
@@ -68,7 +68,7 @@ Warnings may be collected as follows, to enable joint notification or evaluation
 
 .. literalinclude:: examples/process_isa_model.py
     :language: python
-    :lines: 75-87
+    :lines: 73-85
 
 
 Manual ISA model creation

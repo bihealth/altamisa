@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 """Tests for ISA exceptions"""
 
-
 import pytest
 
 from altamisa.exceptions import ParseIsatabException

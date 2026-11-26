@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 """Tests for parsing ISA assay files"""
 
-
 import io
 import os
 from typing import TextIO

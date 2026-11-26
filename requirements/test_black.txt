@@ -1,7 +1,0 @@
-# Requirements including black for code formatting/checking.
-
-# Include base requirements
--r test.txt
-
-# Black for formatting
-black == 24.4.2

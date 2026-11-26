@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 """Token constants for study and assay table parsing and writing."""
 
-
 __author__ = (
     "Manuel Holtgrewe <manuel.holtgrewe@bih-charite.de>, "
     "Mathias Kuhring <mathias.kuhring@bih-charite.de>"

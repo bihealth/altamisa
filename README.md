@@ -47,4 +47,4 @@ Further, the scope of `isa-api` was much broader (including between ISA-Tab and 
 - License: MIT
 - Test Coverage: >90%
 - Documentation: [see here](https://altamisa.readthedocs.org)
-- Code Style: [black](https://github.com/python/black), 100 characters/line
+- Code Style: [ruff](https://docs.astral.sh/ruff/), 100 characters/line

@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
-"""Shared code for the tests.
-"""
+"""Shared code for the tests."""
 
 import os.path
 from typing import Iterator, TextIO

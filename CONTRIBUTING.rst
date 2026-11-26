@@ -64,11 +64,11 @@ Ready to contribute? Here's how to set up `altamisa` for local development.
 
     $ git clone git@github.com:your_name_here/altamisa.git
 
-3. Install your local copy into a virtualenv. Assuming you have virtualenvwrapper installed, this is how you set up your fork for local development::
+3. Install your local copy with `uv <https://docs.astral.sh/uv/>`_, which creates ``.venv`` with
+   the package in editable mode and all development dependencies::
 
-    $ mkvirtualenv altamisa
     $ cd altamisa/
-    $ python setup.py develop
+    $ uv sync
 
 4. Create a branch for local development::
 
@@ -76,20 +76,24 @@ Ready to contribute? Here's how to set up `altamisa` for local development.
 
    Now you can make your changes locally.
 
-5. When you're done making changes, check that your changes pass flake8 and the
-   tests, including testing other Python versions with tox::
+5. When you're done making changes, check that your changes pass linting (ruff and pyright)
+   and the tests::
 
-    $ flake8 altamisa tests
-    $ python setup.py test or py.test
-    $ tox
+    $ make format
+    $ make lint
+    $ make test
 
-   To get flake8 and tox, just pip install them into your virtualenv.
+   The same checks run in CI for Python 3.11 through 3.14.
 
 6. Commit your changes and push your branch to GitHub::
 
     $ git add .
-    $ git commit -m "Your detailed description of your changes."
+    $ git commit -m "fix: your short description of your changes"
     $ git push origin name-of-your-bugfix-or-feature
+
+   Commit messages and pull request titles follow `conventional commits
+   <https://www.conventionalcommits.org/>`_; release-please derives the version and changelog
+   from them.
 
 7. Submit a pull request through the GitHub website.
 
@@ -102,38 +106,24 @@ Before you submit a pull request, check that it meets these guidelines:
 2. If the pull request adds functionality, the docs should be updated. Put
    your new functionality into a function with a docstring, and add the
    feature to the list in README.rst.
-3. The pull request should work for Python 3.8, 3.9, 3.10, and 3.11 as well as for PyPy. Check
-   https://travis-ci.org/bihealth/altamisa/pull_requests
-   and make sure that the tests pass for all supported Python versions.
+3. The pull request should work for Python 3.11, 3.12, 3.13, and 3.14. Check the GitHub Actions
+   results on the pull request and make sure that the tests pass for all supported Python versions.
 
 Tips
 ----
 
 To run a subset of tests::
 
-$ py.test tests.test_altamisa
+$ uv run pytest tests/test_parse_investigation.py
 
 
 Deploying
 ---------
 
 A reminder for the maintainers on how to deploy.
-Make sure all your changes are committed (including an entry in HISTORY.md).
-Then run::
+Releases are made by `release-please <https://github.com/googleapis/release-please>`_:
+every push to ``master`` updates a release pull request with the next version (derived from the
+conventional commit messages) and the changelog. Merging that pull request creates the git tag
+and the GitHub release, builds the package with ``uv build``, and publishes it to PyPI.
 
-$ git tag vMAJOR.MINOR.PATCH
-$ git push
-$ git push --tags
-
-This will create a tag on Github.
-Next, build with ``sdist``::
-
-$ rm -rf dist
-$ python setup.py sdist
-
-Ensure that this builds a clean package without hash and ``-dirty``.
-Now, release to PyPI using ``twine``::
-
-$ twine upload --repository-url https://test.pypi.org/legacy/ dist/altamisa-*.tar.gz
-$ twine upload dist/altamisa-*.tar.gz
-
+Do not edit ``CHANGELOG.md`` or ``altamisa/version.py`` by hand.

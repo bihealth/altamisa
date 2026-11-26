@@ -1,15 +1,14 @@
 # -*- coding: utf-8 -*-
-"""Conversion of ISA-Tab to dot.
-"""
+"""Conversion of ISA-Tab to dot."""
 
 from contextlib import ExitStack
 import json
 import os
 import sys
+from typing import Annotated
 
 import attrs
 import typer
-from typing_extensions import Annotated
 
 from altamisa.isatab import AssayReader, InvestigationReader, StudyReader
 

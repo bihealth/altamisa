@@ -1,7 +1,5 @@
 # -*- coding: utf-8 -*-
-"""This module contains code for the parsing of assay and study files.
-"""
-
+"""This module contains code for the parsing of assay and study files."""
 
 from __future__ import generator_stop
 
@@ -10,9 +8,6 @@ import functools
 import os
 from typing import Callable, Dict, List, Optional, Sequence, TextIO, Tuple, Type, Union
 
-from ..constants import table_headers
-from ..constants.table_tokens import TOKEN_UNKNOWN
-from ..exceptions import WriteIsatabException
 from .headers import (
     AssayHeaderParser,
     ColumnHeader,
@@ -21,6 +16,9 @@ from .headers import (
 )
 from .helpers import is_ontology_term_ref
 from .models import Arc, Assay, Material, OntologyTermRef, Process, Study
+from ..constants import table_headers
+from ..constants.table_tokens import TOKEN_UNKNOWN
+from ..exceptions import WriteIsatabException
 
 __author__ = (
     "Manuel Holtgrewe <manuel.holtgrewe@bih-charite.de>, "

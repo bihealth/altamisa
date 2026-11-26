@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 """Constants used for validation of data and annotation restrictions in study and assay tables."""
 
-
 __author__ = (
     "Manuel Holtgrewe <manuel.holtgrewe@bih-charite.de>, "
     "Mathias Kuhring <mathias.kuhring@bih-charite.de>"

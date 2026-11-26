@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 """Tests for parsing ISA study files"""
 
-
 from datetime import date
 import io
 import os
@@ -383,7 +382,7 @@ def test_study_reader_small_study(
             value=[
                 models.OntologyTermRef(
                     name="Mus musculus",
-                    accession="http://purl.bioontology.org/ontology/" "NCBITAXON/10090",
+                    accession="http://purl.bioontology.org/ontology/NCBITAXON/10090",
                     ontology_name="NCBITAXON",
                 )
             ],
