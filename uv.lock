@@ -48,7 +48,7 @@ docs = [
 [package.metadata]
 requires-dist = [
     { name = "attrs", specifier = ">=23" },
-    { name = "typer", extras = ["all"] },
+    { name = "typer", specifier = ">=0.12" },
 ]
 
 [package.metadata.requires-dev]
