@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 """Tests for parsing ISA investigation files"""
 
-
 from datetime import date
 from pathlib import Path
 import warnings
@@ -93,7 +92,7 @@ def test_parse_small_investigation(small_investigation_file):
         "NCBITAXON",
         "http://data.bioontology.org/ontologies/NCBITAXON",
         "8",
-        ("National Center for Biotechnology Information (NCBI) Organismal " "Classification"),
+        ("National Center for Biotechnology Information (NCBI) Organismal Classification"),
         (),
         [*investigation_headers.ONTOLOGY_SOURCE_REF_KEYS],
     )
@@ -153,7 +152,7 @@ def test_parse_full_investigation(full_investigation_file):
         "NCBITAXON",
         "http://data.bioontology.org/ontologies/NCBITAXON",
         "2",
-        ("National Center for Biotechnology Information (NCBI) Organismal " "Classification"),
+        ("National Center for Biotechnology Information (NCBI) Organismal Classification"),
         (models.Comment("Test", "1"),),
         expected_headers,
     )
@@ -161,7 +160,7 @@ def test_parse_full_investigation(full_investigation_file):
 
     # Basic info
     assert (
-        "Growth control of the eukaryote cell: a systems biology study " "in yeast"
+        "Growth control of the eukaryote cell: a systems biology study in yeast"
     ) == investigation.info.title
     assert "BII-I-1" == investigation.info.identifier
     assert date(2007, 4, 30) == investigation.info.submission_date
@@ -193,7 +192,7 @@ def test_parse_full_investigation(full_investigation_file):
         "Dunn WB, Broadhurst D, O'Donoghue K, Hester SS, Dunkley TP, Hart "
         "SR, Swainston N, Li P, Gaskell SJ, Paton NW, Lilley KS, Kell DB, "
         "Oliver SG.",
-        "Growth control of the eukaryote cell: a systems biology study in " "yeast.",
+        "Growth control of the eukaryote cell: a systems biology study in yeast.",
         models.OntologyTermRef("indexed in Pubmed", "", ""),
         (models.Comment("Subtitle", ""),),
         expected_headers,
@@ -226,7 +225,7 @@ def test_parse_full_investigation(full_investigation_file):
         "",
         "",
         "Oxford Road, Manchester M13 9PT, UK",
-        "Faculty of Life Sciences, Michael Smith Building, " "University of Manchester",
+        "Faculty of Life Sciences, Michael Smith Building, University of Manchester",
         models.OntologyTermRef("corresponding author", "", ""),
         (
             models.Comment("Investigation Person ORCID", "12345"),
@@ -243,7 +242,7 @@ def test_parse_full_investigation(full_investigation_file):
         "123456789",
         "",
         "Oxford Road, Manchester M13 9PT, UK",
-        "Faculty of Life Sciences, Michael Smith Building, " "University of Manchester",
+        "Faculty of Life Sciences, Michael Smith Building, University of Manchester",
         models.OntologyTermRef("author", "", ""),
         (
             models.Comment("Investigation Person ORCID", "0987654321"),
@@ -260,7 +259,7 @@ def test_parse_full_investigation(full_investigation_file):
         "",
         "+49 123456789",
         "Oxford Road, Manchester M13 9PT, UK",
-        "Faculty of Life Sciences, Michael Smith Building, " "University of Manchester",
+        "Faculty of Life Sciences, Michael Smith Building, University of Manchester",
         models.OntologyTermRef("author", "http://purl.obolibrary.org/obo/RoleO_0000061", "ROLEO"),
         (
             models.Comment("Investigation Person ORCID", "1357908642"),
@@ -319,7 +318,7 @@ def test_parse_full_investigation(full_investigation_file):
         "Dunn WB, Broadhurst D, O'Donoghue K, Hester SS, Dunkley TP, Hart "
         "SR, Swainston N, Li P, Gaskell SJ, Paton NW, Lilley KS, Kell DB, "
         "Oliver SG.",
-        "Growth control of the eukaryote cell: a systems biology study in " "yeast.",
+        "Growth control of the eukaryote cell: a systems biology study in yeast.",
         models.OntologyTermRef("published", "", ""),
         (models.Comment("Subtitle", "Something"),),
         [
@@ -463,7 +462,7 @@ def test_parse_full_investigation(full_investigation_file):
         "",
         "",
         "Oxford Road, Manchester M13 9PT, UK",
-        "Faculty of Life Sciences, Michael Smith Building, " "University of Manchester",
+        "Faculty of Life Sciences, Michael Smith Building, University of Manchester",
         models.OntologyTermRef("corresponding author", "", ""),
         (models.Comment("Study Person REF", ""),),
         expected_headers,
@@ -477,7 +476,7 @@ def test_parse_full_investigation(full_investigation_file):
         "123456789",
         "",
         "Oxford Road, Manchester M13 9PT, UK",
-        "Faculty of Life Sciences, Michael Smith Building, " "University of Manchester",
+        "Faculty of Life Sciences, Michael Smith Building, University of Manchester",
         models.OntologyTermRef("author", "http://purl.obolibrary.org/obo/RoleO_0000061", "ROLEO"),
         (models.Comment("Study Person REF", ""),),
         expected_headers,
@@ -491,7 +490,7 @@ def test_parse_full_investigation(full_investigation_file):
         "",
         "+49 123456789",
         "Oxford Road, Manchester M13 9PT, UK",
-        "Faculty of Life Sciences, Michael Smith Building, " "University of Manchester",
+        "Faculty of Life Sciences, Michael Smith Building, University of Manchester",
         models.OntologyTermRef("author", "http://purl.obolibrary.org/obo/RoleO_0000061", "ROLEO"),
         (models.Comment("Study Person REF", ""),),
         expected_headers,
@@ -620,7 +619,7 @@ def test_parse_full_investigation(full_investigation_file):
         "123456789",
         "",
         "Oxford Road, Manchester M13 9PT, UK",
-        "Faculty of Life Sciences, Michael Smith Building, " "University of Manchester",
+        "Faculty of Life Sciences, Michael Smith Building, University of Manchester",
         models.OntologyTermRef("author", "http://purl.obolibrary.org/obo/RoleO_0000061", "ROLEO"),
         (models.Comment("Study Person REF", "personB"),),
         [*investigation_headers.STUDY_CONTACTS_KEYS, "Comment[Study Person REF]"],
@@ -679,7 +678,7 @@ def test_parse_comment_investigation(comment_investigation_file):
         "Dunn WB, Broadhurst D, O'Donoghue K, Hester SS, Dunkley TP, Hart "
         "SR, Swainston N, Li P, Gaskell SJ, Paton NW, Lilley KS, Kell DB, "
         "Oliver SG.",
-        "Growth control of the eukaryote cell: a systems biology study in " "yeast.",
+        "Growth control of the eukaryote cell: a systems biology study in yeast.",
         models.OntologyTermRef("indexed in Pubmed", "", ""),
         (models.Comment("InvestPubsComment", "TestValue01"),),
         [
@@ -700,7 +699,7 @@ def test_parse_comment_investigation(comment_investigation_file):
         "",
         "+49 123456789",
         "Oxford Road, Manchester M13 9PT, UK",
-        "Faculty of Life Sciences, Michael Smith Building, " "University of Manchester",
+        "Faculty of Life Sciences, Michael Smith Building, University of Manchester",
         models.OntologyTermRef("author", "http://purl.obolibrary.org/obo/RoleO_0000061", "ROLEO"),
         (
             models.Comment("Investigation Person ORCID", "1357908642"),
@@ -762,7 +761,7 @@ def test_parse_comment_investigation(comment_investigation_file):
         "Dunn WB, Broadhurst D, O'Donoghue K, Hester SS, Dunkley TP, Hart "
         "SR, Swainston N, Li P, Gaskell SJ, Paton NW, Lilley KS, Kell DB, "
         "Oliver SG.",
-        "Growth control of the eukaryote cell: a systems biology study in " "yeast.",
+        "Growth control of the eukaryote cell: a systems biology study in yeast.",
         models.OntologyTermRef("published", "", ""),
         (models.Comment("StudyPubsComment", "TestValue01"),),
         [
@@ -840,7 +839,7 @@ def test_parse_comment_investigation(comment_investigation_file):
         "123456789",
         "",
         "Oxford Road, Manchester M13 9PT, UK",
-        "Faculty of Life Sciences, Michael Smith Building, " "University of Manchester",
+        "Faculty of Life Sciences, Michael Smith Building, University of Manchester",
         models.OntologyTermRef("author", "http://purl.obolibrary.org/obo/RoleO_0000061", "ROLEO"),
         (models.Comment("Study Person REF", ""),),
         [*investigation_headers.STUDY_CONTACTS_KEYS, "Comment[Study Person REF]"],
@@ -883,7 +882,7 @@ def test_parse_comment_investigation(comment_investigation_file):
         "123456789",
         "",
         "Oxford Road, Manchester M13 9PT, UK",
-        "Faculty of Life Sciences, Michael Smith Building, " "University of Manchester",
+        "Faculty of Life Sciences, Michael Smith Building, University of Manchester",
         models.OntologyTermRef("author", "http://purl.obolibrary.org/obo/RoleO_0000061", "ROLEO"),
         (models.Comment("Study Person REF", "personB"),),
         [*investigation_headers.STUDY_CONTACTS_KEYS, "Comment[Study Person REF]"],

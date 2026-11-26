@@ -1,13 +1,12 @@
 # -*- coding: utf-8 -*-
-"""Read from ISA-Tab and print validation warnings, if any.
-"""
+"""Read from ISA-Tab and print validation warnings, if any."""
 
 import os
+from typing import Annotated
 import warnings
 
 import attrs
 import typer
-from typing_extensions import Annotated
 
 from altamisa.isatab import (
     AssayReader,

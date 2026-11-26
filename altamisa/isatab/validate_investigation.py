@@ -12,12 +12,12 @@ from typing import Dict, Tuple
 import warnings
 
 from . import models
+from .validate_assay_study import _OntologyTermRefValidator
 from ..exceptions import (
     AdvisoryIsaValidationWarning,
     CriticalIsaValidationWarning,
     ModerateIsaValidationWarning,
 )
-from .validate_assay_study import _OntologyTermRefValidator
 
 __author__ = "Mathias Kuhring <mathias.kuhring@bih-charite.de>"
 

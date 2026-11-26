@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
-"""Code for parsing investigation files.
-"""
+"""Code for parsing investigation files."""
 
 from __future__ import generator_stop
 
@@ -12,9 +11,9 @@ from typing import Dict, Iterator, List, Optional, Sequence, TextIO
 import warnings
 
 from . import models
+from .helpers import list_strip
 from ..constants import investigation_headers
 from ..exceptions import ParseIsatabException, ParseIsatabWarning
-from .helpers import list_strip
 
 __author__ = "Manuel Holtgrewe <manuel.holtgrewe@bih-charite.de>"
 

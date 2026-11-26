@@ -1,17 +1,15 @@
 # -*- coding: utf-8 -*-
-"""Read from ISA-Tab and directly write to ISA-Tab.
-"""
+"""Read from ISA-Tab and directly write to ISA-Tab."""
 
 from contextlib import ExitStack
 import os
 import sys
 import typing
-from typing import Dict, Optional, Tuple
+from typing import Annotated, Dict, Optional, Tuple
 import warnings
 
 import attrs
 import typer
-from typing_extensions import Annotated
 
 from altamisa.exceptions import IsaException
 from altamisa.isatab import (

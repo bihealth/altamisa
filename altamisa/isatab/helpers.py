@@ -3,7 +3,6 @@
 Module for helper functions of global use.
 """
 
-
 from typing import Any, List
 import warnings
 

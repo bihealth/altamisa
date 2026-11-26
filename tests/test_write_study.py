@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 """Tests for writing ISA study files"""
 
-
 import filecmp
 import os
 

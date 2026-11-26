@@ -5,7 +5,6 @@ as specified in the `ISA-Tab investigation specifications
 <https://isa-specs.readthedocs.io/en/latest/isatab.html#investigation-file>`_.
 """
 
-
 __author__ = (
     "Manuel Holtgrewe <manuel.holtgrewe@bih-charite.de>, "
     "Mathias Kuhring <mathias.kuhring@bih-charite.de>"

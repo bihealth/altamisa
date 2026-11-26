@@ -114,3 +114,6 @@ ENV/
 
 # Pytest
 .pytest_cache/
+
+# Ruff
+.ruff_cache/

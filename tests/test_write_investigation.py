@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 """Tests for writing ISA investigation files"""
 
-
 import filecmp
 
 import pytest

@@ -1,7 +1,5 @@
 # -*- coding: utf-8 -*-
-"""This module contains code for the parsing of assay and study files.
-"""
-
+"""This module contains code for the parsing of assay and study files."""
 
 from __future__ import generator_stop
 
@@ -24,8 +22,6 @@ from typing import (
 )
 
 from . import models
-from ..constants import table_headers, table_tokens
-from ..exceptions import ParseIsatabException
 from .headers import (
     ArrayDesignRefHeader,
     AssayHeaderParser,
@@ -45,6 +41,8 @@ from .headers import (
     UnitHeader,
 )
 from .helpers import list_strip
+from ..constants import table_headers, table_tokens
+from ..exceptions import ParseIsatabException
 
 __author__ = "Manuel Holtgrewe <manuel.holtgrewe@bih-charite.de>"
 
@@ -189,7 +187,7 @@ class _NodeBuilderBase(Generic[TNode]):
             elif header.column_type == table_headers.TERM_SOURCE_REF:
                 # Guard against misuse / errors
                 if not prev:  # pragma: no cover
-                    tpl = "No primary annotation to annotate with term in " "col {}"
+                    tpl = "No primary annotation to annotate with term in col {}"
                 elif prev.column_type not in (
                     # According to ISA-tab specs, Characteristics, Factor Values,
                     # Parameter Values and Units as well as the special cases First
@@ -211,7 +209,7 @@ class _NodeBuilderBase(Generic[TNode]):
                         f"'{prev.column_type}' (in col {{}})."
                     )
                 elif prev.term_source_ref_header:  # pragma: no cover
-                    tpl = 'Seen "Term Source REF" header for same entity ' "in col {}"
+                    tpl = 'Seen "Term Source REF" header for same entity in col {}'
                 else:
                     tpl = None
                 if tpl:  # pragma: no cover

@@ -1,3 +1,95 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "altamisa"
+dynamic = ["version"]
+description = "Implementation of ISA-tools data model and ISA-TAB"
+readme = "README.md"
+license = "MIT"
+authors = [
+    { name = "Dieter Beule", email = "dieter.beule@bih-charite.de" },
+    { name = "Jennifer Kirwan", email = "jennifer.kirwan@bihalth.de" },
+    { name = "Mathias Kuhring", email = "mathias.kuhring@bih-charite.de" },
+    { name = "Manuel Holtgrewe", email = "manuel.holtgrewe@bih-charite.de" },
+    { name = "Mikko Nieminen", email = "mikko.nieminen@bih-charite.de" },
+]
+requires-python = ">=3.11"
+keywords = ["altamisa"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Natural Language :: English",
+    "Topic :: Scientific/Engineering :: Bio-Informatics",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: 3.14",
+]
+dependencies = [
+    "attrs>=23",
+    "typer>=0.12",
+]
+
+[project.urls]
+Homepage = "https://github.com/bihealth/altamisa"
+Documentation = "https://altamisa.readthedocs.io"
+Changelog = "https://github.com/bihealth/altamisa/blob/master/CHANGELOG.md"
+
+[project.scripts]
+isatab2dot = "altamisa.apps.isatab2dot:app"
+isatab2isatab = "altamisa.apps.isatab2isatab:app"
+isatab_validate = "altamisa.apps.isatab_validate:app"
+
+[dependency-groups]
+dev = [
+    "pytest>=8",
+    "pytest-cov>=6",
+    "syrupy>=4",
+    "ruff>=0.14",
+    "pyright>=1.1",
+    { include-group = "docs" },
+]
+docs = [
+    "sphinx>=8",
+    "sphinx-rtd-theme>=3",
+    "myst-parser>=4",
+]
+
+[tool.hatch.version]
+# Single source of the version; release-please updates this file.
+path = "altamisa/version.py"
+
+[tool.hatch.build.targets.wheel]
+packages = ["altamisa"]
+
+[tool.hatch.build.targets.sdist]
+exclude = [".github"]
+
+[tool.ruff]
+line-length = 100
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "C90", "I"]
+# Line length is left to the formatter, as before with black + flake8.
+ignore = ["E501"]
+
+[tool.ruff.lint.per-file-ignores]
+# The documentation examples use star imports on purpose.
+"docs/examples/*.py" = ["F403", "F405"]
+
+[tool.ruff.lint.mccabe]
+max-complexity = 18
+
+[tool.ruff.lint.isort]
+force-sort-within-sections = true
+# isort placed "from . import x" before "from .. import y"; keep that order.
+relative-imports-order = "closest-to-furthest"
+known-first-party = ["altamisa"]
+
 [tool.pyright]
 include = [
     "altamisa",
@@ -13,5 +105,12 @@ stubPath = "stubs"
 reportMissingImports = true
 reportMissingTypeStubs = false
 
-pythonVersion = "3.8"
+pythonVersion = "3.11"
 pythonPlatform = "Linux"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+
+[tool.coverage.run]
+omit = ["altamisa/version.py"]
+relative_files = true

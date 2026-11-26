@@ -4,56 +4,49 @@ default: help
 .PHONY: help
 help:
 	@echo "make help         - show this help"
-	@echo "make lint         - run all linting"
-	@echo "make format       - run all formatting"
-	@echo "make lint-isort   - run isort linting"
-	@echo "make format-isort - run isort formatting"
-	@echo "make lint-black   - run black linting"
-	@echo "make format-black - run black formatting"
-	@echo "make lint-flake8  - run flake8 linting"
-	@echo "make lint-pyright - run pyright linting"
+	@echo "make lint         - run all linting (ruff check, ruff format --check, pyright)"
+	@echo "make format       - run ruff import sorting and formatting"
+	@echo "make lint-ruff    - run ruff linting and format check"
+	@echo "make lint-pyright - run pyright type checking"
 	@echo "make test         - run all tests"
 	@echo "make test-v       - run all tests with verbose output"
 	@echo "make test-vv      - run all tests with very verbose output"
+	@echo "make coverage     - run tests with coverage report"
+	@echo "make docs         - build the Sphinx HTML documentation"
 
 .PHONY: lint
-lint: lint-isort lint-black lint-flake8 lint-pyright
+lint: lint-ruff lint-pyright
 
 .PHONY: format
-format: format-isort format-black
+format:
+	uv run ruff check --fix .
+	uv run ruff format .
 
-.PHONY: lint-isort
-lint-isort:
-	isort --check-only --diff --force-sort-within-sections --profile=black .
-
-.PHONY: format-isort
-format-isort:
-	isort --force-sort-within-sections --profile=black .
-
-.PHONY: lint-black
-lint-black:
-	black -l 100 --check .
-
-.PHONY: format-black
-format-black:
-	black -l 100 .
-
-.PHONY: lint-flake8
-lint-flake8:
-	flake8 .
+.PHONY: lint-ruff
+lint-ruff:
+	uv run ruff check .
+	uv run ruff format --check .
 
 .PHONY: lint-pyright
 lint-pyright:
-	pyright
+	uv run pyright
 
 .PHONY: test
 test:
-	pytest
+	uv run pytest
 
 .PHONY: test-v
 test-v:
-	pytest -v
+	uv run pytest -v
 
 .PHONY: test-vv
 test-vv:
-	pytest -vv
+	uv run pytest -vv
+
+.PHONY: coverage
+coverage:
+	uv run pytest --cov=altamisa --cov=tests --cov-report=term-missing --cov-report=html
+
+.PHONY: docs
+docs:
+	uv run $(MAKE) -C docs html
