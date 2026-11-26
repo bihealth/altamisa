@@ -1,5 +1,16 @@
 # Changelog
 
+## [1.0.0](https://github.com/bihealth/altamisa/compare/v0.3.1...v1.0.0) (2026-11-26)
+
+
+### ⚠ BREAKING CHANGES
+
+* migrate to pyproject.toml, uv and ruff ([#170](https://github.com/bihealth/altamisa/issues/170))
+
+### Build System
+
+* migrate to pyproject.toml, uv and ruff ([#170](https://github.com/bihealth/altamisa/issues/170)) ([9de4d2e](https://github.com/bihealth/altamisa/commit/9de4d2eb814b1c36ae5d6fe8306926cbc54c66df))
+
 ## [0.3.1](https://github.com/bihealth/altamisa/compare/v0.3.0...v0.3.1) (2025-11-10)
 
 
